@@ -1,4 +1,5 @@
 import { MapPin } from "lucide-react";
+import PropTypes from 'prop-types';
 import { BiBed, BiBath, BiArea } from "react-icons/bi";
 import { FaParking } from "react-icons/fa";
 import { Link } from "react-router-dom";
@@ -7,7 +8,6 @@ const House = ({ house }) => {
   const {
     image,
     type,
-    country,
     state,
     address,
     bedrooms,
@@ -38,20 +38,20 @@ const House = ({ house }) => {
           <MapPin className="mr-2 text-violet-700" />
           <span>{address}</span>
         </div>
-        <div className="flex gap-x-4 my-4">
-          <div className="flex gap-2 text-sm text-gray-600 bg-slate-200 rounded-md p-2 w-24 justify-center items-center transition duration-300 hover:bg-slate-300">
+        <div className="flex md:flex-nowrap flex-wrap justify-center gap-4 my-4">
+          <div className="flex md:w-24 w-5/12 gap-2 text-sm text-gray-600 bg-slate-200 rounded-md p-2 justify-center items-center transition duration-300 hover:bg-slate-300">
             <BiBed className="text-[20px]" />
             <span>{bedrooms}</span>
           </div>
-          <div className="flex gap-2 text-sm text-gray-600 bg-slate-200 rounded-md p-2 w-24 justify-center items-center transition duration-300 hover:bg-slate-300">
+          <div className="flex md:w-24 w-5/12 gap-2 text-sm text-gray-600 bg-slate-200 rounded-md p-2 justify-center items-center transition duration-300 hover:bg-slate-300">
             <BiBath className="text-[20px]" />
             <span>{bathrooms}</span>
           </div>
-          <div className="flex gap-2 text-sm text-gray-600 bg-slate-200 rounded-md p-2 w-24 justify-center items-center transition duration-300 hover:bg-slate-300">
+          <div className="flex md:w-24 w-5/12 gap-2 text-sm text-gray-600 bg-slate-200 rounded-md p-2 justify-center items-center transition duration-300 hover:bg-slate-300">
             <FaParking className="text-[20px]" />
             <span>{parking}</span>
           </div>
-          <div className="flex gap-2 text-sm text-gray-600 bg-slate-200 rounded-md p-2 w-24 justify-center items-center transition duration-300 hover:bg-slate-300">
+          <div className="flex md:w-24 w-5/12 gap-2 text-sm text-gray-600 bg-slate-200 rounded-md p-2 justify-center items-center transition duration-300 hover:bg-slate-300">
             <BiArea className="text-[20px]" />
             <span>{surface}</span>
           </div>
@@ -62,6 +62,20 @@ const House = ({ house }) => {
       </div>
     </Link>
   );
+};
+House.propTypes = {
+  house: PropTypes.shape({
+    image: PropTypes.string.isRequired,
+    type: PropTypes.string.isRequired,
+    state: PropTypes.string.isRequired,
+    address: PropTypes.string.isRequired,
+    bedrooms: PropTypes.number.isRequired,
+    bathrooms: PropTypes.number.isRequired,
+    surface: PropTypes.number.isRequired,
+    price: PropTypes.number.isRequired,
+    parking: PropTypes.number.isRequired,
+    propertyId: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 export default House;

@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
-import House from "./House";
+import { useState, useEffect } from "react";
 import useSupabaseClient from "../../backend/supabase/supabase";
-import { Pagination, Spin } from "antd";
+import { Spin } from "antd";
 import Search from "./Search";
 
 const capitalizeFirstLetter = (string) => {
@@ -12,8 +11,6 @@ const capitalizeFirstLetter = (string) => {
 function ListingMapView() {
   const [houseData, setHouseData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3;
   const supabase = useSupabaseClient();
 
   useEffect(() => {
@@ -61,14 +58,6 @@ function ListingMapView() {
       fetchHouseData();
     }
   }, [supabase]);
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  const indexOfLastHouse = currentPage * itemsPerPage;
-  const indexOfFirstHouse = indexOfLastHouse - itemsPerPage;
-  const currentHouses = houseData.slice(indexOfFirstHouse, indexOfLastHouse);
 
   if (loading) {
     return <Spin size="large" className="flex my-48  justify-center" />;

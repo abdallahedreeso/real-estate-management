@@ -1,4 +1,3 @@
-import React from "react";
 import { FaFacebookSquare } from "react-icons/fa";
 import { SiInstagram } from "react-icons/si";
 import { FaXTwitter } from "react-icons/fa6";
@@ -82,10 +81,10 @@ const Footer = () => {
               Any questions? Let us know by call us on 0123456789 or
             </p>
 
-            <form className="mt-4 flex rounded">
+            <form className="mt-4 w-full flex rounded">
               <input
                 type="email"
-                className="flex-grow p-2 border border-gray-500 rounded-l-md bg-gray-700 text-white placeholder-gray-400"
+                className="flex-grow w-full p-2 border border-gray-500 rounded-l-md bg-gray-700 text-white placeholder-gray-400"
                 placeholder="email@example.com"
               />
               <button

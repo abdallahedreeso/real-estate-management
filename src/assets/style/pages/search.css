@@ -1,0 +1,17 @@
+.search-container {
+    @media screen and (max-width: 440px) {
+        width: 100% !important;
+    }
+}
+
+.search-box {
+    width: 600px !important;
+
+    @media screen and (max-width: 639px) {
+        width: 400px !important;
+    }
+
+    @media screen and (max-width: 438px) {
+        width:  100% !important;
+    }
+}
