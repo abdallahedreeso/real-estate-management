@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import Image from "../assets/img/house-banner.png";
+import { useState, useEffect } from "react";
+import Image from "../assets/img/about-banner.png";
 import { Avatar, Card, Carousel } from "antd";
 
 const reviews = [
@@ -79,10 +79,11 @@ export default function About() {
               </p>
             </div>
           </div>
-          <div className="hidden lg:flex flex-1 justify-end items-end me-10">
+          <div className="hidden lg:flex flex-1 justify-end items-end">
             <img
               src={Image}
-              className="rounded-lg rounded-tl-lg  transition-transform transform hover:scale-105"
+              style={{borderRadius: "165px 0 0 0"}}
+              className="max-h-full max-w-full"
               alt="Real Estate Banner"
             />
           </div>
@@ -101,7 +102,7 @@ export default function About() {
             {["mission", "vision", "values"].map((card) => (
               <div
                 key={card}
-                className={`p-6 rounded-lg shadow-lg cursor-pointer bg-gradient-to-r from-indigo-400 to-indigo-500 text-white hover:from-indigo-500 hover:to-indigo-600 transition duration-300 ease-in-out transform hover:scale-105 ${
+                className={`p-6 rounded-lg shadow-lg cursor-pointer bg-gradient-to-r from-indigo-500 to-indigo-600 text-white hover:from-indigo-600 hover:to-indigo-500 transition duration-300 ease-in-out transform hover:scale-105 ${
                   selectedCard === card
                     ? "bg-gradient-to-r from-indigo-500 to-indigo-600"
                     : "bg-gradient-to-r from-indigo-400 to-indigo-500"
