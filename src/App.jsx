@@ -1,5 +1,5 @@
 import "./App.css";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { RouterProvider, createBrowserRouter, BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
 import Home from "./pages/Home";
 import PropertyDetails from "./pages/PropertyDetails";
@@ -10,6 +10,7 @@ import About from "./pages/About";
 import EditProperty from "./pages/EditProperty";
 import ProtectRoute from "./components/ProtectedRoute/ProtectRoute";
 import Wishlist from "./pages/Wishlist";
+import NotFound from "./pages/NotFound";
 const router = createBrowserRouter([
   {
     element: <AppLayout />,
@@ -61,6 +62,10 @@ const router = createBrowserRouter([
       {
         path: "/About",
         element: <About />,
+      },
+      {
+        path: "*",
+        element: <NotFound />,
       },
     ],
   },

@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { Pagination, Spin, Alert, Card } from "antd";
+import { Spin, Alert, Pagination } from "antd";
 import useSupabaseClient from "@/backend/supabase/supabase";
-import Search from "@/components/Home/Search";
 import { Link } from "react-router-dom";
 import { MapPin } from "lucide-react";
 import { BiArea, BiBath, BiBed } from "react-icons/bi";
 import { FaParking } from "react-icons/fa";
+import EmptyWishlist from "@/components/wishlist/EmptyWishlist";
 
 const Wishlist = () => {
   const [houseData, setHouseData] = useState([]);
@@ -99,6 +99,11 @@ const Wishlist = () => {
     );
   }
 
+  // Show empty state if no wishlist items
+  if (houseData.length === 0) {
+    return <EmptyWishlist />;
+  }
+
   return (
     <div className="mt-10 px-10 md:px-20 lg:px-40">
       <div className="wishlist__title ">
@@ -143,7 +148,7 @@ const Wishlist = () => {
                 </div>
                 <div className="flex gap-2 text-sm text-gray-600 bg-slate-200 rounded-md p-2 w-24 justify-center items-center transition duration-300 hover:bg-slate-300">
                   <BiArea className="text-[20px]" />
-                  <span>{house.surface}</span>
+                  <span>{house.surface_area}</span>
                 </div>
               </div>
               <div className="text-xl font-semibold text-violet-600 mb-2">
@@ -155,6 +160,17 @@ const Wishlist = () => {
       </div>
 
       {/* Pagination */}
+      {houseData.length > itemsPerPage && (
+        <div className="flex justify-center mt-8 mb-10">
+          <Pagination
+            current={currentPage}
+            onChange={handlePageChange}
+            total={houseData.length}
+            pageSize={itemsPerPage}
+            showSizeChanger={false}
+          />
+        </div>
+      )}
     </div>
   );
 };

@@ -7,6 +7,7 @@ import {
   SignedIn,
   SignedOut,
   UserButton,
+  useUser,
 } from "@clerk/clerk-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Heart, Store } from "lucide-react";
@@ -17,6 +18,7 @@ const Navbar = () => {
   const [showSignUp, setShowSignUp] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
   const location = useLocation();
+  const { isSignedIn } = useUser();
 
   // handle drawer
   const showDrawer = () => {
@@ -54,7 +56,12 @@ const Navbar = () => {
     if (params.get("sign-in") === "true") {
       setShowSignIn(true);
     }
-  }, [location.search]);
+
+    if (isSignedIn) {
+      setShowSignUp(false);
+      setShowSignIn(false);
+    }
+  }, [location.search, isSignedIn]);
   return (
     <>
       <div className="shadow-md mb-10 lg:mb-0">
