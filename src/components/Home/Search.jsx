@@ -6,7 +6,7 @@ import { Pagination, Spin } from 'antd';
 import PropTypes from 'prop-types';
 import '@/assets/style/pages/search.css';
 import emptyState from "../../assets/img/properties-empty.webp";
-
+import { useTheme } from '../../context/ThemeContext';
 
 const capitalizeFirstLetter = (string) => {
     if (!string) return "";
@@ -20,6 +20,7 @@ const Search = ({ houses }) => {
     const [input, setInput] = useState("");
     const [filteredHouses, setFilteredHouses] = useState(houses);
     const supabase = useSupabaseClient();
+    const { isDarkMode } = useTheme();
 
     useEffect(() => {
         fetchData(input);
@@ -89,12 +90,12 @@ const Search = ({ houses }) => {
         return (
             <div className='py-10 px-5 min-w-full'>
                 <div className='flex flex-col w-full justify-center items-center mt-2 mb-10'>
-                    <div className='search-box bg-white shadow-2xl rounded-lg p-6 flex flex-col lg:flex-row gap-4 w-full max-w-[600px] transition-all duration-300 ease-in-out hover:shadow-xl border border-gray-300'>
+                    <div className={`search-box ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'} shadow-2xl rounded-lg p-6 flex flex-col lg:flex-row gap-4 w-full max-w-[600px] transition-all duration-300 ease-in-out hover:shadow-xl`}>
                         <input
                             placeholder="Type to search..."
                             value={input}
                             onChange={(e) => handleChange(e.target.value)}
-                            className='p-4 border border-gray-300 rounded-lg w-full lg:max-w-[400px] focus:outline-none focus:ring-2 focus:ring-violet-700 transition duration-300'
+                            className={`p-4 ${isDarkMode ? 'bg-gray-700 text-white border-gray-600 focus:ring-violet-500' : 'bg-white text-gray-800 border-gray-300 focus:ring-violet-700'} rounded-lg w-full lg:max-w-[400px] focus:outline-none focus:ring-2 transition duration-300`}
                         />
                         <button 
                             onClick={handleSearchClick} 
@@ -113,12 +114,12 @@ const Search = ({ houses }) => {
     return (
         <div className='search-container py-10 px-5'>
             <div className='flex flex-col lg:flex-row w-full justify-center items-center mt-2 mb-10'>
-                <div className='search-box bg-white shadow-2xl rounded-lg p-6 flex flex-col lg:flex-row gap-4 max-w-[600px] transition-all duration-300 ease-in-out hover:shadow-xl border border-gray-300'>
+                <div className={`search-box ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'} shadow-2xl rounded-lg p-6 flex flex-col lg:flex-row gap-4 max-w-[600px] transition-all duration-300 ease-in-out hover:shadow-xl`}>
                     <input
                         placeholder="Type to search..."
                         value={input}
                         onChange={(e) => handleChange(e.target.value)}
-                        className='p-4 border border-gray-300 rounded-lg w-full lg:max-w-[400px] focus:outline-none focus:ring-2 focus:ring-violet-700 transition duration-300'
+                        className={`p-4 ${isDarkMode ? 'bg-gray-700 text-white focus:ring-violet-500' : 'bg-white text-gray-800 border border-gray-300 focus:ring-violet-700'} rounded-lg w-full lg:max-w-[400px] focus:outline-none focus:ring-2 transition duration-300`}
                     />
                     <button 
                         onClick={handleSearchClick} 
@@ -129,35 +130,34 @@ const Search = ({ houses }) => {
                 </div>
             </div>
 
-    
             {/* Render house cards */}
             <div>
-    {currentHouses.length > 0 ? (
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center justify-center min-w-full">
-            {currentHouses.map((house) => (
-                <House key={house.propertyId} house={house} />
-            ))}
-        </div>
-    ) : (
-        <div className="flex flex-col items-center justify-center mt-10">
-            <img src={emptyState} alt="No properties available" className="w-80 h-80 rounded-md" />
-            <p className="text-gray-500 mt-4">No properties found. Try adjusting your search criteria.</p>
-        </div>
-    )}
-    
-    {currentHouses.length > 0 && (
-        <div className="flex justify-center mt-4">
-            <Pagination
-                current={currentPage}
-                pageSize={itemsPerPage}
-                total={filteredHouses.length}
-                onChange={handlePageChange}
-                showSizeChanger={false}
-            />
-        </div>
-    )}
-</div>
-
+                {currentHouses.length > 0 ? (
+                    <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center justify-center min-w-full">
+                        {currentHouses.map((house) => (
+                            <House key={house.propertyId} house={house} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center justify-center mt-10">
+                        <img src={emptyState} alt="No properties available" className="w-80 h-80 rounded-md" />
+                        <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-500'} mt-4`}>No properties found. Try adjusting your search criteria.</p>
+                    </div>
+                )}
+                
+                {currentHouses.length > 0 && (
+                    <div className="flex justify-center mt-4">
+                        <Pagination
+                            current={currentPage}
+                            pageSize={itemsPerPage}
+                            total={filteredHouses.length}
+                            onChange={handlePageChange}
+                            showSizeChanger={false}
+                            className={isDarkMode ? 'dark-pagination' : ''}
+                        />
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

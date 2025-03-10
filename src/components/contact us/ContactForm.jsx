@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Input, Button, Card, Form, Typography, message, Spin } from "antd";
 import emailjs from "emailjs-com";
+import { useTheme } from "../../context/ThemeContext";
 const { TextArea } = Input;
 const { Title } = Typography;
 
@@ -13,6 +14,7 @@ export default function ContactForm() {
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
   const [errors, setErrors] = useState({});
+  const { isDarkMode } = useTheme();
 
   const englishRegex = /^[a-zA-Z0-9\s.,'-]+$/;
   const numericOnlyRegex = /^\d+$/;
@@ -112,80 +114,87 @@ export default function ContactForm() {
       <Spin spinning={loading} size="large" className="mt-24">
         <Card
           style={{ maxWidth: "600px", margin: "20px auto", padding: "20px" }}
+          className={isDarkMode ? "bg-gray-800 border-gray-700" : ""}
         >
-          <Title level={3}>Contact Us</Title>
+          <Title level={3} className={isDarkMode ? "text-gray-200" : ""}>Contact Us</Title>
           <Form layout="vertical" onFinish={handleSubmit}>
             <div className="flex justify-between gap-2">
               <div className="flex flex-col w-1/2">
                 <Form.Item
-                  label="First Name"
+                  label={<span className={isDarkMode ? "text-gray-300" : ""}>First Name<span className="text-red-600">*</span></span>}
                   validateStatus={errors.firstName ? "error" : ""}
                   help={errors.firstName}
                 >
                   <Input
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="Required..."
+                    
+                    className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
                   />
                 </Form.Item>
               </div>
               <div className="flex flex-col w-1/2">
                 <Form.Item
-                  label="Last Name"
+                  label={<span className={isDarkMode ? "text-gray-300" : ""}>Last Name<span className="text-red-600">*</span></span>}
                   validateStatus={errors.lastName ? "error" : ""}
                   help={errors.lastName}
                 >
                   <Input
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Required..."
+                    
+                    className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
                   />
                 </Form.Item>
               </div>
             </div>
             <Form.Item
-              label="Email"
+              label={<span className={isDarkMode ? "text-gray-300" : ""}>Email<span className="text-red-600">*</span></span>}
               validateStatus={errors.email ? "error" : ""}
               help={errors.email}
             >
               <Input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Required..."
+                
+                className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
               />
             </Form.Item>
             <Form.Item
-              label="Subject"
+              label={<span className={isDarkMode ? "text-gray-300" : ""}>Subject<span className="text-red-600">*</span></span>}
               validateStatus={errors.subject ? "error" : ""}
               help={errors.subject}
             >
               <Input
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                placeholder="Required..."
+                
+                className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
               />
             </Form.Item>
             <Form.Item
-              label="Phone Number"
+              label={<span className={isDarkMode ? "text-gray-300" : ""}>Phone Number<span className="text-red-600">*</span></span>}
               validateStatus={errors.phoneNumber ? "error" : ""}
               help={errors.phoneNumber}
             >
               <Input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="Required..."
+                
+                className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
               />
             </Form.Item>
             <Form.Item
-              label="body"
+              label={<span className={isDarkMode ? "text-gray-300" : ""}>body<span className="text-red-600">*</span></span>}
               validateStatus={errors.body ? "error" : ""}
               help={errors.body}
             >
               <TextArea
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                placeholder="Required..."
+                
                 rows={8}
+                className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
               />
             </Form.Item>
 
@@ -194,7 +203,9 @@ export default function ContactForm() {
                 type="Dashed"
                 htmlType="submit"
                 block
-                className="mt-2 bg-indigo-500 text-white hover:bg-indigo-600 active:bg-indigo-500"
+                className={`mt-2 ${isDarkMode 
+                  ? "bg-violet-700 text-white hover:bg-violet-600 active:bg-violet-700" 
+                  : "bg-indigo-500 text-white hover:bg-indigo-600 active:bg-indigo-500"}`}
               >
                 Submit
               </Button>

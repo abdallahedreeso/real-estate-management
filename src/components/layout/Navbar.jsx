@@ -11,6 +11,7 @@ import {
 } from "@clerk/clerk-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Heart, Store } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
 
 const Navbar = () => {
   // const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -19,6 +20,7 @@ const Navbar = () => {
   const [showSignIn, setShowSignIn] = useState(false);
   const location = useLocation();
   const { isSignedIn } = useUser();
+  const { isDarkMode } = useTheme();
 
   // handle drawer
   const showDrawer = () => {
@@ -141,11 +143,11 @@ const Navbar = () => {
           </Drawer>
           {/* Links */}
           <div className={`md:flex absolute md:static  w-full md:w-auto z-10`}>
-            <ul className="hidden bg-gray-100 md:flex space-y-4 md:space-y-0 lg:space-x-10 p-4 md:p-0">
+            <ul className="hidden md:flex space-y-4 md:space-y-0 lg:space-x-10 p-4 md:p-0">
               <li>
                 <Link
                   to="/"
-                  className="text-gray-600 font-bold hover:text-white hover:bg-violet-700 rounded py-2 px-6"
+                  className={`${isDarkMode? 'text-gray-100' : 'text-gray-600'}  font-bold hover:text-white hover:bg-violet-700 rounded py-2 px-6`}
                   aria-label="Home"
                 >
                   Home
@@ -155,7 +157,7 @@ const Navbar = () => {
               <li>
                 <Link
                   to="/About"
-                  className="text-gray-600 font-bold hover:text-white hover:bg-violet-700 rounded py-2 px-6"
+                  className={`${isDarkMode? 'text-gray-100' : 'text-gray-600'}  font-bold hover:text-white hover:bg-violet-700 rounded py-2 px-6`}
                   aria-label="About"
                 >
                   About
@@ -164,7 +166,7 @@ const Navbar = () => {
               <li>
                 <Link
                   to="/ContactUs"
-                  className="text-gray-600 font-bold hover:text-white hover:bg-violet-700 rounded py-2 px-6"
+                  className={`${isDarkMode? 'text-gray-100' : 'text-gray-600'}  font-bold hover:text-white hover:bg-violet-700 rounded py-2 px-6`}
                   aria-label="Contact"
                 >
                   Contact Us
