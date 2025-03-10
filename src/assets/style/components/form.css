@@ -1,0 +1,47 @@
+/* Dark mode styles for Select component */
+.dark-select .ant-select-selector {
+  background-color: #374151 !important;
+  border-color: #4B5563 !important;
+  color: white !important;
+}
+
+.dark-select .ant-select-arrow {
+  color: #9CA3AF !important;
+}
+
+.dark-dropdown {
+  background-color: #1F2937 !important;
+  border-color: #4B5563 !important;
+}
+
+.dark-dropdown .ant-select-item {
+  color: #E5E7EB !important;
+}
+
+.dark-dropdown .ant-select-item-option-active {
+  background-color: #374151 !important;
+}
+
+.dark-dropdown .ant-select-item-option-selected {
+  background-color: #4F46E5 !important;
+  color: white !important;
+}
+
+/* Dark mode styles for Upload component */
+.dark-upload .ant-upload-list-item {
+  background-color: #374151 !important;
+  border-color: #4B5563 !important;
+  color: white !important;
+}
+
+.dark-upload .ant-upload-list-item-name {
+  color: #E5E7EB !important;
+}
+
+.dark-upload .ant-upload-list-item-card-actions .anticon {
+  color: #9CA3AF !important;
+}
+
+.dark-upload .ant-upload-list-item-error {
+  color: #EF4444 !important;
+}

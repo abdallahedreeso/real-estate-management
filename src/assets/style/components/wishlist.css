@@ -1,0 +1,5 @@
+/* Dark mode styles for Empty component */
+.dark-empty .ant-empty-image {
+  filter: invert(0.8);
+  opacity: 0.7;
+}

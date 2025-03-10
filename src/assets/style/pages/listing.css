@@ -14,3 +14,149 @@ th {
 .ant-pagination-item-active a {
   color: #6d28d9 !important;
 }
+
+/* Dark mode styles for Table */
+.dark-table {
+  background-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.dark-table .ant-table {
+  background-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.dark-table .ant-table-thead > tr > th {
+  background-color: #374151 !important;
+  color: #e5e7eb !important;
+  border-bottom: 1px solid #4b5563 !important;
+}
+
+.dark-table .ant-table-tbody > tr > td {
+  background-color: #1f2937;
+  color: #e5e7eb;
+  border-bottom: 1px solid #4b5563;
+}
+
+.dark-table .ant-table-tbody > tr:hover > td,
+.dark-table .ant-table-tbody > tr:hover > td:has(.ant-popconfirm:hover) {
+  background-color: #374151 !important;
+}
+
+.dark-table .ant-pagination-item {
+  background-color: #374151;
+  border-color: #4b5563;
+}
+
+.dark-table .ant-pagination-item a {
+  color: #e5e7eb !important;
+}
+
+.dark-table .ant-pagination-item-active {
+  background-color: #6d28d9;
+  border-color: #7c3aed;
+}
+
+.dark-table .ant-pagination-item-active a {
+  color: white !important;
+}
+
+.dark-table .ant-pagination-prev button,
+.dark-table .ant-pagination-next button {
+  color: #e5e7eb;
+  background-color: #374151;
+  border-color: #4b5563;
+}
+
+.dark-table .ant-pagination-disabled button {
+  color: #6B7280 !important;
+  background-color: #1F2937;
+  border-color: #374151;
+}
+
+.dark-table .ant-empty-description {
+  color: #e5e7eb;
+}
+
+/* Dark mode styles for Switch */
+.ant-switch {
+  background-color: #acadad !important;
+}
+
+.dark-switch.ant-switch {
+  background-color: #4b5563 !important;
+}
+
+.ant-switch-checked,
+.dark-switch.ant-switch-checked {
+  background-color: #5B21B6 !important;
+}
+
+.ant-switch:hover {
+  background-color: #4b5563 !important;
+}
+
+.ant-switch-checked:hover {
+  background-color: #5B21B6 !important;
+}
+
+/* Dark mode styles for Buttons */
+.dark-button {
+  background-color: #5B21B6 !important; /* Using the specified primary color */
+  border-color: #4C1D95 !important;
+  color: white !important;
+}
+
+.dark-button:hover {
+  background-color: #6D28D9 !important; /* Slightly lighter for hover */
+  border-color: #5B21B6 !important;
+  color: white !important;
+}
+
+.dark-danger-button {
+  background-color: #991b1b !important;
+  border-color: #7f1d1d !important;
+  color: white;
+}
+
+.dark-danger-button:hover {
+  background-color: #b91c1c;
+  border-color: #991b1b;
+  color: white;
+}
+
+/* Dark mode styles for Popconfirm */
+.dark-popconfirm .ant-popover-inner {
+  background-color: #1f2937 !important;
+  border-color: #4b5563 !important;
+}
+
+.dark-popconfirm .ant-popconfirm-title,
+.dark-popconfirm .ant-popconfirm-description {
+  color: #e5e7eb !important;
+  background-color: #1f2937 !important;
+}
+
+.dark-popconfirm .ant-popover-arrow::before {
+  background-color: #1f2937 !important;
+}
+
+.dark-popconfirm .ant-btn-primary {
+  background-color: #4f46e5 !important;
+  border-color: #4338ca !important;
+}
+
+.dark-popconfirm .ant-btn-primary:hover {
+  background-color: #4338ca !important;
+}
+
+.dark-popconfirm .ant-btn-default {
+  background-color: #374151 !important;
+  border-color: #4b5563 !important;
+  color: #e5e7eb !important;
+}
+
+.dark-popconfirm .ant-btn-default:hover {
+  background-color: #4b5563 !important;
+  border-color: #6b7280 !important;
+}

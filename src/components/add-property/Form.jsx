@@ -14,6 +14,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import InsertData from "@/api/add-property/InsertData";
 import UpdateData from "@/api/update-property/UpdateData";
+import { useTheme } from "../../context/ThemeContext";
+import "../../assets/style/components/form.css";
 
 import useSupabaseClient from "@/backend/supabase/supabase";
 import { UploadOutlined } from "@ant-design/icons";
@@ -40,6 +42,7 @@ export default function AntdForm({ property, id }) {
   const [phone, setPhone] = useState("");
   const [images, setImages] = useState([]);
   const [errors, setErrors] = useState({});
+  const { isDarkMode } = useTheme();
 
   const supabase = useSupabaseClient();
   const navigate = useNavigate();
@@ -249,74 +252,87 @@ export default function AntdForm({ property, id }) {
       <Spin spinning={loading} size="large" className="mt-40">
         <Card
           style={{ maxWidth: "600px", margin: "20px auto", padding: "20px" }}
+          className={isDarkMode ? "bg-gray-800 border-gray-700" : ""}
         >
-          <Title level={3}>Post Your Ad</Title>
+          <Title level={3} className={isDarkMode ? "text-gray-200" : ""}>Post Your Ad</Title>
           <Form layout="vertical" onFinish={handleSubmit}>
             <Form.Item
-              label="Title"
+              label={<span className={isDarkMode ? "text-gray-300" : ""}>Title<span className="text-red-600">*</span></span>}
               validateStatus={errors.title ? "error" : ""}
               help={errors.title}
             >
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Required..."
+                
+                className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
               />
             </Form.Item>
 
             <Form.Item
-              label="Price"
+              label={<span className={isDarkMode ? "text-gray-300" : ""}>Price<span className="text-red-600">*</span></span>}
               validateStatus={errors.price ? "error" : ""}
               help={errors.price}
             >
               <Input
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                placeholder="Required..."
+                
+                className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
               />
             </Form.Item>
             <Form.Item
-              label="Property Type"
+              label={<span className={isDarkMode ? "text-gray-300" : ""}>Property Type<span className="text-red-600">*</span></span>}
               validateStatus={errors.propertyType ? "error" : ""}
               help={errors.propertyType}
             >
               <Select
                 value={propertyType}
                 onChange={setPropertyType}
-                placeholder="Required"
+                
+                className={isDarkMode ? "dark-select" : ""}
+                dropdownClassName={isDarkMode ? "dark-dropdown" : ""}
               >
                 <Option value="rent">For Rent</Option>
                 <Option value="sale">For Sale</Option>
               </Select>
             </Form.Item>
             <Form.Item
-              label="Description"
+              label={<span className={isDarkMode ? "text-gray-300" : ""}>Description</span>}
               validateStatus={errors.description ? "error" : ""}
               help={errors.description}
             >
               <TextArea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Optional..."
+                
+                className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
               />
             </Form.Item>
             <div className="flex justify-between gap-2">
               <div className="flex flex-col w-1/2">
-                <Form.Item label="Country">
-                  <Select value={country} onChange={setCountry}>
+                <Form.Item label={<span className={isDarkMode ? "text-gray-300" : ""}>Country<span className="text-red-600">*</span></span>}>
+                  <Select 
+                    value={country} 
+                    onChange={setCountry}
+                    className={isDarkMode ? "dark-select" : ""}
+                    dropdownClassName={isDarkMode ? "dark-dropdown" : ""}
+                  >
                     <Option value="egypt">Egypt</Option>
                   </Select>
                 </Form.Item>
 
                 <Form.Item
-                  label="State"
+                  label={<span className={isDarkMode ? "text-gray-300" : ""}>State<span className="text-red-600">*</span></span>}
                   validateStatus={errors.state ? "error" : ""}
                   help={errors.state}
                 >
                   <Select
                     value={state}
                     onChange={setState}
-                    placeholder="Required"
+                    
+                    className={isDarkMode ? "dark-select" : ""}
+                    dropdownClassName={isDarkMode ? "dark-dropdown" : ""}
                   >
                     <Option value="cairo">Cairo</Option>
                     <Option value="giza">Giza</Option>
@@ -350,114 +366,133 @@ export default function AntdForm({ property, id }) {
               </div>
               <div className="flex flex-col w-1/2">
                 <Form.Item
-                  label="City"
+                  label={<span className={isDarkMode ? "text-gray-300" : ""}>City</span>}
                   validateStatus={errors.city ? "error" : ""}
                   help={errors.city}
                 >
                   <Input
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    placeholder="Optional..."
+                    
+                    className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
                   />
                 </Form.Item>
 
                 <Form.Item
-                  label="Zip Code"
+                  label={<span className={isDarkMode ? "text-gray-300" : ""}>Zip Code</span>}
                   validateStatus={errors.zip ? "error" : ""}
                   help={errors.zip}
                 >
                   <Input
                     value={zip}
                     onChange={(e) => setZip(e.target.value)}
-                    placeholder="Optional..."
+                    
+                    className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
                   />
                 </Form.Item>
               </div>
             </div>
             <Form.Item
-              label="Address"
+              label={<span className={isDarkMode ? "text-gray-300" : ""}>Address<span className="text-red-600">*</span></span>}
               validateStatus={errors.address ? "error" : ""}
               help={errors.address}
             >
               <Input
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                placeholder="Required..."
+                
+                className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
               />
             </Form.Item>
             <div className="flex justify-between gap-2">
               <div className="flex flex-col w-1/2">
                 <Form.Item
-                  label="Number of Bedrooms"
+                  label={<span className={isDarkMode ? "text-gray-300" : ""}>Number of Bedrooms<span className="text-red-600">*</span></span>}
                   validateStatus={errors.bedrooms ? "error" : ""}
                   help={errors.bedrooms}
                 >
                   <Input
                     value={bedrooms}
                     onChange={(e) => setBedrooms(e.target.value)}
-                    placeholder="Required..."
+                    
+                    className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
                   />
                 </Form.Item>
 
                 <Form.Item
-                  label="Number of Bathrooms"
+                  label={<span className={isDarkMode ? "text-gray-300" : ""}>Number of Bathrooms<span className="text-red-600">*</span></span>}
                   validateStatus={errors.bathrooms ? "error" : ""}
                   help={errors.bathrooms}
                 >
                   <Input
                     value={bathrooms}
                     onChange={(e) => setBathrooms(e.target.value)}
-                    placeholder="Required..."
+                    
+                    className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
                   />
                 </Form.Item>
               </div>
               <div className="flex flex-col w-1/2">
                 <Form.Item
-                  label="Number of Parking Spaces"
+                  label={<span className={isDarkMode ? "text-gray-300" : ""}>Number of Parking Spaces<span className="text-red-600">*</span></span>}
                   validateStatus={errors.parkingSpaces ? "error" : ""}
                   help={errors.parkingSpaces}
                 >
                   <Input
                     value={parkingSpaces}
                     onChange={(e) => setParkingSpaces(e.target.value)}
-                    placeholder="Required..."
+                    
+                    className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
                   />
                 </Form.Item>
 
                 <Form.Item
-                  label="Surface Area"
+                  label={<span className={isDarkMode ? "text-gray-300" : ""}>Surface Area<span className="text-red-600">*</span></span>}
                   validateStatus={errors.surfaceArea ? "error" : ""}
                   help={errors.surfaceArea}
                 >
                   <Input
                     value={surfaceArea}
                     onChange={(e) => setSurfaceArea(e.target.value)}
-                    placeholder="Required..."
+                    
+                    className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
                   />
                 </Form.Item>
               </div>
             </div>
             <Form.Item
-              label="Phone Number"
+              label={<span className={isDarkMode ? "text-gray-300" : ""}>Phone Number<span className="text-red-600">*</span></span>}
               validateStatus={errors.phoneNumber ? "error" : ""}
               help={errors.phoneNumber}
             >
               <Input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="Required..."
+                
+                className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
               />
             </Form.Item>
 
-            <Upload {...props} customRequest={customRequest}>
-              <Button icon={<UploadOutlined />}>Upload</Button>
+            <Upload 
+              {...props} 
+              customRequest={customRequest}
+              className={isDarkMode ? "dark-upload" : ""}
+            >
+              <Button 
+                icon={<UploadOutlined />} 
+                className={isDarkMode ? "bg-gray-700 text-white border-gray-600 hover:bg-gray-600" : ""}
+              >
+                Upload
+              </Button>
             </Upload>
             <Form.Item>
               <Button
                 type="primary"
                 htmlType="submit"
                 block
-                className="mt-2 bg-indigo-700 hover:bg-indigo-800 active:bg-indigo-700"
+                className={`mt-2 ${isDarkMode 
+                  ? "bg-violet-700 hover:bg-violet-600 active:bg-violet-700" 
+                  : "bg-indigo-700 hover:bg-indigo-800 active:bg-indigo-700"}`}
               >
                 Save
               </Button>

@@ -1,5 +1,6 @@
+import React from "react";
 import "./App.css";
-import { RouterProvider, createBrowserRouter, BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
 import Home from "./pages/Home";
 import PropertyDetails from "./pages/PropertyDetails";
@@ -11,6 +12,17 @@ import EditProperty from "./pages/EditProperty";
 import ProtectRoute from "./components/ProtectedRoute/ProtectRoute";
 import Wishlist from "./pages/Wishlist";
 import NotFound from "./pages/NotFound";
+import { ClerkProvider } from "@clerk/clerk-react";
+import HouseContextProvider from "./components/Home/HouseContext";
+import { dark } from "@clerk/themes";
+import { useTheme } from "./context/ThemeContext";
+
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+if (!PUBLISHABLE_KEY) {
+  throw new Error("Missing Publishable Key");
+}
+
 const router = createBrowserRouter([
   {
     element: <AppLayout />,
@@ -72,10 +84,19 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  const { isDarkMode } = useTheme();
   return (
-    <>
-      <RouterProvider router={router} />
-    </>
+    <ClerkProvider
+      appearance={isDarkMode ? { baseTheme: dark } : null}
+      publishableKey={PUBLISHABLE_KEY}
+      afterSignOutUrl="/"
+    >
+      <HouseContextProvider>
+        <React.StrictMode>
+          <RouterProvider router={router} />
+        </React.StrictMode>
+      </HouseContextProvider>
+    </ClerkProvider>
   );
 }
 export default App;

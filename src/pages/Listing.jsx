@@ -4,6 +4,7 @@ import useSupabaseClient from "../backend/supabase/supabase";
 import "@/assets/style/pages/listing.css";
 import { useAuth } from "@clerk/clerk-react";
 import { Link } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
 
 const Listing = () => {
   const [properties, setProperties] = useState();
@@ -12,6 +13,7 @@ const Listing = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const { isDarkMode } = useTheme();
 
   // fetch properties
   const fetchProperties = async () => {
@@ -134,6 +136,7 @@ const Listing = () => {
         <Switch
           checked={record.is_available}
           onChange={() => onChange(record.key, record.is_available)}
+          className={isDarkMode ? "dark-switch" : ""}
         />
       ),
     },
@@ -144,10 +147,19 @@ const Listing = () => {
         <Space size="middle">
           <Link
             to={`/MyProperty/edit/${record.key}`}
-            className="text-gray-600 hover:text-indigo-500"
+            className={`${
+              isDarkMode
+                ? "text-gray-300 hover:text-violet-400"
+                : "text-gray-600 hover:text-indigo-500"
+            }`}
             aria-label="editProperty"
           >
-            <Button color="primary" variant="solid">
+            <Button
+              color="primary"
+              variant="solid"
+              className={isDarkMode ? "dark-button" : ""}
+              style={{ backgroundColor: "#5B21B6", borderColor: "#4C1D95" }}
+            >
               Edit
             </Button>
           </Link>
@@ -158,8 +170,27 @@ const Listing = () => {
             onConfirm={() => confirm(record.key)}
             okText="Yes"
             cancelText="No"
+            overlayClassName={isDarkMode ? "dark-popconfirm" : ""}
+            getPopupContainer={(element) => element}
+            placement="top"
+            okButtonProps={{
+              style: { backgroundColor: "#5B21B6", borderColor: "#4C1D95" },
+            }}
+            cancelButtonProps={{
+              style: isDarkMode
+                ? {
+                    backgroundColor: "#374151",
+                    borderColor: "#4B5563",
+                    color: "#E5E7EB",
+                  }
+                : {},
+            }}
           >
-            <Button danger loading={deleting}>
+            <Button
+              danger
+              loading={deleting}
+              className={isDarkMode ? "dark-danger-button" : ""}
+            >
               Delete
             </Button>
           </Popconfirm>
@@ -169,20 +200,29 @@ const Listing = () => {
   ];
 
   return (
-    <div className="listing px-10 md:px-28 lg:px-40 mt-14">
-      <h1 className="font-extrabold text-3xl text-center text-white bg-violet-700 rounded-lg px-16 py-5 mb-10">
+    <div
+      className={`listing px-10 md:px-28 lg:px-40 mt-14 ${
+        isDarkMode ? "bg-gray-900" : ""
+      }`}
+    >
+      <h1
+        className={`font-extrabold text-3xl text-center text-white ${
+          isDarkMode ? "bg-violet-800" : "bg-violet-700"
+        } rounded-lg px-16 py-5 mb-10`}
+      >
         My Properties
       </h1>
 
       {loading ? (
         <Spin fullscreen size="large" />
       ) : error ? (
-        <p>Error: {error}</p>
+        <p className={isDarkMode ? "text-gray-300" : ""}>Error: {error}</p>
       ) : (
         <Table
           scroll={{ x: "max-content" }}
           dataSource={properties}
           columns={columns}
+          className={isDarkMode ? "dark-table" : ""}
         />
       )}
     </div>

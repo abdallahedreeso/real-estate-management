@@ -15,3 +15,46 @@
         width:  100% !important;
     }
 }
+
+/* Add these styles for dark mode pagination */
+.dark-pagination .ant-pagination-item {
+  background-color: #374151;
+  border-color: #4B5563;
+}
+
+.dark-pagination .ant-pagination-item a {
+  color: #E5E7EB;
+}
+
+.dark-pagination .ant-pagination-item-active {
+  background-color: #6D28D9;
+  border-color: #7C3AED;
+}
+
+.dark-pagination .ant-pagination-item-active a {
+  color: white !important;
+}
+
+.dark-pagination .ant-pagination-prev button,
+.dark-pagination .ant-pagination-next button {
+  color: #E5E7EB;
+  background-color: #374151;
+  border-color: #4B5563;
+}
+
+.dark-pagination .ant-pagination-disabled button {
+  color: #6B7280 !important;
+  background-color: #1F2937;
+  border-color: #374151;
+}
+
+.dark-pagination .ant-pagination-jump-prev .ant-pagination-item-container .ant-pagination-item-ellipsis,
+.dark-pagination .ant-pagination-jump-next .ant-pagination-item-container .ant-pagination-item-ellipsis {
+  color: #9CA3AF;
+}
+
+.dark-pagination .ant-pagination-options .ant-select-selector {
+  background-color: #374151;
+  border-color: #4B5563;
+  color: #E5E7EB;
+}
