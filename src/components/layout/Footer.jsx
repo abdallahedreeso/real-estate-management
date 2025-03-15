@@ -3,10 +3,13 @@ import { SiInstagram } from "react-icons/si";
 import { FaXTwitter } from "react-icons/fa6";
 import { FaLinkedin } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { useTheme } from "@/context/ThemeContext";
 
 const Footer = () => {
+  const { isDarkMode } = useTheme();
+  
   return (
-    <footer className="mt-8 bg-gray-800 text-white py-5">
+    <footer className={`mt-8 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-800'} text-white py-5`}>
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="mb-4">

@@ -11,7 +11,7 @@ const EmptyWishlist = () => {
   return (
     <div 
       className={`flex flex-col items-center justify-center py-16 px-4 ${isDarkMode ? 'bg-gray-900' : ''}`}
-      style={{ marginTop: "66px", marginBottom: "65px" }}
+      style={{ marginTop: "60px"}}
     >
       <Empty
         image={Empty.PRESENTED_IMAGE_SIMPLE}

@@ -5,12 +5,14 @@ import ThemeToggle from "../theme/ThemeToggle";
 
 const AppLayout = () => {
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <Navbar />
-      <Outlet />
+      <main className="flex-grow">
+        <Outlet />
+      </main>
       <ThemeToggle />
       <Footer />
-    </>
+    </div>
   );
 };
 
