@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import InsertData from "@/api/add-property/InsertData";
 import UpdateData from "@/api/update-property/UpdateData";
 import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "@clerk/clerk-react";
 import "../../assets/style/components/form.css";
 
 import useSupabaseClient from "@/backend/supabase/supabase";
@@ -46,6 +47,7 @@ export default function AntdForm({ property, id }) {
 
   const supabase = useSupabaseClient();
   const navigate = useNavigate();
+  const { userId } = useAuth();
 
   const englishRegex = /^[a-zA-Z0-9\s.,'-]+$/;
   const numericOnlyRegex = /^\d+$/;
@@ -231,7 +233,7 @@ export default function AntdForm({ property, id }) {
       setLoading(true);
       let response;
       if (property && id) {
-        response = await UpdateData(supabase, propertyData, id);
+        response = await UpdateData(supabase, propertyData, id, userId);
       } else {
         response = await InsertData(supabase, propertyData);
       }

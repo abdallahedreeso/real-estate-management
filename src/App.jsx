@@ -16,12 +16,14 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import HouseContextProvider from "./components/Home/HouseContext";
 import { dark } from "@clerk/themes";
 import { useTheme } from "./context/ThemeContext";
+import { SupabaseProvider } from "./context/SupabaseContext";
+import EnvDiagnosticScreen from "./components/diagnostics/EnvDiagnosticScreen";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!PUBLISHABLE_KEY) {
-  throw new Error("Missing Publishable Key");
-}
+const hasMissingKeys = !PUBLISHABLE_KEY || !SUPABASE_URL || !SUPABASE_KEY;
 
 const router = createBrowserRouter([
   {
@@ -85,17 +87,24 @@ const router = createBrowserRouter([
 
 function App() {
   const { isDarkMode } = useTheme();
+
+  if (hasMissingKeys) {
+    return <EnvDiagnosticScreen />;
+  }
+
   return (
     <ClerkProvider
       appearance={isDarkMode ? { baseTheme: dark } : null}
       publishableKey={PUBLISHABLE_KEY}
       afterSignOutUrl="/"
     >
-      <HouseContextProvider>
-        <React.StrictMode>
-          <RouterProvider router={router} />
-        </React.StrictMode>
-      </HouseContextProvider>
+      <SupabaseProvider>
+        <HouseContextProvider>
+          <React.StrictMode>
+            <RouterProvider router={router} />
+          </React.StrictMode>
+        </HouseContextProvider>
+      </SupabaseProvider>
     </ClerkProvider>
   );
 }

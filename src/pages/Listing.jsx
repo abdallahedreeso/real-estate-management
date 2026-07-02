@@ -58,9 +58,16 @@ const Listing = () => {
 
   // Table delete function
   const confirm = async (propertyId) => {
+    if (!userId) return;
     setDeleting(true);
     try {
-      await supabase.from("properties").delete().eq("property_id", propertyId);
+      const { error } = await supabase
+        .from("properties")
+        .delete()
+        .eq("property_id", propertyId)
+        .eq("seller_id", userId);
+
+      if (error) throw error;
       console.log("Property deleted successfully");
 
       message.success("Property deleted successfully");
@@ -68,6 +75,7 @@ const Listing = () => {
       fetchProperties();
     } catch (err) {
       console.error("Error deleting property:", err.message);
+      message.error("Failed to delete property.");
     } finally {
       setDeleting(false);
     }
@@ -75,11 +83,13 @@ const Listing = () => {
 
   // Toggle availability status in Supabase
   const onChange = async (propertyId, currentAvailability) => {
+    if (!userId) return;
     try {
       const { error } = await supabase
         .from("properties")
         .update({ is_available: !currentAvailability }) // Toggle the current value
-        .eq("property_id", propertyId);
+        .eq("property_id", propertyId)
+        .eq("seller_id", userId);
 
       if (error) {
         console.error("Error updating is_available:", error.message);

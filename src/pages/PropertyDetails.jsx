@@ -62,16 +62,18 @@ const PropertyDetails = () => {
         .eq("user_id", userId);
       if (error && error.code !== "PGRST116") {
         console.error("Error fetching wishlist status", error);
-      } else if (data.length) {
+      } else if (data && data.length) {
         setIsInWishlist(true);
       }
     };
 
     if (supabase && id) {
       fetchHouseData();
-      fetchWishlistStatus();
+      if (userId) {
+        fetchWishlistStatus();
+      }
     }
-  }, [id, supabase]);
+  }, [id, supabase, userId]);
 
   if (loading) {
     return (
@@ -125,7 +127,13 @@ const PropertyDetails = () => {
     if (isInWishlist) {
       // Remove from wishlist
       try {
-        await supabase.from("wishlist").delete().eq("property_id", propertyId);
+        const { error } = await supabase
+          .from("wishlist")
+          .delete()
+          .eq("property_id", propertyId)
+          .eq("user_id", userId);
+
+        if (error) throw error;
         console.log("Property deleted from wishlist successfully");
         message.success("Property deleted from wishlist successfully");
       } catch (err) {

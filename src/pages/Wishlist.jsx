@@ -7,6 +7,7 @@ import { BiArea, BiBath, BiBed } from "react-icons/bi";
 import { FaParking } from "react-icons/fa";
 import EmptyWishlist from "@/components/wishlist/EmptyWishlist";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@clerk/clerk-react";
 
 const Wishlist = () => {
   const [houseData, setHouseData] = useState([]);
@@ -15,12 +16,16 @@ const Wishlist = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
   const supabase = useSupabaseClient();
+  const { userId, isLoaded } = useAuth();
   const { isDarkMode } = useTheme();
 
   // Fetch wishlist data with associated property details
   const fetchHouseData = async () => {
+    if (!userId) return;
     try {
-      const { data, error } = await supabase.from("wishlist").select(`
+      const { data, error } = await supabase
+        .from("wishlist")
+        .select(`
           id,
           user_id,
           property_id,
@@ -40,7 +45,8 @@ const Wishlist = () => {
             images,
             is_available
           )
-        `);
+        `)
+        .eq("user_id", userId);
 
       if (error) {
         throw new Error(error.message);
@@ -74,12 +80,16 @@ const Wishlist = () => {
     }
   };
 
-  // Fetch data on component mount
+  // Fetch data when component mounts or auth/session resolves
   useEffect(() => {
-    if (supabase) {
-      fetchHouseData();
+    if (supabase && isLoaded) {
+      if (userId) {
+        fetchHouseData();
+      } else {
+        setLoading(false);
+      }
     }
-  }, [supabase]);
+  }, [supabase, userId, isLoaded]);
 
   // Pagination handling
   const handlePageChange = (page) => {
@@ -91,7 +101,7 @@ const Wishlist = () => {
   const indexOfFirstHouse = indexOfLastHouse - itemsPerPage;
   const currentHouses = houseData.slice(indexOfFirstHouse, indexOfLastHouse);
 
-  if (loading) {
+  if (!isLoaded || loading) {
     return <Spin size="large" className="flex my-48 justify-center" />;
   }
 

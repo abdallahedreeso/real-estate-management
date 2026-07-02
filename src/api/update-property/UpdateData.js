@@ -1,4 +1,8 @@
-export default async function InserthData(supabase, propertyData, id) {
+export default async function UpdateData(supabase, propertyData, id, userId) {
+    if (!userId) {
+        console.error("Error updating property: userId is missing.");
+        return null;
+    }
     
     const { error } = await supabase
         .from("properties")
@@ -21,11 +25,13 @@ export default async function InserthData(supabase, propertyData, id) {
             file_list: propertyData.file_list
         })
         .eq('property_id', id)
+        .eq('seller_id', userId); // Secure scoping
+
     if (error) {
         console.error("Error updating data into property table : ", error);
         return null;
     } else {
-        console.log('data updated')
+        console.log('data updated');
         return "ok";
     }
-}
+}
