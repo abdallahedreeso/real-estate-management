@@ -33,9 +33,46 @@ const HouseContextProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        if (supabase) {
-            fetchHouses();
-        }
+        if (!supabase) return;
+
+        // Fetch properties on mount
+        fetchHouses();
+
+        // Subscribe to real-time changes on the properties table
+        const channel = supabase
+            .channel('properties-realtime')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'properties'
+                },
+                (payload) => {
+                    const { eventType, new: newRecord, old: oldRecord } = payload;
+
+                    setHouses((prevHouses) => {
+                        switch (eventType) {
+                            case 'INSERT':
+                                return [...prevHouses, newRecord];
+                            case 'UPDATE':
+                                return prevHouses.map((house) =>
+                                    house.property_id === newRecord.property_id ? newRecord : house
+                                );
+                            case 'DELETE':
+                                return prevHouses.filter((house) => house.property_id !== oldRecord.property_id);
+                            default:
+                                return prevHouses;
+                        }
+                    });
+                }
+            )
+            .subscribe();
+
+        // Cleanup: remove subscription when unmounting
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [supabase]);
 
     const handleClick = (addressInput) => {
