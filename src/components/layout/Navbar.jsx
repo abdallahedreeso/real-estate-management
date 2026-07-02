@@ -114,7 +114,7 @@ const Navbar = () => {
               <SignedIn>
                 <Link to="/AddProperty">
                   <Button
-                    type="Dashed  "
+                    type="dashed"
                     className=" font-semibold shadow text-white rounded-full w-24 h-9 bg-violet-700 hover:bg-violet-500 "
                     style={{ fontSize: "11px" }}
                     onClick={onClose}
@@ -132,7 +132,7 @@ const Navbar = () => {
                   SignUp
                 </Button>
                 <Button
-                  type="Dashed  "
+                  type="dashed"
                   className="  font-semibold shadow text-white rounded-full w-28 h-9 bg-violet-700 hover:bg-violet-500 "
                   onClick={drawerSignIn}
                 >
@@ -186,7 +186,7 @@ const Navbar = () => {
                 SignUp
               </Button>
               <Button
-                type="Dashed  "
+                type="dashed"
                 className="  font-semibold shadow text-white rounded-full w-28 h-9 bg-violet-700 hover:bg-violet-500 hidden md:block"
                 onClick={() => setShowSignIn(true)}
               >
@@ -196,7 +196,7 @@ const Navbar = () => {
             <SignedIn>
               <Link to="/AddProperty" className="hidden md:block">
                 <Button
-                  type="Dashed  "
+                  type="dashed"
                   className=" font-semibold shadow text-white rounded-full w-24 h-9 bg-violet-700 hover:bg-violet-500 "
                   style={{ fontSize: "11px" }}
                 >

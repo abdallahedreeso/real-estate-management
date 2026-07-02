@@ -100,9 +100,7 @@ function App() {
     >
       <SupabaseProvider>
         <HouseContextProvider>
-          <React.StrictMode>
-            <RouterProvider router={router} />
-          </React.StrictMode>
+          <RouterProvider router={router} />
         </HouseContextProvider>
       </SupabaseProvider>
     </ClerkProvider>

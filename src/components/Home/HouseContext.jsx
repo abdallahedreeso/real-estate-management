@@ -1,65 +1,84 @@
-import React, { useState, useEffect, createContext } from 'react';
+import React, { useState, useEffect, createContext, useMemo } from 'react';
 import useSupabaseClient from '../../backend/supabase/supabase';
 
 export const HouseContext = createContext();
 
 const HouseContextProvider = ({ children }) => {
-    const [houses, setHouses] = useState([]);
+    const [houses, setHouses] = useState([]); // Raw listings from database
     const [country, setCountry] = useState('Location (any)');
     const [property, setProperty] = useState('Property type (any)');
     const [price, setPrice] = useState('Price range (any)');
+    const [searchAddress, setSearchAddress] = useState('');
     const [loading, setLoading] = useState(false);
     const supabase = useSupabaseClient();
 
     // Fetch houses from Supabase
     const fetchHouses = async () => {
         setLoading(true);
-        const { data, error } = await supabase
-            .from('properties') // Corrected table name
-            .select('*');
+        try {
+            const { data, error } = await supabase
+                .from('properties')
+                .select('*');
 
-        if (error) {
-            console.error('Error fetching houses:', error);
-        } else {
-            setHouses(data);
+            if (error) {
+                console.error('Error fetching houses:', error);
+            } else {
+                setHouses(data || []);
+            }
+        } catch (err) {
+            console.error('Error fetching houses:', err);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     useEffect(() => {
-        if(supabase){
+        if (supabase) {
             fetchHouses();
-        } // Fetch houses on component mount
+        }
     }, [supabase]);
 
-    const handleClick = (searchAddress) => {
-        setLoading(true);
+    const handleClick = (addressInput) => {
+        setSearchAddress(addressInput || '');
+    };
 
-        const isDefault = (str) => str.split(' ').includes('(any)');
-        const minPrice = parseInt(price.split(' ')[0]);
-        const maxPrice = parseInt(price.split(' ')[2]);
+    // Derived filtering state
+    const filteredHouses = useMemo(() => {
+        const isDefault = (str) => !str || str.toLowerCase().includes('(any)');
 
-        const filteredHouses = houses.filter((house) => {
-            const housePrice = parseInt(house.price);
-            const addressMatch = house.address.toLowerCase().includes(searchAddress.toLowerCase());
-
-            if (
-                (house.country === country || isDefault(country)) &&
-                (house.property_type === property || isDefault(property)) && // Updated for property_type
-                (housePrice >= minPrice && housePrice <= maxPrice) &&
-                addressMatch
-            ) {
-                return true;
+        return houses.filter((house) => {
+            // Country filter
+            if (!isDefault(country) && house.country !== country) {
+                return false;
             }
 
-            return false; // Default case
-        });
+            // Property type filter
+            if (!isDefault(property) && house.property_type !== property) {
+                return false;
+            }
 
-        setTimeout(() => {
-            setHouses(filteredHouses.length < 1 ? [] : filteredHouses);
-            setLoading(false);
-        }, 1000);
-    };
+            // Search Address filter
+            if (searchAddress) {
+                const houseAddress = house.address || '';
+                const addressMatch = houseAddress.toLowerCase().includes(searchAddress.toLowerCase());
+                if (!addressMatch) return false;
+            }
+
+            // Price filter with fallback
+            if (!isDefault(price)) {
+                const parts = price.split(' ');
+                const minPrice = parseInt(parts[0]) || 0;
+                const maxPrice = parseInt(parts[2]) || Infinity;
+                const housePrice = parseInt(house.price) || 0;
+
+                if (housePrice < minPrice || housePrice > maxPrice) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+    }, [houses, country, property, price, searchAddress]);
 
     return (
         <HouseContext.Provider
@@ -70,7 +89,8 @@ const HouseContextProvider = ({ children }) => {
                 setProperty,
                 price,
                 setPrice,
-                houses,
+                houses: filteredHouses, // Expose derived state as "houses"
+                rawHouses: houses,      // Keep raw list accessible
                 loading,
                 handleClick,
             }}
@@ -81,3 +101,4 @@ const HouseContextProvider = ({ children }) => {
 };
 
 export default HouseContextProvider;
+
