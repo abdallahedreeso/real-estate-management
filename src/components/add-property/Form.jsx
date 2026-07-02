@@ -206,10 +206,11 @@ export default function AntdForm({ property, id }) {
 
   const handleSubmit = async () => {
     if (validate()) {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       let imageUrls = [];
       images.map((image) => {
         imageUrls.push(
-          `https://kpcjtdxeopfbjrzubivj.supabase.co/storage/v1/object/public/images/${image.uid}`
+          `${supabaseUrl}/storage/v1/object/public/images/${image.uid}`
         );
       });
       let propertyData = {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { BiBed, BiBath } from "react-icons/bi";
 import { MdLocationOn } from "react-icons/md";
@@ -172,7 +172,7 @@ const PropertyDetails = () => {
     }
   };
 
-  const markers = [
+  const markers = useMemo(() => [
     {
       property_id: house.property_id,
       lat: house.latitude,
@@ -182,7 +182,7 @@ const PropertyDetails = () => {
       bedrooms: house.Bedrooms,
       bathrooms: house.Bathrooms,
     },
-  ];
+  ], [house.property_id, house.latitude, house.longitude, house.address, house.price, house.Bedrooms, house.Bathrooms]);
 
   const imageUrl =
     house.images && house.images.length > 0
