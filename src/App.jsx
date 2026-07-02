@@ -14,7 +14,6 @@ const EditProperty = React.lazy(() => import("./pages/EditProperty"));
 const Wishlist = React.lazy(() => import("./pages/Wishlist"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 import { ClerkProvider } from "@clerk/clerk-react";
-import HouseContextProvider from "./components/Home/HouseContext";
 import { dark } from "@clerk/themes";
 import { useTheme } from "./context/ThemeContext";
 import { SupabaseProvider } from "./context/SupabaseContext";
@@ -100,9 +99,7 @@ function App() {
       afterSignOutUrl="/"
     >
       <SupabaseProvider>
-        <HouseContextProvider>
-          <RouterProvider router={router} />
-        </HouseContextProvider>
+        <RouterProvider router={router} />
       </SupabaseProvider>
     </ClerkProvider>
   );

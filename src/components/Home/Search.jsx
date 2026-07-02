@@ -1,120 +1,69 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { RiSearch2Line } from "react-icons/ri";
 import House from './House'; // Import the House component
-import useSupabaseClient from '../../backend/supabase/supabase';
-import { Pagination, Spin } from 'antd';
-import PropTypes from 'prop-types';
+import { Pagination } from 'antd';
 import '@/assets/style/pages/search.css';
 import emptyState from "../../assets/img/properties-empty.webp";
 import { useTheme } from '../../context/ThemeContext';
+import { useHouseStore, selectFilteredHouses } from '../../store/useHouseStore';
 
 const capitalizeFirstLetter = (string) => {
     if (!string) return "";
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 };
 
-const Search = ({ houses }) => {
+const Search = () => {
     const [currentPage, setCurrentPage] = useState(1);
-    const [loading, setLoading] = useState(true);
-    const itemsPerPage = 6;
     const [input, setInput] = useState("");
-    const [filteredHouses, setFilteredHouses] = useState(houses);
-    const supabase = useSupabaseClient();
     const { isDarkMode } = useTheme();
 
-    useEffect(() => {
-        fetchData(input);
-    }, []);
+    const filteredHouses = useHouseStore(selectFilteredHouses);
+    const handleClick = useHouseStore((state) => state.handleClick);
 
-    const fetchData = async (value) => {
-        if (value && value.length > 0) {
-            try {
-                setLoading(true);
-                const { data, error } = await supabase
-                    .from('properties')
-                    .select('*')
-                    .ilike('address', `%${value}%`);
-
-                if (error) throw error;
-
-                // Filter out houses that are not available
-                const formattedData = data
-                    .filter(property => property.is_available) // Filter available properties
-                    .map((property) => ({
-                        image: property.images ? property.images[0] : 'https://via.placeholder.com/400x250',
-                        type: capitalizeFirstLetter(property.property_type),
-                        country: capitalizeFirstLetter(property.country),
-                        address: property.address,
-                        state: property.state,
-                        bedrooms: property.Bedrooms,
-                        bathrooms: property.Bathrooms,
-                        surface: property.surface_area,
-                        price: property.price,
-                        propertyId: property.property_id,
-                        lat: property.latitude,
-                        lng: property.longitude,
-                        parking: property.ParkingSpaces
-                    }));
-
-                setFilteredHouses(formattedData);
-                setLoading(false);
-            } catch (err) {
-                console.error(err);
-                setLoading(false);
-            }
-        } else {
-            // Reset to all available houses when input is empty
-            setFilteredHouses(houses);
-            setLoading(false);
-        }
-    };
+    // Format houses for child House component compatibility
+    const formattedHouses = filteredHouses
+        .filter(property => property.is_available)
+        .map((property) => ({
+            image: property.images && property.images.length > 0 ? property.images[0] : 'https://via.placeholder.com/400x250',
+            type: capitalizeFirstLetter(property.property_type),
+            country: capitalizeFirstLetter(property.country),
+            address: property.address,
+            state: property.state,
+            bedrooms: property.Bedrooms,
+            bathrooms: property.Bathrooms,
+            surface: property.surface_area,
+            price: property.price,
+            propertyId: property.property_id,
+            lat: property.latitude,
+            lng: property.longitude,
+            parking: property.ParkingSpaces
+        }));
 
     const handleChange = (value) => {
         setInput(value);
-        fetchData(value);
+        // Automatically trigger search on text change for instant reactivity
+        handleClick(value);
+        setCurrentPage(1);
     };
 
     const handleSearchClick = () => {
-        fetchData(input);
+        handleClick(input);
+        setCurrentPage(1);
     };
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
 
+    const itemsPerPage = 6;
     const indexOfLastHouse = currentPage * itemsPerPage;
     const indexOfFirstHouse = indexOfLastHouse - itemsPerPage;
-    const currentHouses = filteredHouses.slice(indexOfFirstHouse, indexOfLastHouse);
-
-    if (loading) {
-        return (
-            <div className='py-10 px-5 min-w-full'>
-                <div className='flex flex-col w-full justify-center items-center mt-2 mb-10'>
-                    <div className={`search-box ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'} shadow-2xl rounded-lg p-6 flex flex-col lg:flex-row gap-4 w-full max-w-[600px] transition-all duration-300 ease-in-out hover:shadow-xl`}>
-                        <input
-                            placeholder="Type to search..."
-                            value={input}
-                            onChange={(e) => handleChange(e.target.value)}
-                            className={`p-4 ${isDarkMode ? 'bg-gray-700 text-white border-gray-600 focus:ring-violet-500' : 'bg-white text-gray-800 border-gray-300 focus:ring-violet-700'} rounded-lg w-full lg:max-w-[400px] focus:outline-none focus:ring-2 transition duration-300`}
-                        />
-                        <button 
-                            onClick={handleSearchClick} 
-                            className='bg-violet-700 hover:bg-violet-800 transition w-full lg:max-w-[162px] h-14 rounded-lg flex justify-center items-center text-white text-lg font-semibold'
-                        >
-                            <RiSearch2Line size={24} />
-                        </button>
-                    </div>
-                
-                    <Spin size="large" className="flex my-48 justify-center" />
-                </div>
-            </div>
-        );
-    }
+    const currentHouses = formattedHouses.slice(indexOfFirstHouse, indexOfLastHouse);
 
     return (
-        <div className='search-container py-10 px-5'>
+        <div className='search-container py-10 px-5 w-full'>
             <div className='flex flex-col lg:flex-row w-full justify-center items-center mt-2 mb-10'>
-                <div className={`search-box ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'} shadow-2xl rounded-lg p-6 flex flex-col lg:flex-row gap-4 max-w-[600px] transition-all duration-300 ease-in-out hover:shadow-xl`}>
+                <div className={`search-box ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'} shadow-2xl rounded-lg p-6 flex flex-col lg:flex-row gap-4 w-full max-w-[600px] transition-all duration-300 ease-in-out hover:shadow-xl`}>
                     <input
                         placeholder="Type to search..."
                         value={input}
@@ -150,7 +99,7 @@ const Search = ({ houses }) => {
                         <Pagination
                             current={currentPage}
                             pageSize={itemsPerPage}
-                            total={filteredHouses.length}
+                            total={formattedHouses.length}
                             onChange={handlePageChange}
                             showSizeChanger={false}
                             className={isDarkMode ? 'dark-pagination' : ''}
@@ -160,10 +109,6 @@ const Search = ({ houses }) => {
             </div>
         </div>
     );
-};
-
-Search.propTypes = {
-    houses: PropTypes.array.isRequired,
 };
 
 export default Search;
