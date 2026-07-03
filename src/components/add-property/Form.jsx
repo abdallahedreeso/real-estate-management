@@ -9,9 +9,11 @@ import {
   message,
   Upload,
   Spin,
+  Tooltip,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useHouseStore } from "@/store/useHouseStore";
 import InsertData from "@/api/add-property/InsertData";
 import UpdateData from "@/api/update-property/UpdateData";
 import { useTheme } from "../../context/ThemeContext";
@@ -74,6 +76,7 @@ const compressImage = (file) => {
 
 export default function AntdForm({ property, id }) {
   const { t } = useTranslation();
+  const isOnline = useHouseStore((state) => state.isOnline);
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
@@ -531,9 +534,11 @@ export default function AntdForm({ property, id }) {
               {...props}
               customRequest={customRequest}
               className={isDarkMode ? "dark-upload" : ""}
+              disabled={!isOnline}
             >
               <Button
                 icon={<UploadOutlined />}
+                disabled={!isOnline}
                 className={isDarkMode ? "bg-gray-700 text-white border-gray-600 hover:bg-gray-600" : ""}
               >
                 {t("form.upload")}
@@ -541,18 +546,21 @@ export default function AntdForm({ property, id }) {
             </Upload>
 
             <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                block
-                className={`mt-2 ${
-                  isDarkMode
-                    ? "bg-violet-700 hover:bg-violet-600 active:bg-violet-700"
-                    : "bg-indigo-700 hover:bg-indigo-800 active:bg-indigo-700"
-                }`}
-              >
-                {t("form.save")}
-              </Button>
+              <Tooltip title={!isOnline ? t("network.offline") : ""}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  block
+                  disabled={!isOnline}
+                  className={`mt-2 ${
+                    isDarkMode
+                      ? "bg-violet-700 hover:bg-violet-600 active:bg-violet-700"
+                      : "bg-indigo-700 hover:bg-indigo-800 active:bg-indigo-700"
+                  }`}
+                >
+                  {t("form.save")}
+                </Button>
+              </Tooltip>
             </Form.Item>
           </Form>
         </Card>

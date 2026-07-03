@@ -1,3 +1,4 @@
+import OptimizedImage from "../common/OptimizedImage";
 import { MapPin } from "lucide-react";
 import PropTypes from 'prop-types';
 import { BiBed, BiBath, BiArea } from "react-icons/bi";
@@ -24,11 +25,13 @@ const House = ({ house }) => {
   return (
     <Link to={`/property/${propertyId}`}>
       <div className={`${isDarkMode ? 'bg-gray-800 hover:shadow-gray-700' : 'bg-white hover:shadow-gray-300'} shadow-lg p-6 w-full max-w-[400px] mx-auto mb-12 cursor-pointer hover:shadow-2xl transition rounded-lg hover:scale-105`}>
-        <img
-          className="rounded-md mb-6 w-full h-[250px] object-cover transition-transform duration-300 transform hover:scale-110"
-          src={image}
-          alt="house"
-        />
+        <div className="rounded-md mb-6 w-full h-[250px] overflow-hidden">
+          <OptimizedImage
+            className="w-full h-full object-cover transition-transform duration-300 transform hover:scale-110"
+            src={image}
+            alt="house"
+          />
+        </div>
         <div className="mb-4 flex gap-x-2 text-sm">
           <div className="bg-green-600 rounded-full text-white font-medium px-3 py-1 shadow">
             {type}

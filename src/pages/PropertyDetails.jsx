@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
+import OptimizedImage from "@/components/common/OptimizedImage";
+import { useHouseStore } from "../store/useHouseStore";
 import { BiBed, BiBath } from "react-icons/bi";
 import { MdLocationOn } from "react-icons/md";
 import { MdHome } from "react-icons/md";
@@ -29,6 +31,9 @@ const PropertyDetails = () => {
   const [isInWishlist, setIsInWishlist] = useState(false);
   const supabase = useSupabaseClient();
   const { isDarkMode } = useTheme();
+
+  const incrementWishlist = useHouseStore((state) => state.incrementWishlist);
+  const decrementWishlist = useHouseStore((state) => state.decrementWishlist);
 
   const markers = useMemo(() => {
     if (!house) return [];
@@ -135,7 +140,6 @@ const PropertyDetails = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
-  // Handle Wishlist Toggle
   const toggleWishlist = async () => {
     const propertyId = id;
 
@@ -151,6 +155,7 @@ const PropertyDetails = () => {
         if (error) throw error;
         console.log("Property deleted from wishlist successfully");
         message.success("Property deleted from wishlist successfully");
+        decrementWishlist();
       } catch (err) {
         console.error("Error deleting property from wishlist:", err.message);
       } finally {
@@ -162,11 +167,12 @@ const PropertyDetails = () => {
         property_id: propertyId,
         user_id: userId,
       });
-      message.success("Property Added to your wishlist successfully");
       if (error) {
         console.error("Error adding to wishlist", error);
       } else {
+        message.success("Property Added to your wishlist successfully");
         setIsInWishlist(true);
+        incrementWishlist();
         return "ok";
       }
     }
@@ -195,11 +201,13 @@ const PropertyDetails = () => {
   return (
     <section className={isDarkMode ? "bg-gray-900 text-gray-100" : ""}>
       <div className={`container mx-auto min-h-[800px] mb-1 ${isDarkMode ? "text-gray-100" : ""}`}>
-        <img
-          src={imageUrl}
-          alt="Property"
-          className="rounded-2xl object-cover w-full max-w-3xl mx-auto my-3 mt-5 py-5 shadow-lg transition-transform transform hover:scale-105 duration-300"
-        />
+        <div className="max-w-3xl mx-auto my-3 mt-5 h-[400px] overflow-hidden rounded-2xl shadow-lg">
+          <OptimizedImage
+            src={imageUrl}
+            alt="Property"
+            className="w-full h-full object-cover transition-transform transform hover:scale-105 duration-300"
+          />
+        </div>
         <div className="my-6 flex flex-col gap-3">
           <div className="flex justify-between items-center">
             <div>

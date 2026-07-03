@@ -106,6 +106,9 @@ const resources = {
         empty: "Your wishlist is empty",
         emptySub: "Start exploring properties and add your favorites to the wishlist",
         explore: "Explore Properties"
+      },
+      network: {
+        offline: "You are browsing offline. Changes will not be saved."
       }
     }
   },
@@ -212,6 +215,9 @@ const resources = {
         empty: "قائمتك المفضلة فارغة",
         emptySub: "ابدأ في استكشاف العقارات وأضف مفضلاتك إلى القائمة",
         explore: "استكشف العقارات"
+      },
+      network: {
+        offline: "أنت تتصفح بدون اتصال بالإنترنت. لن يتم حفظ التعديلات."
       }
     }
   }

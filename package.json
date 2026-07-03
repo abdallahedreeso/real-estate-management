@@ -22,6 +22,7 @@
     "@radix-ui/react-radio-group": "^1.2.0",
     "@radix-ui/react-select": "^2.1.1",
     "@radix-ui/react-slot": "^1.1.0",
+    "@sentry/react": "^10.63.0",
     "@supabase/supabase-js": "^2.45.4",
     "antd": "^5.21.0",
     "class-variance-authority": "^0.7.0",
