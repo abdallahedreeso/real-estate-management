@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import OptimizedImage from "@/components/common/OptimizedImage";
 import { useHouseStore } from "../store/useHouseStore";
+import ChatBox from "@/components/chat/ChatBox";
 import { BiBed, BiBath } from "react-icons/bi";
 import { MdLocationOn } from "react-icons/md";
 import { MdHome } from "react-icons/md";
@@ -316,25 +317,44 @@ const PropertyDetails = () => {
           {/* Whatsapp message */}
           <SignedOut>
             <JoinUsCard />
+            <div className="mt-4 p-4 rounded-xl border border-dashed border-violet-500 bg-violet-50 dark:bg-gray-800 text-center">
+              <p className={`text-sm ${isDarkMode ? "text-violet-300" : "text-violet-700"}`}>
+                Want to chat live? Please sign in to initiate a direct peer-to-peer real-time conversation.
+              </p>
+            </div>
           </SignedOut>
           <SignedIn>
-            <button
-              onClick={handleWhatsAppClick}
-              className={`${isDarkMode ? "bg-violet-800" : "bg-violet-700"} text-white p-3 rounded-md shadow hover:bg-violet-600 transition`}
-            >
-              <div className="flex flex-wrap items-center justify-center ">
-                Message Seller on
-                <div className="flex ">
-                  <img
-                    src={whatsappIcon}
-                    alt="Whatsapp icon"
-                    width="20px"
-                    className="mx-1"
-                  />
-                  WhatsApp: {house.seller_phone}
+            <div className="flex flex-col gap-4">
+              <button
+                onClick={handleWhatsAppClick}
+                className={`${isDarkMode ? "bg-violet-800" : "bg-violet-700"} text-white p-3 rounded-md shadow hover:bg-violet-600 transition`}
+              >
+                <div className="flex flex-wrap items-center justify-center ">
+                  Message Seller on
+                  <div className="flex ">
+                    <img
+                      src={whatsappIcon}
+                      alt="Whatsapp icon"
+                      width="20px"
+                      className="mx-1"
+                    />
+                    WhatsApp: {house.seller_phone}
+                  </div>
                 </div>
+              </button>
+
+              {/* Instant Peer-to-Peer Realtime Chat Box */}
+              <div className="mt-2">
+                <h3 className={`font-bold text-xl mb-3 ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}>
+                  Live Chat with Agent
+                </h3>
+                <ChatBox 
+                  propertyId={house.property_id.toString()} 
+                  sellerId={house.seller_id} 
+                  propertyTitle={house.title} 
+                />
               </div>
-            </button>
+            </div>
           </SignedIn>
 
           {house.description && (
