@@ -1,9 +1,16 @@
-export default async function UpdateData(supabase, propertyData, id, userId) {
+export default async function UpdateData(supabase, propertyData, id, userId, token) {
     if (!userId) {
         console.error("Error updating property: userId is missing.");
         return null;
     }
     
+    if (token) {
+        await supabase.auth.setSession({
+            access_token: token,
+            refresh_token: "",
+        });
+    }
+
     const { error } = await supabase
         .from("properties")
         .update({
@@ -36,4 +43,4 @@ export default async function UpdateData(supabase, propertyData, id, userId) {
         console.log('data updated');
         return "ok";
     }
-}
+}

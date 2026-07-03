@@ -1,4 +1,11 @@
-export default async function InserthData(supabase, propertyData) {
+export default async function InserthData(supabase, propertyData, token) {
+  if (token) {
+    await supabase.auth.setSession({
+      access_token: token,
+      refresh_token: "",
+    });
+  }
+
   const { error } = await supabase.from("properties").insert({
     title: propertyData.title,
     price: propertyData.price,
@@ -19,6 +26,7 @@ export default async function InserthData(supabase, propertyData) {
     lat: propertyData.lat,
     lng: propertyData.lng
   });
+
   if (error) {
     console.error("Error inserting data into property table : ", error);
     return null;

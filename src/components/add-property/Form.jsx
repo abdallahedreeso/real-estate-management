@@ -98,7 +98,7 @@ export default function AntdForm({ property, id }) {
 
   const supabase = useSupabaseClient();
   const navigate = useNavigate();
-  const { userId } = useAuth();
+  const { userId, getToken } = useAuth();
 
   const englishRegex = /^[a-zA-Z0-9\s.,'-]+$/;
   const numericOnlyRegex = /^\d+$/;
@@ -297,10 +297,15 @@ export default function AntdForm({ property, id }) {
 
       setLoading(true);
       let response;
-      if (property && id) {
-        response = await UpdateData(supabase, propertyData, id, userId);
-      } else {
-        response = await InsertData(supabase, propertyData);
+      try {
+        const token = await getToken({ template: "supabase" });
+        if (property && id) {
+          response = await UpdateData(supabase, propertyData, id, userId, token);
+        } else {
+          response = await InsertData(supabase, propertyData, token);
+        }
+      } catch (tokenErr) {
+        console.error("Error acquiring dynamic JWT session token:", tokenErr);
       }
       if (response) {
         setLoading(false);
