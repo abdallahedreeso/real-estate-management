@@ -30,6 +30,21 @@ const PropertyDetails = () => {
   const supabase = useSupabaseClient();
   const { isDarkMode } = useTheme();
 
+  const markers = useMemo(() => {
+    if (!house) return [];
+    return [
+      {
+        property_id: house.property_id,
+        lat: house.latitude,
+        lng: house.longitude,
+        address: house.address,
+        price: house.price,
+        bedrooms: house.Bedrooms,
+        bathrooms: house.Bathrooms,
+      },
+    ];
+  }, [house]);
+
   useEffect(() => {
     const fetchHouseData = async () => {
       try {
@@ -171,18 +186,6 @@ const PropertyDetails = () => {
       });
     }
   };
-
-  const markers = useMemo(() => [
-    {
-      property_id: house.property_id,
-      lat: house.latitude,
-      lng: house.longitude,
-      address: house.address,
-      price: house.price,
-      bedrooms: house.Bedrooms,
-      bathrooms: house.Bathrooms,
-    },
-  ], [house.property_id, house.latitude, house.longitude, house.address, house.price, house.Bedrooms, house.Bathrooms]);
 
   const imageUrl =
     house.images && house.images.length > 0

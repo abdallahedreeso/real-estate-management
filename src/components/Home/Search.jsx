@@ -5,6 +5,7 @@ import { Pagination } from 'antd';
 import '@/assets/style/pages/search.css';
 import emptyState from "../../assets/img/properties-empty.webp";
 import { useTheme } from '../../context/ThemeContext';
+import { useShallow } from 'zustand/react/shallow';
 import { useHouseStore, selectFilteredHouses } from '../../store/useHouseStore';
 
 const capitalizeFirstLetter = (string) => {
@@ -17,7 +18,7 @@ const Search = () => {
     const [input, setInput] = useState("");
     const { isDarkMode } = useTheme();
 
-    const filteredHouses = useHouseStore(selectFilteredHouses);
+    const filteredHouses = useHouseStore(useShallow(selectFilteredHouses));
     const handleClick = useHouseStore((state) => state.handleClick);
 
     // Format houses for child House component compatibility
