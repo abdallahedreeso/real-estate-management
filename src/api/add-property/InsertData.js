@@ -15,7 +15,9 @@ export default async function InserthData(supabase, propertyData) {
     seller_phone: propertyData.seller_phone,
     images: propertyData.images,
     file_list: propertyData.file_list,
-    address: propertyData.address
+    address: propertyData.address,
+    lat: propertyData.lat,
+    lng: propertyData.lng
   });
   if (error) {
     console.error("Error inserting data into property table : ", error);

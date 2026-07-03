@@ -108,19 +108,19 @@ export default function AntdForm({ property, id }) {
 
   useEffect(() => {
     if (property) {
-      setTitle(property.title);
-      setPrice(property.price);
-      setPropertyType(property.property_type);
-      setDescription(property.description);
-      setState(property.state);
-      setCity(property.city);
-      setZip(property.zip_code);
-      setAddress(property.address);
-      setBedrooms(property.Bedrooms);
-      setBathrooms(property.Bathrooms);
-      setParkingSpaces(property.ParkingSpaces);
-      setSurfaceArea(property.surface_area);
-      setPhone(property.seller_phone);
+      setTitle(property.title || "");
+      setPrice(property.price?.toString() || "");
+      setPropertyType(property.property_type || null);
+      setDescription(property.description || "");
+      setState(property.state || null);
+      setCity(property.city || "");
+      setZip(property.zip_code || "");
+      setAddress(property.address || "");
+      setBedrooms(property.Bedrooms?.toString() || "");
+      setBathrooms(property.Bathrooms?.toString() || "");
+      setParkingSpaces(property.ParkingSpaces?.toString() || "");
+      setSurfaceArea(property.surface_area?.toString() || "");
+      setPhone(property.seller_phone || "");
       setImages(property.file_list || []);
     }
   }, [property]);
@@ -138,7 +138,7 @@ export default function AntdForm({ property, id }) {
 
     if (!price) {
       newErrors.price = t("validation.priceRequired");
-    } else if (!numericOnlyRegex.test(price) || parseInt(price) < 0) {
+    } else if (!numericOnlyRegex.test(price) || parseInt(price, 10) < 0) {
       newErrors.price = t("validation.positiveNumbers");
     }
 
@@ -176,13 +176,13 @@ export default function AntdForm({ property, id }) {
 
     if (!bedrooms) {
       newErrors.bedrooms = t("validation.bedroomsRequired");
-    } else if (!numericOnlyRegex.test(bedrooms) || parseInt(bedrooms) < 0) {
+    } else if (!numericOnlyRegex.test(bedrooms) || parseInt(bedrooms, 10) < 0) {
       newErrors.bedrooms = t("validation.positiveNumbers");
     }
 
     if (!bathrooms) {
       newErrors.bathrooms = t("validation.bathroomsRequired");
-    } else if (!numericOnlyRegex.test(bathrooms) || parseInt(bathrooms) < 0) {
+    } else if (!numericOnlyRegex.test(bathrooms) || parseInt(bathrooms, 10) < 0) {
       newErrors.bathrooms = t("validation.positiveNumbers");
     }
 
@@ -190,7 +190,7 @@ export default function AntdForm({ property, id }) {
       newErrors.parkingSpaces = t("validation.parkingRequired");
     } else if (
       !numericOnlyRegex.test(parkingSpaces) ||
-      parseInt(parkingSpaces) < 0
+      parseInt(parkingSpaces, 10) < 0
     ) {
       newErrors.parkingSpaces = t("validation.positiveNumbers");
     }
@@ -199,7 +199,7 @@ export default function AntdForm({ property, id }) {
       newErrors.surfaceArea = t("validation.surfaceRequired");
     } else if (
       !numericOnlyRegex.test(surfaceArea) ||
-      parseInt(surfaceArea) < 0
+      parseInt(surfaceArea, 10) < 0
     ) {
       newErrors.surfaceArea = t("validation.positiveNumbers");
     }
@@ -216,14 +216,11 @@ export default function AntdForm({ property, id }) {
 
   const customRequest = async ({ file, onSuccess, onError, onProgress }) => {
     try {
-      // 1. Initial State: Signal compression has started
       if (onProgress) onProgress({ percent: 15 });
 
-      // 2. Perform Client-Side Compression
       const compressedFile = await compressImage(file);
       if (onProgress) onProgress({ percent: 45 });
 
-      // 3. Dispatch WebP file to Supabase Bucket
       const imageName = `${file.uid}`;
       const { data, error } = await supabase.storage
         .from("images")
@@ -269,9 +266,17 @@ export default function AntdForm({ property, id }) {
           `${supabaseUrl}/storage/v1/object/public/images/${image.uid}`
         );
       });
+
+      // Localized bounding box centered around Cairo, Egypt (base: 30.0444, 31.2357)
+      const baseLat = 30.0444;
+      const baseLng = 31.2357;
+      const generatedLat = baseLat + (Math.random() - 0.5) * 0.06;
+      const generatedLng = baseLng + (Math.random() - 0.5) * 0.06;
+
+      // Safe integer cast payloads right before transmission
       let propertyData = {
         title,
-        price,
+        price: parseInt(price, 10) || 0,
         property_type: propertyType,
         description,
         country,
@@ -279,14 +284,17 @@ export default function AntdForm({ property, id }) {
         city,
         zip_code: zip,
         address: address,
-        Bedrooms: bedrooms,
-        Bathrooms: bathrooms,
-        ParkingSpaces: parkingSpaces,
-        surface_area: surfaceArea,
+        Bedrooms: parseInt(bedrooms, 10) || 0,
+        Bathrooms: parseInt(bathrooms, 10) || 0,
+        ParkingSpaces: parseInt(parkingSpaces, 10) || 0,
+        surface_area: parseInt(surfaceArea, 10) || 0,
         seller_phone: phone,
         images: imageUrls,
         file_list: images,
+        lat: property?.lat ? parseFloat(property.lat) : generatedLat,
+        lng: property?.lng ? parseFloat(property.lng) : generatedLng,
       };
+
       setLoading(true);
       let response;
       if (property && id) {
@@ -307,256 +315,293 @@ export default function AntdForm({ property, id }) {
     }
   };
 
+  // High-performance theme classes helper
+  const inputThemeClasses = `h-12 rounded-xl text-base px-4 border transition-all duration-200 ${
+    isDarkMode
+      ? "bg-gray-700 text-white border-gray-600 focus:bg-gray-600 focus:border-violet-500 hover:border-gray-500 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]"
+      : "bg-gray-50 text-gray-800 border-gray-200 focus:bg-white focus:border-violet-500 hover:border-gray-300 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]"
+  }`;
+
   return (
     <>
       <Spin spinning={loading} size="large" className="mt-40">
         <Card
-          style={{ maxWidth: "600px", margin: "20px auto", padding: "20px" }}
-          className={isDarkMode ? "bg-gray-800 border-gray-700 text-white" : ""}
+          className={`max-w-3xl mx-auto my-12 p-8 rounded-2xl shadow-xl transition-all duration-300 border ${
+            isDarkMode ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-100 text-gray-800"
+          }`}
         >
-          <Title level={3} className={isDarkMode ? "text-gray-200" : ""}>
-            {t("form.postAd")}
-          </Title>
-          <Form layout="vertical" onFinish={handleSubmit}>
-            <Form.Item
-              label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.title")}<span className="text-red-600">*</span></span>}
-              validateStatus={errors.title ? "error" : ""}
-              help={errors.title}
-            >
-              <Input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
-              />
-            </Form.Item>
+          <div className="mb-8 border-b pb-4 border-gray-200 dark:border-gray-700">
+            <Title level={2} className={`font-extrabold ${isDarkMode ? "!text-gray-100" : "!text-gray-800"}`}>
+              {t("form.postAd")}
+            </Title>
+            <p className="text-gray-400 text-sm mt-1">Provide listing details to showcase your property in Egypt</p>
+          </div>
 
-            <Form.Item
-              label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.price")}<span className="text-red-600">*</span></span>}
-              validateStatus={errors.price ? "error" : ""}
-              help={errors.price}
-            >
-              <Input
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
-              />
-            </Form.Item>
-
-            <Form.Item
-              label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.propertyType")}<span className="text-red-600">*</span></span>}
-              validateStatus={errors.propertyType ? "error" : ""}
-              help={errors.propertyType}
-            >
-              <Select
-                value={propertyType}
-                onChange={setPropertyType}
-                className={isDarkMode ? "dark-select" : ""}
-                dropdownClassName={isDarkMode ? "dark-dropdown" : ""}
+          <Form layout="vertical" onFinish={handleSubmit} requiredMark={false}>
+            {/* Title & Price Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Form.Item
+                label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.title")}<span className="text-red-500 ml-1">*</span></span>}
+                validateStatus={errors.title ? "error" : ""}
+                help={errors.title}
               >
-                <Option value="rent">{t("form.forRent")}</Option>
-                <Option value="sale">{t("form.forSale")}</Option>
-              </Select>
-            </Form.Item>
+                <Input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className={inputThemeClasses}
+                  placeholder="e.g. Modern Apartment in Zamalek"
+                />
+              </Form.Item>
 
+              <Form.Item
+                label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.price")}<span className="text-red-500 ml-1">*</span></span>}
+                validateStatus={errors.price ? "error" : ""}
+                help={errors.price}
+              >
+                <Input
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  className={inputThemeClasses}
+                  placeholder="e.g. 2500000"
+                />
+              </Form.Item>
+            </div>
+
+            {/* Property Type & Phone Number */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Form.Item
+                label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.propertyType")}<span className="text-red-500 ml-1">*</span></span>}
+                validateStatus={errors.propertyType ? "error" : ""}
+                help={errors.propertyType}
+              >
+                <Select
+                  value={propertyType}
+                  onChange={setPropertyType}
+                  className={`h-12 ${isDarkMode ? "dark-select" : ""}`}
+                  dropdownClassName={isDarkMode ? "dark-dropdown" : ""}
+                  placeholder="Select listing option"
+                >
+                  <Option value="rent">{t("form.forRent")}</Option>
+                  <Option value="sale">{t("form.forSale")}</Option>
+                </Select>
+              </Form.Item>
+
+              <Form.Item
+                label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.phone")}<span className="text-red-500 ml-1">*</span></span>}
+                validateStatus={errors.phoneNumber ? "error" : ""}
+                help={errors.phoneNumber}
+              >
+                <Input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className={inputThemeClasses}
+                  placeholder="e.g. 01012345678"
+                />
+              </Form.Item>
+            </div>
+
+            {/* Description (Full Width) */}
             <Form.Item
-              label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.description")}</span>}
+              label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.description")}</span>}
               validateStatus={errors.description ? "error" : ""}
               help={errors.description}
             >
               <TextArea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
+                rows={4}
+                className={`rounded-xl text-base p-4 border transition-all duration-200 ${
+                  isDarkMode
+                    ? "bg-gray-700 text-white border-gray-600 focus:bg-gray-600 focus:border-violet-500 hover:border-gray-500 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]"
+                    : "bg-gray-50 text-gray-800 border-gray-200 focus:bg-white focus:border-violet-500 hover:border-gray-300 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]"
+                }`}
+                placeholder="Describe key features, vicinity landmarks, etc..."
               />
             </Form.Item>
 
-            <div className="flex justify-between gap-2">
-              <div className="flex flex-col w-1/2">
-                <Form.Item label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.country")}<span className="text-red-600">*</span></span>}>
-                  <Select
-                    value={country}
-                    onChange={setCountry}
-                    className={isDarkMode ? "dark-select" : ""}
-                    dropdownClassName={isDarkMode ? "dark-dropdown" : ""}
-                  >
-                    <Option value="egypt">{t("form.egypt")}</Option>
-                  </Select>
-                </Form.Item>
-
-                <Form.Item
-                  label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.state")}<span className="text-red-600">*</span></span>}
-                  validateStatus={errors.state ? "error" : ""}
-                  help={errors.state}
+            {/* Country & State Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Form.Item label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.country")}<span className="text-red-500 ml-1">*</span></span>}>
+                <Select
+                  value={country}
+                  onChange={setCountry}
+                  className={`h-12 ${isDarkMode ? "dark-select" : ""}`}
+                  dropdownClassName={isDarkMode ? "dark-dropdown" : ""}
                 >
-                  <Select
-                    value={state}
-                    onChange={setState}
-                    className={isDarkMode ? "dark-select" : ""}
-                    dropdownClassName={isDarkMode ? "dark-dropdown" : ""}
-                  >
-                    <Option value="cairo">Cairo</Option>
-                    <Option value="giza">Giza</Option>
-                    <Option value="alexandria">Alexandria</Option>
-                    <Option value="aswan">Aswan</Option>
-                    <Option value="asyut">Asyut</Option>
-                    <Option value="beheira">Beheira</Option>
-                    <Option value="beni_suef">Beni Suef</Option>
-                    <Option value="dakahlia">Dakahlia</Option>
-                    <Option value="damietta">Damietta</Option>
-                    <Option value="faiyum">Faiyum</Option>
-                    <Option value="gharbia">Gharbia</Option>
-                    <Option value="ismailia">Ismailia</Option>
-                    <Option value="kafr_el_sheikh">Kafr El Sheikh</Option>
-                    <Option value="luxor">Luxor</Option>
-                    <Option value="matruh">Matruh</Option>
-                    <Option value="minya">Minya</Option>
-                    <Option value="monufia">Monufia</Option>
-                    <Option value="new_valley">New Valley</Option>
-                    <Option value="north_sinai">North Sinai</Option>
-                    <Option value="port_said">Port Said</Option>
-                    <Option value="qalyubia">Qalyubia</Option>
-                    <Option value="qanatir">Qena</Option>
-                    <Option value="red_sea">Red Sea</Option>
-                    <Option value="sharqia">Sharqia</Option>
-                    <Option value="sohag">Sohag</Option>
-                    <Option value="south_sinai">South Sinai</Option>
-                    <Option value="suez">Suez</Option>
-                  </Select>
-                </Form.Item>
-              </div>
+                  <Option value="egypt">{t("form.egypt")}</Option>
+                </Select>
+              </Form.Item>
 
-              <div className="flex flex-col w-1/2">
-                <Form.Item
-                  label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.city")}</span>}
-                  validateStatus={errors.city ? "error" : ""}
-                  help={errors.city}
+              <Form.Item
+                label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.state")}<span className="text-red-500 ml-1">*</span></span>}
+                validateStatus={errors.state ? "error" : ""}
+                help={errors.state}
+              >
+                <Select
+                  value={state}
+                  onChange={setState}
+                  className={`h-12 ${isDarkMode ? "dark-select" : ""}`}
+                  dropdownClassName={isDarkMode ? "dark-dropdown" : ""}
+                  placeholder="Select governorate"
                 >
-                  <Input
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.zipCode")}</span>}
-                  validateStatus={errors.zip ? "error" : ""}
-                  help={errors.zip}
-                >
-                  <Input
-                    value={zip}
-                    onChange={(e) => setZip(e.target.value)}
-                    className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
-                  />
-                </Form.Item>
-              </div>
+                  <Option value="cairo">Cairo</Option>
+                  <Option value="giza">Giza</Option>
+                  <Option value="alexandria">Alexandria</Option>
+                  <Option value="aswan">Aswan</Option>
+                  <Option value="asyut">Asyut</Option>
+                  <Option value="beheira">Beheira</Option>
+                  <Option value="beni_suef">Beni Suef</Option>
+                  <Option value="dakahlia">Dakahlia</Option>
+                  <Option value="damietta">Damietta</Option>
+                  <Option value="faiyum">Faiyum</Option>
+                  <Option value="gharbia">Gharbia</Option>
+                  <Option value="ismailia">Ismailia</Option>
+                  <Option value="kafr_el_sheikh">Kafr El Sheikh</Option>
+                  <Option value="luxor">Luxor</Option>
+                  <Option value="matruh">Matruh</Option>
+                  <Option value="minya">Minya</Option>
+                  <Option value="monufia">Monufia</Option>
+                  <Option value="new_valley">New Valley</Option>
+                  <Option value="north_sinai">North Sinai</Option>
+                  <Option value="port_said">Port Said</Option>
+                  <Option value="qalyubia">Qalyubia</Option>
+                  <Option value="qena">Qena</Option>
+                  <Option value="red_sea">Red Sea</Option>
+                  <Option value="sharqia">Sharqia</Option>
+                  <Option value="sohag">Sohag</Option>
+                  <Option value="south_sinai">South Sinai</Option>
+                  <Option value="suez">Suez</Option>
+                </Select>
+              </Form.Item>
             </div>
 
+            {/* City & Zip Code Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Form.Item
+                label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.city")}</span>}
+                validateStatus={errors.city ? "error" : ""}
+                help={errors.city}
+              >
+                <Input
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className={inputThemeClasses}
+                  placeholder="e.g. Nasr City"
+                />
+              </Form.Item>
+
+              <Form.Item
+                label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.zipCode")}</span>}
+                validateStatus={errors.zip ? "error" : ""}
+                help={errors.zip}
+              >
+                <Input
+                  value={zip}
+                  onChange={(e) => setZip(e.target.value)}
+                  className={inputThemeClasses}
+                  placeholder="e.g. 11762"
+                />
+              </Form.Item>
+            </div>
+
+            {/* Detailed Address (Full Width) */}
             <Form.Item
-              label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.address")}<span className="text-red-600">*</span></span>}
+              label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.address")}<span className="text-red-500 ml-1">*</span></span>}
               validateStatus={errors.address ? "error" : ""}
               help={errors.address}
             >
               <Input
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
+                className={inputThemeClasses}
+                placeholder="e.g. Building 12, Abbas El-Akkad St."
               />
             </Form.Item>
 
-            <div className="flex justify-between gap-2">
-              <div className="flex flex-col w-1/2">
-                <Form.Item
-                  label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.bedrooms")}<span className="text-red-600">*</span></span>}
-                  validateStatus={errors.bedrooms ? "error" : ""}
-                  help={errors.bedrooms}
-                >
-                  <Input
-                    value={bedrooms}
-                    onChange={(e) => setBedrooms(e.target.value)}
-                    className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
-                  />
-                </Form.Item>
+            {/* 4-Column Layout for Bedrooms, Bathrooms, Parking & Surface Area */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <Form.Item
+                label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.bedrooms")}<span className="text-red-500 ml-1">*</span></span>}
+                validateStatus={errors.bedrooms ? "error" : ""}
+                help={errors.bedrooms}
+              >
+                <Input
+                  value={bedrooms}
+                  onChange={(e) => setBedrooms(e.target.value)}
+                  className={inputThemeClasses}
+                  placeholder="e.g. 3"
+                />
+              </Form.Item>
 
-                <Form.Item
-                  label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.bathrooms")}<span className="text-red-600">*</span></span>}
-                  validateStatus={errors.bathrooms ? "error" : ""}
-                  help={errors.bathrooms}
-                >
-                  <Input
-                    value={bathrooms}
-                    onChange={(e) => setBathrooms(e.target.value)}
-                    className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
-                  />
-                </Form.Item>
-              </div>
+              <Form.Item
+                label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.bathrooms")}<span className="text-red-500 ml-1">*</span></span>}
+                validateStatus={errors.bathrooms ? "error" : ""}
+                help={errors.bathrooms}
+              >
+                <Input
+                  value={bathrooms}
+                  onChange={(e) => setBathrooms(e.target.value)}
+                  className={inputThemeClasses}
+                  placeholder="e.g. 2"
+                />
+              </Form.Item>
 
-              <div className="flex flex-col w-1/2">
-                <Form.Item
-                  label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.parking")}<span className="text-red-600">*</span></span>}
-                  validateStatus={errors.parkingSpaces ? "error" : ""}
-                  help={errors.parkingSpaces}
-                >
-                  <Input
-                    value={parkingSpaces}
-                    onChange={(e) => setParkingSpaces(e.target.value)}
-                    className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
-                  />
-                </Form.Item>
+              <Form.Item
+                label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.parking")}<span className="text-red-500 ml-1">*</span></span>}
+                validateStatus={errors.parkingSpaces ? "error" : ""}
+                help={errors.parkingSpaces}
+              >
+                <Input
+                  value={parkingSpaces}
+                  onChange={(e) => setParkingSpaces(e.target.value)}
+                  className={inputThemeClasses}
+                  placeholder="e.g. 1"
+                />
+              </Form.Item>
 
-                <Form.Item
-                  label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.surfaceArea")}<span className="text-red-600">*</span></span>}
-                  validateStatus={errors.surfaceArea ? "error" : ""}
-                  help={errors.surfaceArea}
-                >
-                  <Input
-                    value={surfaceArea}
-                    onChange={(e) => setSurfaceArea(e.target.value)}
-                    className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
-                  />
-                </Form.Item>
-              </div>
+              <Form.Item
+                label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.surfaceArea")}<span className="text-red-500 ml-1">*</span></span>}
+                validateStatus={errors.surfaceArea ? "error" : ""}
+                help={errors.surfaceArea}
+              >
+                <Input
+                  value={surfaceArea}
+                  onChange={(e) => setSurfaceArea(e.target.value)}
+                  className={inputThemeClasses}
+                  placeholder="e.g. 150"
+                />
+              </Form.Item>
             </div>
 
-            <Form.Item
-              label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.phone")}<span className="text-red-600">*</span></span>}
-              validateStatus={errors.phoneNumber ? "error" : ""}
-              help={errors.phoneNumber}
-            >
-              <Input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
-              />
-            </Form.Item>
-
-            <Upload
-              {...props}
-              customRequest={customRequest}
-              className={isDarkMode ? "dark-upload" : ""}
-              disabled={!isOnline}
-            >
-              <Button
-                icon={<UploadOutlined />}
+            {/* Premium Full-Width Upload Zone */}
+            <div className="mb-6">
+              <span className={`block font-semibold mb-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                Property Images
+              </span>
+              <Upload
+                {...props}
+                customRequest={customRequest}
+                className={`w-full ${isDarkMode ? "dark-upload" : ""}`}
                 disabled={!isOnline}
-                className={isDarkMode ? "bg-gray-700 text-white border-gray-600 hover:bg-gray-600" : ""}
+                listType="picture-card"
               >
-                {t("form.upload")}
-              </Button>
-            </Upload>
+                <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-2xl cursor-pointer hover:border-violet-500 border-gray-300 dark:border-gray-600 transition duration-300 w-full h-[150px]">
+                  <UploadOutlined className="text-3xl text-violet-600 mb-2" />
+                  <p className="font-semibold text-sm">{t("form.upload")}</p>
+                  <p className="text-xs text-gray-400 mt-1">Select PNG, JPG, or GIF (WebP Auto-Compression)</p>
+                </div>
+              </Upload>
+            </div>
 
-            <Form.Item>
+            {/* Premium Gilded Accent Submit Button */}
+            <Form.Item className="mt-8">
               <Tooltip title={!isOnline ? t("network.offline") : ""}>
                 <Button
                   type="primary"
                   htmlType="submit"
                   block
                   disabled={!isOnline}
-                  className={`mt-2 ${
-                    isDarkMode
-                      ? "bg-violet-700 hover:bg-violet-600 active:bg-violet-700"
-                      : "bg-indigo-700 hover:bg-indigo-800 active:bg-indigo-700"
-                  }`}
+                  className="h-12 rounded-xl font-bold text-base shadow-lg shadow-violet-600/30 hover:shadow-violet-600/40 active:scale-[0.98] transition-all duration-300 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 border-none text-white flex items-center justify-center"
                 >
                   {t("form.save")}
                 </Button>
