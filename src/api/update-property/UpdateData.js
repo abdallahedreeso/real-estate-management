@@ -30,8 +30,8 @@ export default async function UpdateData(supabase, propertyData, id, userId, tok
             seller_phone: propertyData.seller_phone,
             images: propertyData.images,
             file_list: propertyData.file_list,
-            lat: propertyData.lat,
-            lng: propertyData.lng
+            latitude: propertyData.latitude,
+            longitude: propertyData.longitude
         })
         .eq('property_id', id)
         .eq('seller_id', userId); // Secure scoping

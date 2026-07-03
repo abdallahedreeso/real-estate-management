@@ -31,8 +31,8 @@ function ListingMapView() {
     .filter((house) => house.is_available)
     .map((house) => ({
       property_id: house.property_id,
-      lat: house.latitude,
-      lng: house.longitude,
+      lat: house.latitude || house.lat,
+      lng: house.longitude || house.lng,
       address: house.address,
       price: house.price,
       bedrooms: house.Bedrooms,

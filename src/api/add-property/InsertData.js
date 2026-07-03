@@ -23,8 +23,8 @@ export default async function InserthData(supabase, propertyData, token) {
     images: propertyData.images,
     file_list: propertyData.file_list,
     address: propertyData.address,
-    lat: propertyData.lat,
-    lng: propertyData.lng
+    latitude: propertyData.latitude,
+    longitude: propertyData.longitude
   });
 
   if (error) {

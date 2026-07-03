@@ -291,8 +291,8 @@ export default function AntdForm({ property, id }) {
         seller_phone: phone,
         images: imageUrls,
         file_list: images,
-        lat: property?.lat ? parseFloat(property.lat) : generatedLat,
-        lng: property?.lng ? parseFloat(property.lng) : generatedLng,
+        latitude: property?.latitude || property?.lat ? parseFloat(property.latitude || property.lat) : generatedLat,
+        longitude: property?.longitude || property?.lng ? parseFloat(property.longitude || property.lng) : generatedLng,
       };
 
       setLoading(true);
