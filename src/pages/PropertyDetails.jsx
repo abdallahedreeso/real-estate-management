@@ -34,6 +34,8 @@ const PropertyDetails = () => {
 
   const incrementWishlist = useHouseStore((state) => state.incrementWishlist);
   const decrementWishlist = useHouseStore((state) => state.decrementWishlist);
+  const isOnline = useHouseStore((state) => state.isOnline);
+  const queueOfflineAction = useHouseStore((state) => state.queueOfflineAction);
 
   const markers = useMemo(() => {
     if (!house) return [];
@@ -142,6 +144,21 @@ const PropertyDetails = () => {
 
   const toggleWishlist = async () => {
     const propertyId = id;
+
+    if (!isOnline) {
+      if (isInWishlist) {
+        setIsInWishlist(false);
+        decrementWishlist();
+        queueOfflineAction({ propertyId, operation: "REMOVE" });
+        message.info("Wishlist updated offline. Synchronizing changes soon...");
+      } else {
+        setIsInWishlist(true);
+        incrementWishlist();
+        queueOfflineAction({ propertyId, operation: "ADD" });
+        message.info("Wishlist updated offline. Synchronizing changes soon...");
+      }
+      return;
+    }
 
     if (isInWishlist) {
       // Remove from wishlist

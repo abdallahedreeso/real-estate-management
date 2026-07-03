@@ -31,13 +31,18 @@ const Navbar = () => {
   const supabase = useSupabaseClient();
   const wishlistCount = useHouseStore((state) => state.wishlistCount);
   const fetchWishlistCount = useHouseStore((state) => state.fetchWishlistCount);
+  const isOnline = useHouseStore((state) => state.isOnline);
+  const processOfflineOutbox = useHouseStore((state) => state.processOfflineOutbox);
 
-  // Fetch wishlist count when user logs in or supabase context initializes
+  // Fetch wishlist count and sync offline outbox queue when user is online
   useEffect(() => {
     if (supabase && userId) {
       fetchWishlistCount(supabase, userId);
+      if (isOnline) {
+        processOfflineOutbox(supabase, userId);
+      }
     }
-  }, [supabase, userId]);
+  }, [supabase, userId, isOnline]);
 
   const toggleLanguage = () => {
     const nextLang = i18n.language.startsWith("ar") ? "en" : "ar";

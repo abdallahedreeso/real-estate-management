@@ -16,6 +16,7 @@ export const useHouseStore = create(
       realtimeChannel: null,
       wishlistCount: 0,
       isOnline: typeof navigator !== "undefined" ? navigator.onLine : true,
+      offlineOutbox: [], // Array for pending mutations
 
       // Setters
       setCountry: (country) => set({ country }),
@@ -23,6 +24,43 @@ export const useHouseStore = create(
       setPrice: (price) => set({ price }),
       handleClick: (searchAddress) => set({ searchAddress: searchAddress || "" }),
       setNetworkStatus: (status) => set({ isOnline: status }),
+
+      // Outbox sync actions
+      queueOfflineAction: (actionPayload) => set((state) => ({
+        offlineOutbox: [...state.offlineOutbox, actionPayload]
+      })),
+
+      processOfflineOutbox: async (supabase, userId) => {
+        if (!supabase || !userId) return;
+        const { offlineOutbox } = get();
+        if (offlineOutbox.length === 0) return;
+
+        console.log(`Processing offline outbox: ${offlineOutbox.length} actions pending.`);
+        
+        for (const action of offlineOutbox) {
+          const { propertyId, operation } = action;
+          try {
+            if (operation === "ADD") {
+              await supabase.from("wishlist").insert({
+                property_id: propertyId,
+                user_id: userId,
+              });
+            } else if (operation === "REMOVE") {
+              await supabase
+                .from("wishlist")
+                .delete()
+                .eq("property_id", propertyId)
+                .eq("user_id", userId);
+            }
+          } catch (err) {
+            console.error("Failed to process offline action:", action, err);
+          }
+        }
+
+        // Clear outbox after syncing
+        set({ offlineOutbox: [] });
+        get().fetchWishlistCount(supabase, userId);
+      },
 
       // Actions
       fetchWishlistCount: async (supabase, userId) => {
@@ -127,13 +165,14 @@ export const useHouseStore = create(
     {
       name: "real-estate-cache",
       storage: createJSONStorage(() => localStorage),
-      // Caches only raw state fields; ignores Supabase client classes/channels
+      // Cache list heavy attributes including the offline outbox queue
       partialize: (state) => ({
         houses: state.houses,
         wishlistCount: state.wishlistCount,
         country: state.country,
         property: state.property,
         price: state.price,
+        offlineOutbox: state.offlineOutbox,
       }),
     }
   )
