@@ -24,6 +24,54 @@ const { TextArea } = Input;
 const { Option } = Select;
 const { Title } = Typography;
 
+// Client-Side Image Resizing & WebP Compression Helper
+const compressImage = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+
+        const MAX_WIDTH = 1200;
+        if (width > MAX_WIDTH) {
+          height = Math.round((height * MAX_WIDTH) / width);
+          width = MAX_WIDTH;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+              const compressedFile = new File([blob], `${nameWithoutExt}.webp`, {
+                type: "image/webp",
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            } else {
+              reject(new Error("Canvas compression yielded null blob"));
+            }
+          },
+          "image/webp",
+          0.75 // 75% quality conversion
+        );
+      };
+      img.onerror = (err) => reject(err);
+    };
+    reader.onerror = (err) => reject(err);
+  });
+};
+
 export default function AntdForm({ property, id }) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -163,19 +211,28 @@ export default function AntdForm({ property, id }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const customRequest = async ({ file, onSuccess, onError }) => {
+  const customRequest = async ({ file, onSuccess, onError, onProgress }) => {
     try {
+      // 1. Initial State: Signal compression has started
+      if (onProgress) onProgress({ percent: 15 });
+
+      // 2. Perform Client-Side Compression
+      const compressedFile = await compressImage(file);
+      if (onProgress) onProgress({ percent: 45 });
+
+      // 3. Dispatch WebP file to Supabase Bucket
       const imageName = `${file.uid}`;
       const { data, error } = await supabase.storage
         .from("images")
-        .upload(imageName, file, {
-          contentType: file.type,
+        .upload(imageName, compressedFile, {
+          contentType: "image/webp",
         });
 
       if (error) {
         onError(error);
         message.error(t("toast.uploadFailed", { name: file.name }));
       } else {
+        if (onProgress) onProgress({ percent: 100 });
         onSuccess(data);
         message.success(t("toast.uploadSuccess", { name: file.name }));
       }
