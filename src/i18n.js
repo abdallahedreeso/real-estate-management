@@ -109,6 +109,11 @@ const resources = {
       },
       network: {
         offline: "You are browsing offline. Changes will not be saved."
+      },
+      pwa: {
+        install: "Install",
+        dismiss: "Not Now",
+        installDesc: "Add to home screen for offline-friendly, fast property search."
       }
     }
   },
@@ -218,6 +223,11 @@ const resources = {
       },
       network: {
         offline: "أنت تتصفح بدون اتصال بالإنترنت. لن يتم حفظ التعديلات."
+      },
+      pwa: {
+        install: "تثبيت",
+        dismiss: "ليس الآن",
+        installDesc: "أضف التطبيق للشاشة الرئيسية لتصفح سريع وسهل للممتلكات بدون إنترنت."
       }
     }
   }

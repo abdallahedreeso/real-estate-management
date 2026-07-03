@@ -4,6 +4,11 @@ import "./i18n";
 import "./index.css";
 import App from "./App";
 import { ThemeProvider } from "./context/ThemeContext";
+import { registerSW } from "virtual:pwa-register";
+
+if (import.meta.env.PROD) {
+  registerSW({ immediate: true });
+}
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(

@@ -5,6 +5,7 @@ import Navbar from "./Navbar";
 import ThemeToggle from "../theme/ThemeToggle";
 import { Spin } from "antd";
 import NetworkStatusBar from "../common/NetworkStatusBar";
+import PwaInstallPrompt from "../common/PwaInstallPrompt";
 
 const AppLayout = () => {
   return (
@@ -22,6 +23,7 @@ const AppLayout = () => {
           <Outlet />
         </Suspense>
       </main>
+      <PwaInstallPrompt />
       <ThemeToggle />
       <Footer />
     </div>
