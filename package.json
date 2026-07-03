@@ -39,6 +39,7 @@
     "react-leaflet": "^4.2.1",
     "react-router-dom": "^6.26.2",
     "react-share": "^5.1.0",
+    "recharts": "^3.9.1",
     "sweetalert2": "^11.14.1",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",

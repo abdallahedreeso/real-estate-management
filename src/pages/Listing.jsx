@@ -6,6 +6,7 @@ import "@/assets/style/pages/listing.css";
 import { useAuth } from "@clerk/clerk-react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import ListingAnalytics from "@/components/dashboard/ListingAnalytics";
 
 const Listing = () => {
   const { t } = useTranslation();
@@ -230,12 +231,15 @@ const Listing = () => {
       ) : error ? (
         <p className={isDarkMode ? "text-gray-300" : ""}>Error: {error}</p>
       ) : (
-        <Table
-          scroll={{ x: "max-content" }}
-          dataSource={properties}
-          columns={columns}
-          className={isDarkMode ? "dark-table" : ""}
-        />
+        <>
+          <ListingAnalytics properties={properties} />
+          <Table
+            scroll={{ x: "max-content" }}
+            dataSource={properties}
+            columns={columns}
+            className={isDarkMode ? "dark-table" : ""}
+          />
+        </>
       )}
     </div>
   );
