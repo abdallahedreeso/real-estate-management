@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Spin, Alert, Pagination } from "antd";
+import { useTranslation } from "react-i18next";
 import useSupabaseClient from "@/backend/supabase/supabase";
 import { Link } from "react-router-dom";
 import { MapPin } from "lucide-react";
@@ -10,6 +11,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@clerk/clerk-react";
 
 const Wishlist = () => {
+  const { t } = useTranslation();
   const [houseData, setHouseData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -54,7 +56,7 @@ const Wishlist = () => {
 
       // Map and filter to include necessary property data
       const formattedData = data
-        .filter((wishlistItem) => wishlistItem.properties.is_available)
+        .filter((wishlistItem) => wishlistItem.properties && wishlistItem.properties.is_available)
         .map((wishlistItem) => ({
           id: wishlistItem.id, // Wishlist ID
           user_id: wishlistItem.user_id, // Clerk User ID
@@ -102,12 +104,12 @@ const Wishlist = () => {
   const currentHouses = houseData.slice(indexOfFirstHouse, indexOfLastHouse);
 
   if (!isLoaded || loading) {
-    return <Spin size="large" className="flex my-48 justify-center" />;
+    return <Spin size="large" className="flex my-48 justify-center" tip={t("wishlist.loading")} />;
   }
 
   if (errorMessage) {
     return (
-      <Alert message="Error" description={errorMessage} type="error" showIcon />
+      <Alert message={t("wishlist.error")} description={errorMessage} type="error" showIcon />
     );
   }
 
@@ -120,7 +122,7 @@ const Wishlist = () => {
     <div className="mt-10 px-10 md:px-20 lg:px-40">
       <div className="wishlist__title ">
         <h1 className="font-extrabold text-3xl text-center text-white bg-violet-700 rounded-lg px-16 py-5 mb-10">
-          My Wishlist
+          {t("wishlist.myWishlist")}
         </h1>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -142,29 +144,29 @@ const Wishlist = () => {
                 </div>
               </div>
               <div className={`flex text-lg font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'} max-w-[260px]`}>
-              <MapPin className={`mr-2 ${isDarkMode ? 'text-violet-400' : 'text-violet-700'}`} />
+                <MapPin className={`mr-2 ${isDarkMode ? 'text-violet-400' : 'text-violet-700'}`} />
                 <span>{house.address}</span>
               </div>
               <div className="flex gap-x-4 my-4">
-              <div className={`flex md:w-24 w-5/12 gap-2 text-sm ${isDarkMode ? 'text-gray-300 bg-gray-700 hover:bg-gray-600' : 'text-gray-600 bg-slate-200 hover:bg-slate-300'} rounded-md p-2 justify-center items-center transition duration-300`}>
-              <BiBed className="text-[20px]" />
+                <div className={`flex md:w-24 w-5/12 gap-2 text-sm ${isDarkMode ? 'text-gray-300 bg-gray-700 hover:bg-gray-600' : 'text-gray-600 bg-slate-200 hover:bg-slate-300'} rounded-md p-2 justify-center items-center transition duration-300`}>
+                  <BiBed className="text-[20px]" />
                   <span>{house.bedrooms}</span>
                 </div>
                 <div className={`flex md:w-24 w-5/12 gap-2 text-sm ${isDarkMode ? 'text-gray-300 bg-gray-700 hover:bg-gray-600' : 'text-gray-600 bg-slate-200 hover:bg-slate-300'} rounded-md p-2 justify-center items-center transition duration-300`}>
-                <BiBath className="text-[20px]" />
+                  <BiBath className="text-[20px]" />
                   <span>{house.bathrooms}</span>
                 </div>
                 <div className={`flex md:w-24 w-5/12 gap-2 text-sm ${isDarkMode ? 'text-gray-300 bg-gray-700 hover:bg-gray-600' : 'text-gray-600 bg-slate-200 hover:bg-slate-300'} rounded-md p-2 justify-center items-center transition duration-300`}>
-                <FaParking className="text-[20px]" />
+                  <FaParking className="text-[20px]" />
                   <span>{house.parking}</span>
                 </div>
                 <div className={`flex md:w-24 w-5/12 gap-2 text-sm ${isDarkMode ? 'text-gray-300 bg-gray-700 hover:bg-gray-600' : 'text-gray-600 bg-slate-200 hover:bg-slate-300'} rounded-md p-2 justify-center items-center transition duration-300`}>
-                <BiArea className="text-[20px]" />
+                  <BiArea className="text-[20px]" />
                   <span>{house.surface_area}</span>
                 </div>
               </div>
               <div className={`text-xl font-semibold ${isDarkMode ? 'text-violet-400' : 'text-violet-600'} mb-2`}>
-              ${house.price}
+                ${house.price}
               </div>
             </div>
           </Link>

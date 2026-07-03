@@ -1,10 +1,12 @@
 import { Button, Empty } from "antd";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Home } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import "../../assets/style/components/wishlist.css";
 
 const EmptyWishlist = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
 
@@ -19,9 +21,11 @@ const EmptyWishlist = () => {
         className={isDarkMode ? 'dark-empty' : ''}
         description={
           <div className="text-center">
-            <h3 className={`text-xl font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'} mb-2`}>Your wishlist is empty</h3>
+            <h3 className={`text-xl font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'} mb-2`}>
+              {t("wishlist.empty")}
+            </h3>
             <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'} mb-6`}>
-              Start exploring properties and add your favorites to the wishlist
+              {t("wishlist.emptySub")}
             </p>
           </div>
         }
@@ -33,7 +37,7 @@ const EmptyWishlist = () => {
           className={`${isDarkMode ? 'bg-violet-600 hover:bg-violet-500' : 'bg-violet-700 hover:bg-violet-600'} flex items-center gap-2 mx-auto`}
           size="large"
         >
-          Explore Properties
+          {t("wishlist.explore")}
         </Button>
       </Empty>
     </div>

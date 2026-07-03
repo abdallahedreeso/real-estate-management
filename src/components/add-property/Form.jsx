@@ -7,11 +7,11 @@ import {
   Form,
   Typography,
   message,
-  Space,
   Upload,
   Spin,
 } from "antd";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import InsertData from "@/api/add-property/InsertData";
 import UpdateData from "@/api/update-property/UpdateData";
 import { useTheme } from "../../context/ThemeContext";
@@ -20,12 +20,12 @@ import "../../assets/style/components/form.css";
 
 import useSupabaseClient from "@/backend/supabase/supabase";
 import { UploadOutlined } from "@ant-design/icons";
-import { Plus } from "lucide-react";
 const { TextArea } = Input;
 const { Option } = Select;
 const { Title } = Typography;
 
 export default function AntdForm({ property, id }) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
@@ -70,94 +70,93 @@ export default function AntdForm({ property, id }) {
       setParkingSpaces(property.ParkingSpaces);
       setSurfaceArea(property.surface_area);
       setPhone(property.seller_phone);
-      setImages(property.file_list);
+      setImages(property.file_list || []);
     }
-  }, []);
+  }, [property]);
 
   const validate = () => {
     let newErrors = {};
 
     if (!title) {
-      newErrors.title = "Title is required.";
+      newErrors.title = t("validation.titleRequired");
     } else if (numericOnlyRegex.test(title)) {
-      newErrors.title = "Field cannot consist only of numbers.";
+      newErrors.title = t("validation.numbersOnly");
     } else if (!englishRegex.test(title)) {
-      newErrors.title = "Field must contain only English characters.";
+      newErrors.title = t("validation.englishOnly");
     }
 
     if (!price) {
-      newErrors.price = "Price is required.";
+      newErrors.price = t("validation.priceRequired");
     } else if (!numericOnlyRegex.test(price) || parseInt(price) < 0) {
-      newErrors.price = "Field must contain only positive numbers.";
+      newErrors.price = t("validation.positiveNumbers");
     }
 
     if (!propertyType) {
-      newErrors.propertyType = "Property type is required.";
+      newErrors.propertyType = t("validation.typeRequired");
     }
 
     if (description && numericOnlyRegex.test(description)) {
-      newErrors.description = "Description cannot consist only of numbers.";
+      newErrors.description = t("validation.descNumbersOnly");
     } else if (description && !englishRegex.test(description)) {
-      newErrors.description =
-        "Description must contain only English characters.";
+      newErrors.description = t("validation.descEnglishOnly");
     }
 
     if (!state) {
-      newErrors.state = "State is required.";
+      newErrors.state = t("validation.stateRequired");
     }
 
     if (city && numericOnlyRegex.test(city)) {
-      newErrors.city = "City cannot consist only of numbers.";
+      newErrors.city = t("validation.cityNumbersOnly");
     } else if (city && !englishLettersNumericOnlyRegex.test(city)) {
-      newErrors.city = "Field should contain only English letters and numbers.";
+      newErrors.city = t("validation.cityLettersNumbers");
     }
 
     if (zip && !zipCodeRegex.test(zip)) {
-      newErrors.zip = "Zip code must contain between 3 and 9 digits.";
+      newErrors.zip = t("validation.zipLength");
     }
 
     if (!address) {
-      newErrors.address = "Address is required.";
+      newErrors.address = t("validation.addressRequired");
     } else if (numericOnlyRegex.test(address)) {
-      newErrors.description = "Field cannot consist only of numbers.";
+      newErrors.address = t("validation.numbersOnly");
     } else if (!englishRegex.test(address)) {
-      newErrors.address = "Field must contain only English characters.";
+      newErrors.address = t("validation.englishOnly");
     }
 
     if (!bedrooms) {
-      newErrors.bedrooms = "Number of bedrooms is required";
+      newErrors.bedrooms = t("validation.bedroomsRequired");
     } else if (!numericOnlyRegex.test(bedrooms) || parseInt(bedrooms) < 0) {
-      newErrors.bedrooms = "Field must contain only positive numbers.";
+      newErrors.bedrooms = t("validation.positiveNumbers");
     }
 
     if (!bathrooms) {
-      newErrors.bathrooms = "Number of bathrooms is required";
+      newErrors.bathrooms = t("validation.bathroomsRequired");
     } else if (!numericOnlyRegex.test(bathrooms) || parseInt(bathrooms) < 0) {
-      newErrors.bathrooms = "Field must contain only positive numbers.";
+      newErrors.bathrooms = t("validation.positiveNumbers");
     }
 
     if (!parkingSpaces) {
-      newErrors.parkingSpaces = "Number of parking spaces is required";
+      newErrors.parkingSpaces = t("validation.parkingRequired");
     } else if (
       !numericOnlyRegex.test(parkingSpaces) ||
       parseInt(parkingSpaces) < 0
     ) {
-      newErrors.parkingSpaces = "Field must contain only positive numbers.";
+      newErrors.parkingSpaces = t("validation.positiveNumbers");
     }
 
     if (!surfaceArea) {
-      newErrors.surfaceArea = "surface area is required";
+      newErrors.surfaceArea = t("validation.surfaceRequired");
     } else if (
       !numericOnlyRegex.test(surfaceArea) ||
       parseInt(surfaceArea) < 0
     ) {
-      newErrors.surfaceArea = "Field must contain only positive numbers.";
+      newErrors.surfaceArea = t("validation.positiveNumbers");
     }
 
     if (!phone) {
-      newErrors.phoneNumber = "Phone number is required.";
+      newErrors.phoneNumber = t("validation.phoneRequired");
     } else if (!egyptianPhoneRegex.test(phone)) {
-      newErrors.phoneNumber = "Enter a valid egyptian phone number.";
+      newErrors.phoneNumber = t("validation.phoneValid");
     }
 
     setErrors(newErrors);
@@ -165,25 +164,24 @@ export default function AntdForm({ property, id }) {
   };
 
   const customRequest = async ({ file, onSuccess, onError }) => {
-    console.log(images);
     try {
       const imageName = `${file.uid}`;
       const { data, error } = await supabase.storage
-        .from("images") // Your bucket name
+        .from("images")
         .upload(imageName, file, {
           contentType: file.type,
         });
 
       if (error) {
-        onError(error); // If upload fails, trigger error callback
-        message.error(`Failed to upload ${file.name}`);
+        onError(error);
+        message.error(t("toast.uploadFailed", { name: file.name }));
       } else {
-        onSuccess(data); // If upload is successful, trigger success callback
-        message.success(`${file.name} uploaded successfully`);
+        onSuccess(data);
+        message.success(t("toast.uploadSuccess", { name: file.name }));
       }
     } catch (error) {
       onError(error);
-      message.error("Upload failed.");
+      message.error(t("toast.genericUploadFailed"));
     }
   };
 
@@ -194,12 +192,10 @@ export default function AntdForm({ property, id }) {
     accept: "image/png, image/gif, image/jpeg",
     multiple: true,
     previewFile(file) {
-      console.log("Your upload file:", file);
-      // Return a Promise to resolve the file into a preview
       return new Promise((resolve) => {
         const reader = new FileReader();
-        reader.readAsDataURL(file); // Convert the file to a base64 string
-        reader.onload = () => resolve(reader.result); // When done, resolve the promise with the result
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
       });
     },
   };
@@ -208,7 +204,7 @@ export default function AntdForm({ property, id }) {
     if (validate()) {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       let imageUrls = [];
-      images.map((image) => {
+      images.forEach((image) => {
         imageUrls.push(
           `${supabaseUrl}/storage/v1/object/public/images/${image.uid}`
         );
@@ -240,13 +236,14 @@ export default function AntdForm({ property, id }) {
       }
       if (response) {
         setLoading(false);
-        message.success("Form submitted successfully");
+        message.success(t("toast.submitSuccess"));
         navigate("/MyProperty");
       } else {
-        message.error("server error, please try again later");
+        setLoading(false);
+        message.error(t("toast.submitError"));
       }
     } else {
-      message.error("Please fix the errors.");
+      message.error(t("toast.fixErrors"));
     }
   };
 
@@ -255,85 +252,85 @@ export default function AntdForm({ property, id }) {
       <Spin spinning={loading} size="large" className="mt-40">
         <Card
           style={{ maxWidth: "600px", margin: "20px auto", padding: "20px" }}
-          className={isDarkMode ? "bg-gray-800 border-gray-700" : ""}
+          className={isDarkMode ? "bg-gray-800 border-gray-700 text-white" : ""}
         >
-          <Title level={3} className={isDarkMode ? "text-gray-200" : ""}>Post Your Ad</Title>
+          <Title level={3} className={isDarkMode ? "text-gray-200" : ""}>
+            {t("form.postAd")}
+          </Title>
           <Form layout="vertical" onFinish={handleSubmit}>
             <Form.Item
-              label={<span className={isDarkMode ? "text-gray-300" : ""}>Title<span className="text-red-600">*</span></span>}
+              label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.title")}<span className="text-red-600">*</span></span>}
               validateStatus={errors.title ? "error" : ""}
               help={errors.title}
             >
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                
                 className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
               />
             </Form.Item>
 
             <Form.Item
-              label={<span className={isDarkMode ? "text-gray-300" : ""}>Price<span className="text-red-600">*</span></span>}
+              label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.price")}<span className="text-red-600">*</span></span>}
               validateStatus={errors.price ? "error" : ""}
               help={errors.price}
             >
               <Input
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                
                 className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
               />
             </Form.Item>
+
             <Form.Item
-              label={<span className={isDarkMode ? "text-gray-300" : ""}>Property Type<span className="text-red-600">*</span></span>}
+              label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.propertyType")}<span className="text-red-600">*</span></span>}
               validateStatus={errors.propertyType ? "error" : ""}
               help={errors.propertyType}
             >
               <Select
                 value={propertyType}
                 onChange={setPropertyType}
-                
                 className={isDarkMode ? "dark-select" : ""}
                 dropdownClassName={isDarkMode ? "dark-dropdown" : ""}
               >
-                <Option value="rent">For Rent</Option>
-                <Option value="sale">For Sale</Option>
+                <Option value="rent">{t("form.forRent")}</Option>
+                <Option value="sale">{t("form.forSale")}</Option>
               </Select>
             </Form.Item>
+
             <Form.Item
-              label={<span className={isDarkMode ? "text-gray-300" : ""}>Description</span>}
+              label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.description")}</span>}
               validateStatus={errors.description ? "error" : ""}
               help={errors.description}
             >
               <TextArea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                
                 className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
               />
             </Form.Item>
+
             <div className="flex justify-between gap-2">
               <div className="flex flex-col w-1/2">
-                <Form.Item label={<span className={isDarkMode ? "text-gray-300" : ""}>Country<span className="text-red-600">*</span></span>}>
-                  <Select 
-                    value={country} 
+                <Form.Item label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.country")}<span className="text-red-600">*</span></span>}>
+                  <Select
+                    value={country}
                     onChange={setCountry}
                     className={isDarkMode ? "dark-select" : ""}
                     dropdownClassName={isDarkMode ? "dark-dropdown" : ""}
                   >
-                    <Option value="egypt">Egypt</Option>
+                    <Option value="egypt">{t("form.egypt")}</Option>
                   </Select>
                 </Form.Item>
 
                 <Form.Item
-                  label={<span className={isDarkMode ? "text-gray-300" : ""}>State<span className="text-red-600">*</span></span>}
+                  label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.state")}<span className="text-red-600">*</span></span>}
                   validateStatus={errors.state ? "error" : ""}
                   help={errors.state}
                 >
                   <Select
                     value={state}
                     onChange={setState}
-                    
                     className={isDarkMode ? "dark-select" : ""}
                     dropdownClassName={isDarkMode ? "dark-dropdown" : ""}
                   >
@@ -367,137 +364,137 @@ export default function AntdForm({ property, id }) {
                   </Select>
                 </Form.Item>
               </div>
+
               <div className="flex flex-col w-1/2">
                 <Form.Item
-                  label={<span className={isDarkMode ? "text-gray-300" : ""}>City</span>}
+                  label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.city")}</span>}
                   validateStatus={errors.city ? "error" : ""}
                   help={errors.city}
                 >
                   <Input
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    
                     className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
                   />
                 </Form.Item>
 
                 <Form.Item
-                  label={<span className={isDarkMode ? "text-gray-300" : ""}>Zip Code</span>}
+                  label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.zipCode")}</span>}
                   validateStatus={errors.zip ? "error" : ""}
                   help={errors.zip}
                 >
                   <Input
                     value={zip}
                     onChange={(e) => setZip(e.target.value)}
-                    
                     className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
                   />
                 </Form.Item>
               </div>
             </div>
+
             <Form.Item
-              label={<span className={isDarkMode ? "text-gray-300" : ""}>Address<span className="text-red-600">*</span></span>}
+              label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.address")}<span className="text-red-600">*</span></span>}
               validateStatus={errors.address ? "error" : ""}
               help={errors.address}
             >
               <Input
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                
                 className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
               />
             </Form.Item>
+
             <div className="flex justify-between gap-2">
               <div className="flex flex-col w-1/2">
                 <Form.Item
-                  label={<span className={isDarkMode ? "text-gray-300" : ""}>Number of Bedrooms<span className="text-red-600">*</span></span>}
+                  label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.bedrooms")}<span className="text-red-600">*</span></span>}
                   validateStatus={errors.bedrooms ? "error" : ""}
                   help={errors.bedrooms}
                 >
                   <Input
                     value={bedrooms}
                     onChange={(e) => setBedrooms(e.target.value)}
-                    
                     className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
                   />
                 </Form.Item>
 
                 <Form.Item
-                  label={<span className={isDarkMode ? "text-gray-300" : ""}>Number of Bathrooms<span className="text-red-600">*</span></span>}
+                  label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.bathrooms")}<span className="text-red-600">*</span></span>}
                   validateStatus={errors.bathrooms ? "error" : ""}
                   help={errors.bathrooms}
                 >
                   <Input
                     value={bathrooms}
                     onChange={(e) => setBathrooms(e.target.value)}
-                    
                     className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
                   />
                 </Form.Item>
               </div>
+
               <div className="flex flex-col w-1/2">
                 <Form.Item
-                  label={<span className={isDarkMode ? "text-gray-300" : ""}>Number of Parking Spaces<span className="text-red-600">*</span></span>}
+                  label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.parking")}<span className="text-red-600">*</span></span>}
                   validateStatus={errors.parkingSpaces ? "error" : ""}
                   help={errors.parkingSpaces}
                 >
                   <Input
                     value={parkingSpaces}
                     onChange={(e) => setParkingSpaces(e.target.value)}
-                    
                     className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
                   />
                 </Form.Item>
 
                 <Form.Item
-                  label={<span className={isDarkMode ? "text-gray-300" : ""}>Surface Area<span className="text-red-600">*</span></span>}
+                  label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.surfaceArea")}<span className="text-red-600">*</span></span>}
                   validateStatus={errors.surfaceArea ? "error" : ""}
                   help={errors.surfaceArea}
                 >
                   <Input
                     value={surfaceArea}
                     onChange={(e) => setSurfaceArea(e.target.value)}
-                    
                     className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
                   />
                 </Form.Item>
               </div>
             </div>
+
             <Form.Item
-              label={<span className={isDarkMode ? "text-gray-300" : ""}>Phone Number<span className="text-red-600">*</span></span>}
+              label={<span className={isDarkMode ? "text-gray-300" : ""}>{t("form.phone")}<span className="text-red-600">*</span></span>}
               validateStatus={errors.phoneNumber ? "error" : ""}
               help={errors.phoneNumber}
             >
               <Input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                
                 className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
               />
             </Form.Item>
 
-            <Upload 
-              {...props} 
+            <Upload
+              {...props}
               customRequest={customRequest}
               className={isDarkMode ? "dark-upload" : ""}
             >
-              <Button 
-                icon={<UploadOutlined />} 
+              <Button
+                icon={<UploadOutlined />}
                 className={isDarkMode ? "bg-gray-700 text-white border-gray-600 hover:bg-gray-600" : ""}
               >
-                Upload
+                {t("form.upload")}
               </Button>
             </Upload>
+
             <Form.Item>
               <Button
                 type="primary"
                 htmlType="submit"
                 block
-                className={`mt-2 ${isDarkMode 
-                  ? "bg-violet-700 hover:bg-violet-600 active:bg-violet-700" 
-                  : "bg-indigo-700 hover:bg-indigo-800 active:bg-indigo-700"}`}
+                className={`mt-2 ${
+                  isDarkMode
+                    ? "bg-violet-700 hover:bg-violet-600 active:bg-violet-700"
+                    : "bg-indigo-700 hover:bg-indigo-800 active:bg-indigo-700"
+                }`}
               >
-                Save
+                {t("form.save")}
               </Button>
             </Form.Item>
           </Form>

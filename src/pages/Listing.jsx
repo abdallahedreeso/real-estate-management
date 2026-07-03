@@ -1,5 +1,6 @@
 import { Button, message, Popconfirm, Space, Spin, Switch, Table } from "antd";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import useSupabaseClient from "../backend/supabase/supabase";
 import "@/assets/style/pages/listing.css";
 import { useAuth } from "@clerk/clerk-react";
@@ -7,6 +8,7 @@ import { Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 
 const Listing = () => {
+  const { t } = useTranslation();
   const [properties, setProperties] = useState();
   const supabase = useSupabaseClient();
   const { userId } = useAuth();
@@ -70,12 +72,12 @@ const Listing = () => {
       if (error) throw error;
       console.log("Property deleted successfully");
 
-      message.success("Property deleted successfully");
+      message.success(t("listings.deleteSuccess"));
       // Re-fetch properties after deletion
       fetchProperties();
     } catch (err) {
       console.error("Error deleting property:", err.message);
-      message.error("Failed to delete property.");
+      message.error(t("listings.deleteFailed"));
     } finally {
       setDeleting(false);
     }
@@ -93,9 +95,9 @@ const Listing = () => {
 
       if (error) {
         console.error("Error updating is_available:", error.message);
-        message.error("Failed to update availability.");
+        message.error(t("listings.updateFailed"));
       } else {
-        message.success("Availability updated successfully.");
+        message.success(t("listings.updateSuccess"));
 
         setProperties((pre) =>
           pre.map((property) =>
@@ -107,40 +109,40 @@ const Listing = () => {
       }
     } catch (err) {
       console.error("Error updating is_available:", err.message);
-      message.error("An error occurred while updating availability.");
+      message.error(t("listings.updateError"));
     }
   };
 
   // table header
   const columns = [
     {
-      title: "Title",
+      title: t("listings.title"),
       key: "title",
       dataIndex: "title",
     },
     {
-      title: "Property Type",
+      title: t("listings.propertyType"),
       dataIndex: "property_type",
       key: "property_type",
     },
     {
-      title: "Price",
+      title: t("listings.price"),
       dataIndex: "price",
       key: "price",
     },
     {
-      title: "State",
+      title: t("listings.state"),
       dataIndex: "state",
       key: "state",
     },
     {
-      title: "Address",
+      title: t("listings.address"),
       dataIndex: "address",
       key: "address",
       width: 100,
     },
     {
-      title: "Is available",
+      title: t("listings.isAvailable"),
       key: "is_available",
       render: (_, record) => (
         <Switch
@@ -151,7 +153,7 @@ const Listing = () => {
       ),
     },
     {
-      title: "Actions",
+      title: t("listings.actions"),
       key: "actions",
       render: (_, record) => (
         <Space size="middle">
@@ -170,16 +172,16 @@ const Listing = () => {
               className={isDarkMode ? "dark-button" : ""}
               style={{ backgroundColor: "#5B21B6", borderColor: "#4C1D95" }}
             >
-              Edit
+              {t("listings.edit")}
             </Button>
           </Link>
 
           <Popconfirm
-            title="Delete the property"
-            description="Are you sure to delete this property?"
+            title={t("listings.deleteConfirm")}
+            description={t("listings.deleteWarning")}
             onConfirm={() => confirm(record.key)}
-            okText="Yes"
-            cancelText="No"
+            okText={t("listings.yes")}
+            cancelText={t("listings.no")}
             overlayClassName={isDarkMode ? "dark-popconfirm" : ""}
             getPopupContainer={(element) => element}
             placement="top"
@@ -201,7 +203,7 @@ const Listing = () => {
               loading={deleting}
               className={isDarkMode ? "dark-danger-button" : ""}
             >
-              Delete
+              {t("listings.delete")}
             </Button>
           </Popconfirm>
         </Space>
@@ -220,7 +222,7 @@ const Listing = () => {
           isDarkMode ? "bg-violet-800" : "bg-violet-700"
         } rounded-lg px-16 py-5 mb-10`}
       >
-        My Properties
+        {t("listings.myProperties")}
       </h1>
 
       {loading ? (
