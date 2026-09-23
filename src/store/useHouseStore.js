@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { distanceKm, validPoint } from "@/utils/geo";
 
 const isDefault = (str) => !str || str.toLowerCase().includes("(any)");
 
@@ -11,6 +12,10 @@ export const useHouseStore = create(
       country: "Location (any)",
       property: "Property type (any)",
       price: "Price range (any)",
+      city: "",
+      proximityPoint: null,
+      proximitySource: null,
+      radiusKm: 25,
       searchAddress: "",
       loading: false,
       realtimeChannel: null,
@@ -22,6 +27,10 @@ export const useHouseStore = create(
       setCountry: (country) => set({ country }),
       setProperty: (property) => set({ property }),
       setPrice: (price) => set({ price }),
+      setCity: (city) => set({ city, proximityPoint: null, proximitySource: null }),
+      setProximityPoint: (point, source) => set({ proximityPoint: point, proximitySource: source, city: "" }),
+      clearProximity: () => set({ proximityPoint: null, proximitySource: null }),
+      setRadiusKm: (radiusKm) => set({ radiusKm }),
       handleClick: (searchAddress) => set({ searchAddress: searchAddress || "" }),
       setNetworkStatus: (status) => set({ isOnline: status }),
 
@@ -172,6 +181,8 @@ export const useHouseStore = create(
         country: state.country,
         property: state.property,
         price: state.price,
+        city: state.city,
+        radiusKm: state.radiusKm,
         offlineOutbox: state.offlineOutbox,
       }),
     }
@@ -180,11 +191,15 @@ export const useHouseStore = create(
 
 // Derived selector: computes the filtered list dynamically
 export const selectFilteredHouses = (state) => {
-  const { houses, country, property, price, searchAddress } = state;
+  const { houses, country, property, price, city, proximityPoint, radiusKm, searchAddress } = state;
 
-  return houses.filter((house) => {
+  const results = houses.filter((house) => {
     // Country filter
     if (!isDefault(country) && house.country !== country) {
+      return false;
+    }
+
+    if (city && String(house.city || "").toLocaleLowerCase() !== city.toLocaleLowerCase()) {
       return false;
     }
 
@@ -195,8 +210,8 @@ export const selectFilteredHouses = (state) => {
 
     // Search Address filter
     if (searchAddress) {
-      const houseAddress = house.address || "";
-      const addressMatch = houseAddress.toLowerCase().includes(searchAddress.toLowerCase());
+      const houseAddress = [house.address, house.city, house.state].filter(Boolean).join(" ");
+      const addressMatch = houseAddress.toLocaleLowerCase().includes(searchAddress.toLocaleLowerCase());
       if (!addressMatch) return false;
     }
 
@@ -212,7 +227,21 @@ export const selectFilteredHouses = (state) => {
       }
     }
 
+    if (proximityPoint) {
+      const latitude = house.latitude ?? house.lat;
+      const longitude = house.longitude ?? house.lng;
+      if (!validPoint(latitude, longitude)) return false;
+      if (radiusKm != null && distanceKm(proximityPoint, [Number(latitude), Number(longitude)]) > radiusKm) return false;
+    }
+
     return true;
+  });
+
+  if (!proximityPoint) return results;
+  return results.sort((a, b) => {
+    const aPoint = [Number(a.latitude ?? a.lat), Number(a.longitude ?? a.lng)];
+    const bPoint = [Number(b.latitude ?? b.lat), Number(b.longitude ?? b.lng)];
+    return distanceKm(proximityPoint, aPoint) - distanceKm(proximityPoint, bPoint);
   });
 };
 

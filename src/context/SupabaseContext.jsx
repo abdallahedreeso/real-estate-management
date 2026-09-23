@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useEffect, useMemo } from "react";
+import { createContext, useContext, useMemo, useRef } from "react";
+import PropTypes from "prop-types";
 import { useSession } from "@clerk/clerk-react";
 import { createClient } from "@supabase/supabase-js";
 
@@ -9,6 +10,8 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const SupabaseProvider = ({ children }) => {
   const { session } = useSession();
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
   
   // Create a single, stable client instance
   const supabase = useMemo(() => {
@@ -16,39 +19,10 @@ export const SupabaseProvider = ({ children }) => {
       console.warn("Supabase Client: Missing URL or Anon Key. Fallback to null.");
       return null;
     }
-    return createClient(supabaseUrl, supabaseKey);
+    return createClient(supabaseUrl, supabaseKey, {
+      accessToken: async () => sessionRef.current?.getToken({ template: "supabase" }) ?? null,
+    });
   }, []);
-
-  useEffect(() => {
-    if (!supabase) return;
-
-    const updateClientSession = async () => {
-      if (session) {
-        try {
-          const token = await session.getToken({ template: "supabase" });
-          if (token) {
-            // Update auth headers dynamically for Rest & Realtime clients
-            supabase.realtime.setAuth(token);
-            supabase.rest.headers = {
-              ...supabase.rest.headers,
-              Authorization: `Bearer ${token}`,
-            };
-            console.log("Supabase Client: Clerk JWT token injected successfully.");
-          }
-        } catch (error) {
-          console.error("Error setting dynamic Supabase auth token:", error);
-        }
-      } else {
-        // Fallback to anonymous access if no session is active (e.g. signed out)
-        delete supabase.rest.headers["Authorization"];
-        console.log("Supabase Client: Cleared auth header (Fallback to Anon).");
-      }
-    };
-
-    if (session !== undefined) {
-      updateClientSession();
-    }
-  }, [session, supabase]);
 
   return (
     <SupabaseContext.Provider value={supabase}>
@@ -56,6 +30,7 @@ export const SupabaseProvider = ({ children }) => {
     </SupabaseContext.Provider>
   );
 };
+SupabaseProvider.propTypes = { children: PropTypes.node };
 
 export const useSupabaseClient = () => {
   const context = useContext(SupabaseContext);

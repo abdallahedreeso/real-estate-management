@@ -1,12 +1,8 @@
-export default async function InserthData(supabase, propertyData, token) {
-  if (token) {
-    await supabase.auth.setSession({
-      access_token: token,
-      refresh_token: "",
-    });
-  }
+export default async function InserthData(supabase, propertyData, userId) {
+  if (!userId) throw new Error("Seller ID is required");
 
   const { error } = await supabase.from("properties").insert({
+    seller_id: userId,
     title: propertyData.title,
     price: propertyData.price,
     property_type: propertyData.property_type,
@@ -27,10 +23,6 @@ export default async function InserthData(supabase, propertyData, token) {
     longitude: propertyData.longitude
   });
 
-  if (error) {
-    console.error("Error inserting data into property table : ", error);
-    return null;
-  } else {
-    return "ok";
-  }
+  if (error) throw error;
+  return "ok";
 }

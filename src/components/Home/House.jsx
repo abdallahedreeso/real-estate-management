@@ -1,88 +1,47 @@
 import OptimizedImage from "../common/OptimizedImage";
-import { MapPin } from "lucide-react";
-import PropTypes from 'prop-types';
-import { BiBed, BiBath, BiArea } from "react-icons/bi";
-import { FaParking } from "react-icons/fa";
+import { ArrowUpRight, BedDouble, Bath, MapPin, Ruler, Building2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useTheme } from '../../context/ThemeContext';
+import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 
-const House = ({ house }) => {
-  const {
-    image,
-    type,
-    state,
-    address,
-    bedrooms,
-    bathrooms,
-    surface,
-    price,
-    parking,
-    propertyId,
-  } = house;
-  
-  const { isDarkMode } = useTheme();
+export default function House({ house }) {
+  const { t, i18n } = useTranslation();
+  const { image, type, state, address, bedrooms, bathrooms, surface, price, propertyId, distanceKm } = house;
+  const formattedPrice = new Intl.NumberFormat(i18n.language.startsWith("ar") ? "ar-EG" : "en-EG", { style: "currency", currency: "EGP", maximumFractionDigits: 0 }).format(Number(price) || 0);
 
   return (
-    <Link to={`/property/${propertyId}`}>
-      <div className={`${isDarkMode ? 'bg-gray-800 hover:shadow-gray-700' : 'bg-white hover:shadow-gray-300'} shadow-lg p-6 w-full max-w-[400px] mx-auto mb-12 cursor-pointer hover:shadow-2xl transition rounded-lg hover:scale-105`}>
-        <div className="rounded-md mb-6 w-full h-[250px] overflow-hidden">
-          <OptimizedImage
-            className="w-full h-full object-cover transition-transform duration-300 transform hover:scale-110"
-            src={image}
-            alt="house"
-          />
+    <Link to={`/property/${propertyId}`} className="property-card" aria-label={`View ${address}, ${state}`}>
+      <div className="property-photo">
+        {image ? <OptimizedImage src={image} alt={`${type} at ${address}`} className="property-photo-img" /> : <div className="property-photo-placeholder"><Building2 size={42} strokeWidth={1.25} aria-hidden="true" /><span>{t("redesign.imageUnavailable")}</span></div>}
+        <span className="property-type">{type}</span>
+        <span className="property-arrow"><ArrowUpRight size={19} /></span>
+      </div>
+      <div className="property-content">
+        <div className="property-location"><MapPin size={15} /> {state}</div>
+        {distanceKm != null && <div className="property-distance">{t("redesign.distanceAway", { distance: distanceKm < 10 ? distanceKm.toFixed(1) : Math.round(distanceKm) })}</div>}
+        <h3>{address}</h3>
+        <div className="property-features">
+          <span><BedDouble size={16} />{bedrooms ?? "—"} beds</span>
+          <span><Bath size={16} />{bathrooms ?? "—"} baths</span>
+          <span><Ruler size={16} />{surface ?? "—"} m²</span>
         </div>
-        <div className="mb-4 flex gap-x-2 text-sm">
-          <div className="bg-green-600 rounded-full text-white font-medium px-3 py-1 shadow">
-            {type}
-          </div>
-          <div className="bg-violet-600 rounded-full text-white font-medium px-3 py-1 shadow">
-            {state}
-          </div>
-        </div>
-        <div className={`flex text-lg font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'} max-w-[260px]`}>
-          <MapPin className={`mr-2 ${isDarkMode ? 'text-violet-400' : 'text-violet-700'}`} />
-          <span>{address}</span>
-        </div>
-        <div className="flex md:flex-nowrap flex-wrap justify-center gap-4 my-4">
-          <div className={`flex md:w-24 w-5/12 gap-2 text-sm ${isDarkMode ? 'text-gray-300 bg-gray-700 hover:bg-gray-600' : 'text-gray-600 bg-slate-200 hover:bg-slate-300'} rounded-md p-2 justify-center items-center transition duration-300`}>
-            <BiBed className="text-[20px]" />
-            <span>{bedrooms}</span>
-          </div>
-          <div className={`flex md:w-24 w-5/12 gap-2 text-sm ${isDarkMode ? 'text-gray-300 bg-gray-700 hover:bg-gray-600' : 'text-gray-600 bg-slate-200 hover:bg-slate-300'} rounded-md p-2 justify-center items-center transition duration-300`}>
-            <BiBath className="text-[20px]" />
-            <span>{bathrooms}</span>
-          </div>
-          <div className={`flex md:w-24 w-5/12 gap-2 text-sm ${isDarkMode ? 'text-gray-300 bg-gray-700 hover:bg-gray-600' : 'text-gray-600 bg-slate-200 hover:bg-slate-300'} rounded-md p-2 justify-center items-center transition duration-300`}>
-            <FaParking className="text-[20px]" />
-            <span>{parking}</span>
-          </div>
-          <div className={`flex md:w-24 w-5/12 gap-2 text-sm ${isDarkMode ? 'text-gray-300 bg-gray-700 hover:bg-gray-600' : 'text-gray-600 bg-slate-200 hover:bg-slate-300'} rounded-md p-2 justify-center items-center transition duration-300`}>
-            <BiArea className="text-[20px]" />
-            <span>{surface}</span>
-          </div>
-        </div>
-        <div className={`text-xl font-semibold ${isDarkMode ? 'text-violet-400' : 'text-violet-600'} mb-2`}>
-          ${price}
-        </div>
+        <div className="property-price"><strong dir="ltr">{formattedPrice}</strong><span>{t("redesign.viewProperty")} <ArrowUpRight size={15} /></span></div>
       </div>
     </Link>
   );
-};
+}
 
 House.propTypes = {
   house: PropTypes.shape({
-    image: PropTypes.string.isRequired,
-    type: PropTypes.string.isRequired,
-    state: PropTypes.string.isRequired,
-    address: PropTypes.string.isRequired,
-    bedrooms: PropTypes.number.isRequired,
-    bathrooms: PropTypes.number.isRequired,
-    surface: PropTypes.number.isRequired,
-    price: PropTypes.number.isRequired,
-    parking: PropTypes.number.isRequired,
-    propertyId: PropTypes.string.isRequired,
+    image: PropTypes.string,
+    type: PropTypes.string,
+    state: PropTypes.string,
+    address: PropTypes.string,
+    bedrooms: PropTypes.number,
+    bathrooms: PropTypes.number,
+    surface: PropTypes.number,
+    price: PropTypes.number,
+    propertyId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    distanceKm: PropTypes.number,
   }).isRequired,
 };
-
-export default House;

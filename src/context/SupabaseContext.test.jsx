@@ -1,5 +1,5 @@
-import React from "react";
-import { render, act } from "@testing-library/react";
+import PropTypes from "prop-types";
+import { render } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useSession } from "@clerk/clerk-react";
 import { createClient } from "@supabase/supabase-js";
@@ -12,11 +12,7 @@ vi.mock("@clerk/clerk-react", () => ({
 
 // Mock Supabase JS client creator
 vi.mock("@supabase/supabase-js", () => {
-  const mockRealtime = { setAuth: vi.fn() };
-  const mockClient = {
-    realtime: mockRealtime,
-    rest: { headers: {} },
-  };
+  const mockClient = {};
   return {
     createClient: vi.fn(() => mockClient),
   };
@@ -28,6 +24,7 @@ const ConsumerComponent = ({ onConsume }) => {
   onConsume(client);
   return <div>Supabase Client Active</div>;
 };
+ConsumerComponent.propTypes = { onConsume: PropTypes.func.isRequired };
 
 describe("SupabaseContext / SupabaseProvider", () => {
   const mockGetToken = vi.fn();
@@ -51,28 +48,24 @@ describe("SupabaseContext / SupabaseProvider", () => {
     expect(consumedClient).not.toBeNull();
   });
 
-  it("dynamically injects Clerk JWT authorization header when a session is active", async () => {
+  it("provides the current Clerk JWT when Supabase makes a request", async () => {
     const mockSession = {
       getToken: mockGetToken.mockResolvedValue("mocked-clerk-jwt-token"),
     };
     useSession.mockReturnValue({ session: mockSession });
 
-    let consumedClient = null;
-    
-    await act(async () => {
-      render(
+    render(
         <SupabaseProvider>
-          <ConsumerComponent onConsume={(client) => { consumedClient = client; }} />
+          <ConsumerComponent onConsume={() => {}} />
         </SupabaseProvider>
-      );
-    });
+    );
 
+    const accessToken = createClient.mock.calls[0][2].accessToken;
+    expect(await accessToken()).toBe("mocked-clerk-jwt-token");
     expect(mockGetToken).toHaveBeenCalledWith({ template: "supabase" });
-    expect(consumedClient.rest.headers["Authorization"]).toBe("Bearer mocked-clerk-jwt-token");
-    expect(consumedClient.realtime.setAuth).toHaveBeenCalledWith("mocked-clerk-jwt-token");
   });
 
-  it("removes Authorization header when user logs out (session becomes null)", async () => {
+  it("returns no token after the user signs out", async () => {
     // 1. Start with an active session
     const mockSession = {
       getToken: mockGetToken.mockResolvedValue("mocked-clerk-jwt-token"),
@@ -82,28 +75,24 @@ describe("SupabaseContext / SupabaseProvider", () => {
     let sessionState = { session: mockSession };
     useSession.mockImplementation(() => sessionState);
 
-    let consumedClient = null;
     const { rerender } = render(
       <SupabaseProvider>
-        <ConsumerComponent onConsume={(client) => { consumedClient = client; }} />
+        <ConsumerComponent onConsume={() => {}} />
       </SupabaseProvider>
     );
 
-    // Verify token was set
-    expect(consumedClient.rest.headers["Authorization"]).toBe("Bearer mocked-clerk-jwt-token");
+    const accessToken = createClient.mock.calls[0][2].accessToken;
+    expect(await accessToken()).toBe("mocked-clerk-jwt-token");
 
     // 2. Simulate Logout (session = null)
     sessionState = { session: null };
     
-    await act(async () => {
-      rerender(
+    rerender(
         <SupabaseProvider>
-          <ConsumerComponent onConsume={(client) => { consumedClient = client; }} />
+          <ConsumerComponent onConsume={() => {}} />
         </SupabaseProvider>
-      );
-    });
+    );
 
-    // Check that Authorization header was deleted
-    expect(consumedClient.rest.headers["Authorization"]).toBeUndefined();
+    expect(await accessToken()).toBeNull();
   });
 });

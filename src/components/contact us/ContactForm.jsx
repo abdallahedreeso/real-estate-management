@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Input, Button, Card, Form, Typography, message, Spin } from "antd";
+import { Input, Button, Form, message } from "antd";
+import { ArrowUpRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import emailjs from "emailjs-com";
-import { useTheme } from "../../context/ThemeContext";
+
 const { TextArea } = Input;
-const { Title } = Typography;
 
 export default function ContactForm() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [subject, setSubject] = useState("");
   const [email, setEmail] = useState("");
@@ -14,205 +16,99 @@ export default function ContactForm() {
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
   const [errors, setErrors] = useState({});
-  const { isDarkMode } = useTheme();
+  const clearError = (field) => setErrors((current) => current[field] ? { ...current, [field]: undefined } : current);
 
-  const englishRegex = /^[a-zA-Z0-9\s.,'-]+$/;
+  const messageRegex = /^[\p{L}\p{N}\s.,'!?،؛()-]+$/u;
   const numericOnlyRegex = /^\d+$/;
-  const englishLettersOnlyRegex = /^[a-zA-Z\s]+$/;
+  const lettersOnlyRegex = /^[\p{L}\s]+$/u;
   const egyptianPhoneRegex = /^(?:\+20|0020)?01[0125]\d{8}$/;
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Email regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const validate = () => {
-    let newErrors = {};
-
-    if (!subject) {
-      newErrors.subject = "Subject is required.";
-    } else if (!englishLettersOnlyRegex.test(subject)) {
-      newErrors.subject = "Field must contain only English letters.";
-    }
-
-    if (!email) {
-      newErrors.email = "Email is required.";
-    } else if (!emailRegex.test(email)) {
-      newErrors.email = "Enter a valid email address.";
-    }
-
-    if (!body) {
-      newErrors.body = "body is required.";
-    }
-    if (numericOnlyRegex.test(body)) {
-      newErrors.body = "body cannot consist only of numbers.";
-    } else if (!englishRegex.test(body)) {
-      newErrors.body = "body must contain only English characters.";
-    }
-    if (!firstName) {
-      newErrors.firstName = "First Name is required.";
-    } else if (firstName && !englishLettersOnlyRegex.test(firstName)) {
-      newErrors.firstName = "Field must contain only English letters.";
-    }
-
-    if (!lastName) {
-      newErrors.lastName = "Last Name is required.";
-    } else if (lastName && !englishLettersOnlyRegex.test(lastName)) {
-      newErrors.lastName = "Field must contain only English letters.";
-    }
-
-    if (!phone) {
-      newErrors.phoneNumber = "Phone number is required.";
-    } else if (!egyptianPhoneRegex.test(phone)) {
-      newErrors.phoneNumber = "Enter a valid egyptian phone number.";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const nextErrors = {};
+    if (!firstName) nextErrors.firstName = t("contactForm.required");
+    else if (!lettersOnlyRegex.test(firstName)) nextErrors.firstName = t("contactForm.lettersOnly");
+    if (!lastName) nextErrors.lastName = t("contactForm.required");
+    else if (!lettersOnlyRegex.test(lastName)) nextErrors.lastName = t("contactForm.lettersOnly");
+    if (!email) nextErrors.email = t("contactForm.required");
+    else if (!emailRegex.test(email)) nextErrors.email = t("contactForm.invalidEmail");
+    if (!subject) nextErrors.subject = t("contactForm.required");
+    else if (!lettersOnlyRegex.test(subject)) nextErrors.subject = t("contactForm.lettersOnly");
+    if (!phone) nextErrors.phone = t("contactForm.required");
+    else if (!egyptianPhoneRegex.test(phone)) nextErrors.phone = t("contactForm.invalidPhone");
+    if (!body) nextErrors.body = t("contactForm.required");
+    else if (numericOnlyRegex.test(body)) nextErrors.body = t("contactForm.numbersOnly");
+    else if (!messageRegex.test(body)) nextErrors.body = t("contactForm.invalidMessage");
+    setErrors(nextErrors);
+    return nextErrors;
   };
 
   const handleSubmit = async () => {
-    if (validate()) {
-      let formData = {
-        subject,
-        email,
-        body,
-        firstName,
-        lastName,
-        seller_phone: phone,
-      };
-      setLoading(true);
-      emailjs
-        .send(
-          "service_14n2tub",
-          "template_7jh3nau",
-          formData,
-          "wTm29m44MLbQaNTd3"
-        )
-        .then((response) => {
-          setLoading(false);
-          console.log(
-            "Email sent successfully!",
-            response.status,
-            response.text
-          );
-          message.success("Form submitted successfully");
-          setFirstName("");
-          setLastName("");
-          setSubject("");
-          setEmail("");
-          setBody("");
-          setPhone("");
-        })
-        .catch((err) => {
-          console.error("Failed to send email.", err);
-          message.error("server side error, please try again later");
+    const validationErrors = validate();
+    const firstInvalid = Object.keys(validationErrors)[0];
+    if (firstInvalid) {
+      message.error(t("contactForm.fixErrors"));
+      requestAnimationFrame(() => {
+        const fieldIds = {
+          firstName: "contact-first-name", lastName: "contact-last-name", email: "contact-email",
+          subject: "contact-subject", phone: "contact-phone", body: "contact-message",
+        };
+        const field = document.getElementById(fieldIds[firstInvalid]);
+        field?.focus({ preventScroll: true });
+        field?.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+          block: "center",
         });
-    } else {
-      message.error("Please fix the errors.");
+      });
+      return;
+    }
+    setLoading(true);
+    try {
+      await emailjs.send("service_14n2tub", "template_7jh3nau", {
+        subject, email, body, firstName, lastName, seller_phone: phone,
+      }, "wTm29m44MLbQaNTd3");
+      message.success(t("contactForm.success"));
+      setFirstName("");
+      setLastName("");
+      setSubject("");
+      setEmail("");
+      setBody("");
+      setPhone("");
+      setErrors({});
+    } catch (error) {
+      console.error("Failed to send email.", error);
+      message.error(t("contactForm.sendError"));
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <>
-      <Spin spinning={loading} size="large" className="mt-24">
-        <Card
-          style={{ maxWidth: "600px", margin: "20px auto", padding: "20px" }}
-          className={isDarkMode ? "bg-gray-800 border-gray-700" : ""}
-        >
-          <Title level={3} className={isDarkMode ? "text-gray-200" : ""}>Contact Us</Title>
-          <Form layout="vertical" onFinish={handleSubmit}>
-            <div className="flex justify-between gap-2">
-              <div className="flex flex-col w-1/2">
-                <Form.Item
-                  label={<span className={isDarkMode ? "text-gray-300" : ""}>First Name<span className="text-red-600">*</span></span>}
-                  validateStatus={errors.firstName ? "error" : ""}
-                  help={errors.firstName}
-                >
-                  <Input
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    
-                    className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
-                  />
-                </Form.Item>
-              </div>
-              <div className="flex flex-col w-1/2">
-                <Form.Item
-                  label={<span className={isDarkMode ? "text-gray-300" : ""}>Last Name<span className="text-red-600">*</span></span>}
-                  validateStatus={errors.lastName ? "error" : ""}
-                  help={errors.lastName}
-                >
-                  <Input
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    
-                    className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
-                  />
-                </Form.Item>
-              </div>
-            </div>
-            <Form.Item
-              label={<span className={isDarkMode ? "text-gray-300" : ""}>Email<span className="text-red-600">*</span></span>}
-              validateStatus={errors.email ? "error" : ""}
-              help={errors.email}
-            >
-              <Input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                
-                className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
-              />
-            </Form.Item>
-            <Form.Item
-              label={<span className={isDarkMode ? "text-gray-300" : ""}>Subject<span className="text-red-600">*</span></span>}
-              validateStatus={errors.subject ? "error" : ""}
-              help={errors.subject}
-            >
-              <Input
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                
-                className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
-              />
-            </Form.Item>
-            <Form.Item
-              label={<span className={isDarkMode ? "text-gray-300" : ""}>Phone Number<span className="text-red-600">*</span></span>}
-              validateStatus={errors.phoneNumber ? "error" : ""}
-              help={errors.phoneNumber}
-            >
-              <Input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                
-                className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
-              />
-            </Form.Item>
-            <Form.Item
-              label={<span className={isDarkMode ? "text-gray-300" : ""}>body<span className="text-red-600">*</span></span>}
-              validateStatus={errors.body ? "error" : ""}
-              help={errors.body}
-            >
-              <TextArea
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                
-                rows={8}
-                className={isDarkMode ? "bg-gray-700 text-white border-gray-600" : ""}
-              />
-            </Form.Item>
-
-            <Form.Item>
-              <Button
-                type="Dashed"
-                htmlType="submit"
-                block
-                className={`mt-2 ${isDarkMode 
-                  ? "bg-violet-700 text-white hover:bg-violet-600 active:bg-violet-700" 
-                  : "bg-indigo-500 text-white hover:bg-indigo-600 active:bg-indigo-500"}`}
-              >
-                Submit
-              </Button>
-            </Form.Item>
-          </Form>
-        </Card>
-      </Spin>
-    </>
+    <div className="contact-form-panel">
+      <h2>{t("contactForm.title")}</h2>
+      <Form layout="vertical" onFinish={handleSubmit} noValidate>
+        <div className="contact-name-row">
+          <Form.Item label={t("contactForm.firstName")} htmlFor="contact-first-name" required validateStatus={errors.firstName ? "error" : ""} help={errors.firstName}>
+            <Input id="contact-first-name" autoComplete="given-name" value={firstName} onChange={(event) => { setFirstName(event.target.value); clearError("firstName"); }} aria-invalid={Boolean(errors.firstName)} />
+          </Form.Item>
+          <Form.Item label={t("contactForm.lastName")} htmlFor="contact-last-name" required validateStatus={errors.lastName ? "error" : ""} help={errors.lastName}>
+            <Input id="contact-last-name" autoComplete="family-name" value={lastName} onChange={(event) => { setLastName(event.target.value); clearError("lastName"); }} aria-invalid={Boolean(errors.lastName)} />
+          </Form.Item>
+        </div>
+        <Form.Item label={t("contactForm.email")} htmlFor="contact-email" required validateStatus={errors.email ? "error" : ""} help={errors.email}>
+          <Input id="contact-email" type="email" autoComplete="email" value={email} onChange={(event) => { setEmail(event.target.value); clearError("email"); }} aria-invalid={Boolean(errors.email)} />
+        </Form.Item>
+        <Form.Item label={t("contactForm.subject")} htmlFor="contact-subject" required validateStatus={errors.subject ? "error" : ""} help={errors.subject}>
+          <Input id="contact-subject" value={subject} onChange={(event) => { setSubject(event.target.value); clearError("subject"); }} aria-invalid={Boolean(errors.subject)} />
+        </Form.Item>
+        <Form.Item label={t("contactForm.phone")} htmlFor="contact-phone" required validateStatus={errors.phone ? "error" : ""} help={errors.phone}>
+          <Input id="contact-phone" type="tel" autoComplete="tel" dir="ltr" value={phone} onChange={(event) => { setPhone(event.target.value); clearError("phone"); }} aria-invalid={Boolean(errors.phone)} />
+        </Form.Item>
+        <Form.Item label={t("contactForm.message")} htmlFor="contact-message" required validateStatus={errors.body ? "error" : ""} help={errors.body}>
+          <TextArea id="contact-message" rows={6} value={body} onChange={(event) => { setBody(event.target.value); clearError("body"); }} aria-invalid={Boolean(errors.body)} />
+        </Form.Item>
+        <Button htmlType="submit" loading={loading} disabled={loading} className="contact-submit">{t("contactForm.submit")} <ArrowUpRight size={19} aria-hidden="true" /></Button>
+      </Form>
+    </div>
   );
 }

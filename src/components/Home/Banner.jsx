@@ -1,70 +1,29 @@
-import React, { useEffect, useState } from 'react';
-import Image from "../../assets/img/house-banner.png";
-import Search from "./Search";
-import useSupabaseClient from '../../backend/supabase/supabase';
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { ArrowUpRight, Search } from "lucide-react";
+import image from "../../assets/img/home-hero-v2.webp";
 
-const Banner = () => {
-    const [houses, setHouses] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const supabase = useSupabaseClient();
-    // Fetch houses from Supabase
+export default function Banner() {
+  const { t } = useTranslation();
 
-    const fetchHouses = async () => {
-        try {
-            setLoading(true);
-            const { data, error } = await supabase
-                .from('properties')
-                .select('*');
-
-            if (error) throw error;
-
-            setHouses(data || []);
-        } catch (err) {
-            setError('Failed to load houses. Please try again later.');
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        if(supabase){
-            fetchHouses();
-        }
-    }, [supabase]);
-
-    return (
-        <section className='h-full mb-0 xl:mb-5'>
-            <div className='flex flex-col lg:flex-row'>
-                <div className='lg:ml-8 xl:ml-[135px] flex flex-col items-center lg:items-start text-center lg:text-left justify-center flex-1 px-4 lg:px-0'>
-                    <h1 className='text-4xl lg:text-[58px] font-semibold leading-none mb-6'>
-                        <span className='text-violet-700'>Rent </span> 
-                        Your Dream House With Us.
-                    </h1>
-                    <p className='max-w-[480px] mb-8'>
-                        Find your dream home, move in now, 
-                        and rent with built-in savings for 
-                        your down payment. In 3 years or 
-                        less, you're ready to buy.
-                    </p>
-                </div>
-
-                {/* Image */}
-                <div className='hidden flex-1 lg:flex justify-end items-end'>
-                    <img src={Image} alt="House banner" />
-                </div>
-            </div>
-            
-            {/* {loading ? (
-                <p className="text-center">Loading houses...</p>
-            ) : error ? (
-                <p className="text-red-500 text-center">{error}</p>
-            ) : (
-                <Search houses={houses} setResults={setHouses} />
-            )} */}
-        </section>
-    );
-};
-
-export default Banner;
+  return (
+    <section className="hero-section" aria-labelledby="hero-title">
+      <div className="site-container hero-grid">
+        <div className="hero-copy">
+          <div className="hero-marker" aria-hidden="true"><span /> <span /></div>
+          <h1 id="hero-title"><span>{t("marketing.rent")}</span> <em>{t("marketing.dreamTitle")}</em></h1>
+          <p>{t("marketing.subtitle")}</p>
+          <div className="hero-actions">
+            <a className="hero-primary" href="#explore"><Search size={19} /> {t("redesign.explore")} <ArrowUpRight size={18} /></a>
+            <Link className="hero-secondary" to="/About">{t("redesign.story")} <ArrowUpRight size={18} /></Link>
+          </div>
+          <div className="hero-proof"><span className="proof-rule" /><span>{t("redesign.heroNote")}</span></div>
+        </div>
+        <div className="hero-visual">
+          <img src={image} alt="Limestone courtyard home with a teal entrance" className="hero-image rtl:-scale-x-100" fetchPriority="high" />
+          <div className="hero-image-caption"><span>{t("redesign.imageNote")}</span><span className="hero-caption-line" aria-hidden="true" /></div>
+        </div>
+      </div>
+    </section>
+  );
+}

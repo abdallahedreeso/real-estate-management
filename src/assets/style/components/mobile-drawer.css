@@ -1,0 +1,34 @@
+.site-mobile-drawer .ant-drawer-content { background: var(--canvas); }
+.site-mobile-drawer .ant-drawer-body { padding: 0; }
+.mobile-drawer-shell { display: flex; flex-direction: column; min-height: 100%; color: var(--ink); }
+.mobile-drawer-top { display: flex; align-items: center; justify-content: space-between; gap: 15px; min-height: 76px; padding: 15px 24px; background: #123b37; }
+.mobile-drawer-brand { display: inline-flex; align-items: center; gap: 8px; color: #fff; font-family: Manrope, sans-serif; font-size: 17px; font-weight: 800; letter-spacing: -.055em; white-space: nowrap; }
+.mobile-drawer-brand:hover { color: #fff; }
+.mobile-drawer-brand svg,.mobile-drawer-brand > span > span { color: #d6e58b; }
+.mobile-drawer-close { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border: 1px solid #ffffff55; border-radius: 7px; background: transparent; color: #fff; cursor: pointer; }
+.mobile-drawer-close:hover { background: #ffffff1c; }
+.mobile-drawer-intro { padding: 29px 25px 26px; background: #123b37; }
+.mobile-drawer-intro > span,.mobile-drawer-label,.mobile-drawer-bottom > span { display: block; color: #d6e58b; font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+.mobile-drawer-intro p { color: #f5f4e9; font-family: Manrope, sans-serif; font-size: 23px; font-weight: 800; line-height: 1.25; letter-spacing: -.035em; margin: 10px 0 0; }
+.mobile-drawer-nav { display: flex; flex-direction: column; padding: 16px 25px 6px; }
+.mobile-drawer-nav a { display: grid; grid-template-columns: 35px minmax(0, 1fr) 20px; align-items: center; gap: 9px; min-height: 61px; border-bottom: 1px solid var(--line); color: var(--ink); font-family: Manrope, sans-serif; font-size: 19px; font-weight: 800; }
+.mobile-drawer-nav a:hover,.mobile-drawer-nav a[aria-current="page"] { color: var(--accent); }
+.mobile-drawer-nav a[aria-current="page"] > svg { color: var(--accent); }
+.mobile-drawer-number { color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: .06em; }
+.mobile-drawer-nav a > svg { justify-self: end; color: var(--muted); }
+.mobile-drawer-account { display: grid; gap: 12px; padding: 28px 25px 26px; }
+.mobile-drawer-label,.mobile-drawer-bottom > span { color: var(--accent); }
+.mobile-drawer-primary { display: inline-flex; align-items: center; justify-content: flex-start; gap: 9px; width: 100%; min-height: 50px; padding: 0 16px; border: 0; border-radius: 7px; background: #d6e58b; color: #123b37; font-size: 14px; font-weight: 800; cursor: pointer; }
+.mobile-drawer-primary:hover { background: #edf5b9; color: #123b37; }
+.mobile-drawer-primary > svg:last-child { margin-inline-start: auto; }
+.mobile-drawer-secondary { min-height: 44px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--ink); font-weight: 800; cursor: pointer; }
+.mobile-drawer-shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.mobile-drawer-shortcuts a { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 48px; padding: 7px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--ink); font-size: 12px; font-weight: 800; white-space: nowrap; }
+.mobile-drawer-shortcuts a:hover,.mobile-drawer-shortcuts a[aria-current="page"] { border-color: var(--accent); color: var(--accent); }
+.mobile-drawer-shortcuts a > span { color: var(--accent); }
+.mobile-drawer-shortcuts a:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.mobile-drawer-bottom { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding: 20px 25px 25px; border-top: 1px solid var(--line); }
+.mobile-drawer-bottom button { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--ink); font-size: 12px; font-weight: 800; cursor: pointer; }
+.mobile-drawer-bottom button:hover { border-color: var(--accent); color: var(--accent); }
+[dir="rtl"] .mobile-drawer-nav a > svg,[dir="rtl"] .mobile-drawer-primary > svg:last-child,[dir="rtl"] .mobile-drawer-bottom button > svg:last-child { transform: scaleX(-1); }
+@media (max-height: 700px) { .mobile-drawer-top { min-height: 68px; } .mobile-drawer-intro { padding-block: 20px; } .mobile-drawer-intro p { font-size: 21px; } .mobile-drawer-nav { padding-top: 10px; } .mobile-drawer-nav a { min-height: 55px; } .mobile-drawer-account { padding-block: 20px 18px; } .mobile-drawer-bottom { padding-block: 12px 15px; } }

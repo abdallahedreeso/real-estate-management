@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { 
   CheckCircle2, 
   AlertCircle, 
@@ -12,7 +12,7 @@ import {
   ShieldAlert
 } from "lucide-react";
 
-export default function EnvDiagnosticScreen({ missingKeys }) {
+export default function EnvDiagnosticScreen() {
   const [copied, setCopied] = useState(false);
 
   const envTemplate = `# Clerk Authentication Configuration

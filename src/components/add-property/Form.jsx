@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Input,
   Select,
@@ -22,6 +22,10 @@ import "../../assets/style/components/form.css";
 
 import useSupabaseClient from "@/backend/supabase/supabase";
 import { UploadOutlined } from "@ant-design/icons";
+import PropTypes from "prop-types";
+import PropertyLocationPicker from "./PropertyLocationPicker";
+import { ownedImagePaths } from "@/api/propertyImages";
+import listingHero from "../../assets/img/home-hero-v2.webp";
 const { TextArea } = Input;
 const { Option } = Select;
 const { Title } = Typography;
@@ -93,17 +97,18 @@ export default function AntdForm({ property, id }) {
   const [surfaceArea, setSurfaceArea] = useState("");
   const [phone, setPhone] = useState("");
   const [images, setImages] = useState([]);
+  const [position, setPosition] = useState(null);
   const [errors, setErrors] = useState({});
+  const formColumnRef = useRef(null);
+  const scrollToErrorOnRender = useRef(false);
   const { isDarkMode } = useTheme();
 
   const supabase = useSupabaseClient();
   const navigate = useNavigate();
   const { userId, getToken } = useAuth();
 
-  const englishRegex = /^[a-zA-Z0-9\s.,'-]+$/;
   const numericOnlyRegex = /^\d+$/;
   const zipCodeRegex = /^\d{3,9}$/;
-  const englishLettersNumericOnlyRegex = /^[a-zA-Z0-9\s]+$/;
   const egyptianPhoneRegex = /^(?:\+20|0020)?01[0125]\d{8}$/;
 
   useEffect(() => {
@@ -112,6 +117,7 @@ export default function AntdForm({ property, id }) {
       setPrice(property.price?.toString() || "");
       setPropertyType(property.property_type || null);
       setDescription(property.description || "");
+      setCountry(property.country || "egypt");
       setState(property.state || null);
       setCity(property.city || "");
       setZip(property.zip_code || "");
@@ -121,24 +127,45 @@ export default function AntdForm({ property, id }) {
       setParkingSpaces(property.ParkingSpaces?.toString() || "");
       setSurfaceArea(property.surface_area?.toString() || "");
       setPhone(property.seller_phone || "");
-      setImages(property.file_list || []);
+      setImages((property.images || []).map((url, index) => ({
+        uid: `existing-${index}`, name: `Property photo ${index + 1}`, status: "done", url,
+      })));
+      const latitude = property.latitude ?? property.lat;
+      const longitude = property.longitude ?? property.lng;
+      const lat = Number(latitude);
+      const lng = Number(longitude);
+      if (latitude != null && longitude != null && latitude !== "" && longitude !== "" && Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
+        setPosition([lat, lng]);
+      }
     }
   }, [property]);
+
+  useEffect(() => {
+    if (!scrollToErrorOnRender.current) return;
+    scrollToErrorOnRender.current = false;
+    const firstError = formColumnRef.current?.querySelector(
+      ".ant-form-item-has-error, #property-photos .property-field-error, #property-location .property-field-error"
+    );
+    if (!firstError) return;
+    const target = firstError.closest("#property-photos, #property-location") || firstError;
+    window.scrollTo({
+      top: window.scrollY + target.getBoundingClientRect().top - 28,
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    });
+  }, [errors]);
 
   const validate = () => {
     let newErrors = {};
 
-    if (!title) {
+    if (!title.trim()) {
       newErrors.title = t("validation.titleRequired");
     } else if (numericOnlyRegex.test(title)) {
       newErrors.title = t("validation.numbersOnly");
-    } else if (!englishRegex.test(title)) {
-      newErrors.title = t("validation.englishOnly");
     }
 
     if (!price) {
       newErrors.price = t("validation.priceRequired");
-    } else if (!numericOnlyRegex.test(price) || parseInt(price, 10) < 0) {
+    } else if (!/^\d+(?:\.\d{1,2})?$/.test(price) || Number(price) <= 0) {
       newErrors.price = t("validation.positiveNumbers");
     }
 
@@ -146,32 +173,30 @@ export default function AntdForm({ property, id }) {
       newErrors.propertyType = t("validation.typeRequired");
     }
 
-    if (description && numericOnlyRegex.test(description)) {
+    if (!description.trim() || description.trim().length < 20) {
+      newErrors.description = t("propertyForm.descriptionRequired");
+    } else if (numericOnlyRegex.test(description)) {
       newErrors.description = t("validation.descNumbersOnly");
-    } else if (description && !englishRegex.test(description)) {
-      newErrors.description = t("validation.descEnglishOnly");
     }
 
     if (!state) {
       newErrors.state = t("validation.stateRequired");
     }
 
-    if (city && numericOnlyRegex.test(city)) {
+    if (!city.trim()) {
+      newErrors.city = t("propertyForm.cityRequired");
+    } else if (numericOnlyRegex.test(city)) {
       newErrors.city = t("validation.cityNumbersOnly");
-    } else if (city && !englishLettersNumericOnlyRegex.test(city)) {
-      newErrors.city = t("validation.cityLettersNumbers");
     }
 
     if (zip && !zipCodeRegex.test(zip)) {
       newErrors.zip = t("validation.zipLength");
     }
 
-    if (!address) {
+    if (!address.trim()) {
       newErrors.address = t("validation.addressRequired");
     } else if (numericOnlyRegex.test(address)) {
       newErrors.address = t("validation.numbersOnly");
-    } else if (!englishRegex.test(address)) {
-      newErrors.address = t("validation.englishOnly");
     }
 
     if (!bedrooms) {
@@ -197,10 +222,7 @@ export default function AntdForm({ property, id }) {
 
     if (!surfaceArea) {
       newErrors.surfaceArea = t("validation.surfaceRequired");
-    } else if (
-      !numericOnlyRegex.test(surfaceArea) ||
-      parseInt(surfaceArea, 10) < 0
-    ) {
+    } else if (!numericOnlyRegex.test(surfaceArea) || Number(surfaceArea) <= 0) {
       newErrors.surfaceArea = t("validation.positiveNumbers");
     }
 
@@ -210,43 +232,34 @@ export default function AntdForm({ property, id }) {
       newErrors.phoneNumber = t("validation.phoneValid");
     }
 
+    if (!position) newErrors.location = t("propertyForm.locationRequired");
+    if (images.length === 0) newErrors.images = t("propertyForm.imagesRequired");
+
+    scrollToErrorOnRender.current = Object.keys(newErrors).length > 0;
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const customRequest = async ({ file, onSuccess, onError, onProgress }) => {
-    try {
-      if (onProgress) onProgress({ percent: 15 });
-
-      const compressedFile = await compressImage(file);
-      if (onProgress) onProgress({ percent: 45 });
-
-      const imageName = `${file.uid}`;
-      const { data, error } = await supabase.storage
-        .from("images")
-        .upload(imageName, compressedFile, {
-          contentType: "image/webp",
-        });
-
-      if (error) {
-        onError(error);
-        message.error(t("toast.uploadFailed", { name: file.name }));
-      } else {
-        if (onProgress) onProgress({ percent: 100 });
-        onSuccess(data);
-        message.success(t("toast.uploadSuccess", { name: file.name }));
-      }
-    } catch (error) {
-      onError(error);
-      message.error(t("toast.genericUploadFailed"));
-    }
   };
 
   const props = {
     listType: "picture",
     fileList: images,
-    onChange: ({ fileList }) => setImages(fileList),
-    accept: "image/png, image/gif, image/jpeg",
+    onChange: ({ fileList }) => {
+      if (fileList.length > 10) message.error(t("propertyForm.imageLimit"));
+      setImages(fileList.slice(0, 10));
+      if (fileList.length) setErrors((current) => ({ ...current, images: undefined }));
+    },
+    beforeUpload: (file) => {
+      if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 10 * 1024 * 1024) {
+        message.error(t("propertyForm.imageInvalid"));
+        return Upload.LIST_IGNORE;
+      }
+      if (images.length >= 10) {
+        message.error(t("propertyForm.imageLimit"));
+        return Upload.LIST_IGNORE;
+      }
+      return false;
+    },
+    accept: "image/png,image/jpeg,image/webp",
     multiple: true,
     previewFile(file) {
       return new Promise((resolve) => {
@@ -259,61 +272,68 @@ export default function AntdForm({ property, id }) {
 
   const handleSubmit = async () => {
     if (validate()) {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      let imageUrls = [];
-      images.forEach((image) => {
-        imageUrls.push(
-          `${supabaseUrl}/storage/v1/object/public/images/${image.uid}`
-        );
-      });
-
-      // Localized bounding box centered around Cairo, Egypt (base: 30.0444, 31.2357)
-      const baseLat = 30.0444;
-      const baseLng = 31.2357;
-      const generatedLat = baseLat + (Math.random() - 0.5) * 0.06;
-      const generatedLng = baseLng + (Math.random() - 0.5) * 0.06;
+      setLoading(true);
+      const uploadedPaths = [];
+      try {
+        if (!userId) throw new Error("Sign in is required to publish a property");
+        const token = await getToken({ template: "supabase" });
+        if (!token) throw new Error("Supabase access token is unavailable");
+        const imageUrls = [];
+        for (const image of images) {
+          if (image.url && !image.originFileObj) {
+            imageUrls.push(image.url);
+            continue;
+          }
+          const source = image.originFileObj || image;
+          const compressedFile = await compressImage(source);
+          const path = `${userId}/${crypto.randomUUID()}.webp`;
+          const { error: uploadError } = await supabase.storage.from("images").upload(path, compressedFile, { contentType: "image/webp" });
+          if (uploadError) throw uploadError;
+          uploadedPaths.push(path);
+          imageUrls.push(supabase.storage.from("images").getPublicUrl(path).data.publicUrl);
+        }
 
       // Safe integer cast payloads right before transmission
       let propertyData = {
-        title,
-        price: parseInt(price, 10) || 0,
+        title: title.trim(),
+        price: Number(price),
         property_type: propertyType,
-        description,
+        description: description.trim(),
         country,
         state,
-        city,
+        city: city.trim(),
         zip_code: zip,
-        address: address,
+        address: address.trim(),
         Bedrooms: parseInt(bedrooms, 10) || 0,
         Bathrooms: parseInt(bathrooms, 10) || 0,
         ParkingSpaces: parseInt(parkingSpaces, 10) || 0,
-        surface_area: parseInt(surfaceArea, 10) || 0,
+        surface_area: parseInt(surfaceArea, 10),
         seller_phone: phone,
         images: imageUrls,
-        file_list: images,
-        latitude: property?.latitude || property?.lat ? parseFloat(property.latitude || property.lat) : generatedLat,
-        longitude: property?.longitude || property?.lng ? parseFloat(property.longitude || property.lng) : generatedLng,
+        file_list: imageUrls.map((url, index) => ({ uid: `image-${index}`, name: `Property photo ${index + 1}`, status: "done", url })),
+        latitude: position[0],
+        longitude: position[1],
       };
 
-      setLoading(true);
-      let response;
-      try {
-        const token = await getToken({ template: "supabase" });
         if (property && id) {
-          response = await UpdateData(supabase, propertyData, id, userId, token);
+          await UpdateData(supabase, propertyData, id, userId);
+          const removedUrls = (property.images || []).filter((url) => !imageUrls.includes(url));
+          const removedPaths = ownedImagePaths(removedUrls, userId);
+          if (removedPaths.length) {
+            const { error: cleanupError } = await supabase.storage.from("images").remove(removedPaths);
+            if (cleanupError) console.warn("Could not clean up removed property photos:", cleanupError);
+          }
         } else {
-          response = await InsertData(supabase, propertyData, token);
+          await InsertData(supabase, propertyData, userId);
         }
-      } catch (tokenErr) {
-        console.error("Error acquiring dynamic JWT session token:", tokenErr);
-      }
-      if (response) {
-        setLoading(false);
         message.success(t("toast.submitSuccess"));
         navigate("/MyProperty");
-      } else {
-        setLoading(false);
+      } catch (error) {
+        console.error("Could not save property:", error);
+        if (uploadedPaths.length) await supabase.storage.from("images").remove(uploadedPaths);
         message.error(t("toast.submitError"));
+      } finally {
+        setLoading(false);
       }
     } else {
       message.error(t("toast.fixErrors"));
@@ -323,26 +343,50 @@ export default function AntdForm({ property, id }) {
   // High-performance theme classes helper
   const inputThemeClasses = `h-12 rounded-xl text-base px-4 border transition-all duration-200 ${
     isDarkMode
-      ? "bg-gray-700 text-white border-gray-600 focus:bg-gray-600 focus:border-violet-500 hover:border-gray-500 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]"
-      : "bg-gray-50 text-gray-800 border-gray-200 focus:bg-white focus:border-violet-500 hover:border-gray-300 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]"
+      ? "bg-gray-700 text-white border-gray-600 focus:bg-gray-600 focus:border-teal-600 hover:border-gray-500"
+      : "bg-white text-gray-800 border-gray-300 focus:bg-white focus:border-teal-700 hover:border-gray-400"
   }`;
 
   return (
-    <>
-      <Spin spinning={loading} size="large" className="mt-40">
+    <div className="listing-editor-page">
+      <section className="listing-editor-hero" aria-labelledby="listing-editor-title">
+        <div className="site-container listing-editor-hero-grid">
+          <div className="listing-editor-hero-copy">
+            <span className="listing-editor-hero-index">{t("propertyForm.heroIndex")}</span>
+            <h1 id="listing-editor-title">{property ? t("propertyForm.editHeroTitle") : t("propertyForm.heroTitle")}</h1>
+            <p>{t("propertyForm.heroIntro")}</p>
+          </div>
+          <div className="listing-editor-hero-image"><img src={listingHero} alt="" aria-hidden="true" /></div>
+        </div>
+      </section>
+      <div className="site-container listing-editor-layout">
+        <aside className="listing-editor-aside" aria-label={t("propertyForm.guideTitle")}>
+          <div className="listing-editor-aside-inner">
+            <p className="listing-editor-aside-title">{t("propertyForm.guideTitle")}</p>
+            <nav className="listing-editor-step-nav" aria-label={t("propertyForm.guideTitle")}>
+              <a href="#property-details"><span>01</span>{t("propertyForm.guideDetails")}</a>
+              <a href="#property-photos"><span>02</span>{t("propertyForm.guidePhotos")}</a>
+              <a href="#property-location"><span>03</span>{t("propertyForm.guideLocation")}</a>
+            </nav>
+            <p className="listing-editor-aside-note">{t("propertyForm.guideNote")}</p>
+          </div>
+        </aside>
+      <div ref={formColumnRef} className="listing-editor-form-column">
+      <Spin spinning={loading} size="large">
         <Card
-          className={`max-w-3xl mx-auto my-12 p-8 rounded-2xl shadow-xl transition-all duration-300 border ${
+          className={`listing-form-card ${
             isDarkMode ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-100 text-gray-800"
           }`}
         >
-          <div className="mb-8 border-b pb-4 border-gray-200 dark:border-gray-700">
-            <Title level={2} className={`font-extrabold ${isDarkMode ? "!text-gray-100" : "!text-gray-800"}`}>
-              {t("form.postAd")}
+          <div className="listing-editor-card-heading">
+            <Title level={2}>
+              {property ? t("propertyForm.editFormTitle") : t("form.postAd")}
             </Title>
-            <p className="text-gray-400 text-sm mt-1">Provide listing details to showcase your property in Egypt</p>
+            <p>{t("propertyForm.intro")}</p>
           </div>
 
           <Form layout="vertical" onFinish={handleSubmit} requiredMark={false}>
+            <div id="property-details" className="property-section-heading property-form-step-heading"><div><span className="property-step">{t("propertyForm.detailsStep")}</span><h3>{t("propertyForm.detailsTitle")}</h3></div></div>
             {/* Title & Price Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Form.Item
@@ -407,7 +451,7 @@ export default function AntdForm({ property, id }) {
 
             {/* Description (Full Width) */}
             <Form.Item
-              label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.description")}</span>}
+              label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.description")}<span className="text-red-500 ml-1">*</span></span>}
               validateStatus={errors.description ? "error" : ""}
               help={errors.description}
             >
@@ -417,8 +461,8 @@ export default function AntdForm({ property, id }) {
                 rows={4}
                 className={`rounded-xl text-base p-4 border transition-all duration-200 ${
                   isDarkMode
-                    ? "bg-gray-700 text-white border-gray-600 focus:bg-gray-600 focus:border-violet-500 hover:border-gray-500 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]"
-                    : "bg-gray-50 text-gray-800 border-gray-200 focus:bg-white focus:border-violet-500 hover:border-gray-300 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]"
+                    ? "bg-gray-700 text-white border-gray-600 focus:bg-gray-600 focus:border-teal-600 hover:border-gray-500 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]"
+                    : "bg-gray-50 text-gray-800 border-gray-200 focus:bg-white focus:border-teal-600 hover:border-gray-300 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]"
                 }`}
                 placeholder="Describe key features, vicinity landmarks, etc..."
               />
@@ -483,7 +527,7 @@ export default function AntdForm({ property, id }) {
             {/* City & Zip Code Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Form.Item
-                label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.city")}</span>}
+                label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.city")}<span className="text-red-500 ml-1">*</span></span>}
                 validateStatus={errors.city ? "error" : ""}
                 help={errors.city}
               >
@@ -579,42 +623,70 @@ export default function AntdForm({ property, id }) {
             </div>
 
             {/* Premium Full-Width Upload Zone */}
-            <div className="mb-6">
-              <span className={`block font-semibold mb-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
-                Property Images
-              </span>
+            <div id="property-photos" className="mb-6">
+              <div className="property-section-heading property-form-step-heading"><div><span className="property-step">{t("propertyForm.photosStep")}</span><h3>{t("propertyForm.photosTitle")}</h3></div></div>
               <Upload
                 {...props}
-                customRequest={customRequest}
-                className={`w-full ${isDarkMode ? "dark-upload" : ""}`}
+                className={`property-upload w-full ${isDarkMode ? "dark-upload" : ""}`}
                 disabled={!isOnline}
                 listType="picture-card"
               >
-                <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-2xl cursor-pointer hover:border-violet-500 border-gray-300 dark:border-gray-600 transition duration-300 w-full h-[150px]">
-                  <UploadOutlined className="text-3xl text-violet-600 mb-2" />
-                  <p className="font-semibold text-sm">{t("form.upload")}</p>
-                  <p className="text-xs text-gray-400 mt-1">Select PNG, JPG, or GIF (WebP Auto-Compression)</p>
-                </div>
+                {images.length < 10 && <div className="property-upload-prompt">
+                  <UploadOutlined aria-hidden="true" />
+                  <strong>{t("form.upload")}</strong>
+                  <span>{t("propertyForm.imageHelp")}</span>
+                </div>}
               </Upload>
+              {errors.images && <p role="alert" className="property-field-error">{errors.images}</p>}
             </div>
 
+            <PropertyLocationPicker position={position} onChange={(next) => { setPosition(next); setErrors((current) => ({ ...current, location: undefined })); }} error={errors.location} />
+
             {/* Premium Gilded Accent Submit Button */}
-            <Form.Item className="mt-8">
+            <Form.Item className="listing-editor-submit">
               <Tooltip title={!isOnline ? t("network.offline") : ""}>
                 <Button
                   type="primary"
                   htmlType="submit"
                   block
                   disabled={!isOnline}
-                  className="h-12 rounded-xl font-bold text-base shadow-lg shadow-violet-600/30 hover:shadow-violet-600/40 active:scale-[0.98] transition-all duration-300 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 border-none text-white flex items-center justify-center"
+                  className="property-submit-button"
                 >
-                  {t("form.save")}
+                  {property ? t("propertyForm.saveChanges") : t("propertyForm.publish")}
                 </Button>
               </Tooltip>
             </Form.Item>
           </Form>
         </Card>
       </Spin>
-    </>
+      </div>
+      </div>
+    </div>
   );
 }
+
+AntdForm.propTypes = {
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  property: PropTypes.shape({
+    title: PropTypes.string,
+    price: PropTypes.number,
+    property_type: PropTypes.string,
+    country: PropTypes.string,
+    description: PropTypes.string,
+    state: PropTypes.string,
+    city: PropTypes.string,
+    zip_code: PropTypes.string,
+    address: PropTypes.string,
+    Bedrooms: PropTypes.number,
+    Bathrooms: PropTypes.number,
+    ParkingSpaces: PropTypes.number,
+    surface_area: PropTypes.number,
+    seller_phone: PropTypes.string,
+    file_list: PropTypes.array,
+    images: PropTypes.array,
+    latitude: PropTypes.number,
+    longitude: PropTypes.number,
+    lat: PropTypes.number,
+    lng: PropTypes.number,
+  }),
+};

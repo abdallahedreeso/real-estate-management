@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Form from '../components/add-property/Form'
 import { useParams } from 'react-router-dom';
 import useSupabaseClient from '@/backend/supabase/supabase';
 import { Spin } from 'antd';
+import { useAuth } from '@clerk/clerk-react';
+import { Link } from 'react-router-dom';
 export default function EditProperty() {
     const [property, setProperty] = useState(null)
+    const [status, setStatus] = useState('loading');
     const { id } = useParams();
     const supabase = useSupabaseClient();
+    const { userId, isLoaded } = useAuth();
     useEffect(() => {
         const fetchHouseData = async () => {
             try {
@@ -14,25 +18,33 @@ export default function EditProperty() {
                     .from('properties')
                     .select()
                     .eq('property_id', id)
-                    .single();
+                    .eq('seller_id', userId)
+                    .maybeSingle();
 
                 if (error) {
                     console.error("Error fetching property data:", error);
+                    setStatus('error');
                     return;
                 } else {
                     setProperty(data);
+                    setStatus(data ? 'ready' : 'not-found');
                 }
             } catch (err) {
                 console.error("Error fetching data from Supabase:", err);
+                setStatus('error');
             }
         };
-        if (supabase && id) {
+        if (isLoaded && !userId) {
+            setStatus('not-found');
+        } else if (supabase && id && isLoaded && userId) {
             fetchHouseData();
         }
-    }, [id, supabase]);
+    }, [id, supabase, userId, isLoaded]);
     return (
         <>
-            {property ? <Form property={property} id={id} /> : <Spin fullscreen size='large' />}
+            {status === 'loading' && <Spin fullscreen size='large' />}
+            {status === 'ready' && <Form property={property} id={id} />}
+            {(status === 'error' || status === 'not-found') && <div className="site-container property-edit-error"><h1>Property unavailable</h1><p>We could not open this listing for editing. Check that it belongs to your account.</p><Link to="/MyProperty">Back to my properties</Link></div>}
         </>
     )
 }

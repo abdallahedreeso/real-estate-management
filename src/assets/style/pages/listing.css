@@ -1,162 +1,82 @@
-table {
-  background-color: #f8f4ff !important;
-}
-
-th {
-  background-color: #f1e9ff !important;
-}
-
-/* pagination */
-.ant-pagination-item-active {
-  border-color: #6d28d9 !important;
-}
-
-.ant-pagination-item-active a {
-  color: #6d28d9 !important;
-}
-
-/* Dark mode styles for Table */
-.dark-table {
-  background-color: #1f2937;
-  color: #e5e7eb;
-}
-
-.dark-table .ant-table {
-  background-color: #1f2937;
-  color: #e5e7eb;
-}
-
-.dark-table .ant-table-thead > tr > th {
-  background-color: #374151 !important;
-  color: #e5e7eb !important;
-  border-bottom: 1px solid #4b5563 !important;
-}
-
-.dark-table .ant-table-tbody > tr > td {
-  background-color: #1f2937;
-  color: #e5e7eb;
-  border-bottom: 1px solid #4b5563;
-}
-
-.dark-table .ant-table-tbody > tr:hover > td,
-.dark-table .ant-table-tbody > tr:hover > td:has(.ant-popconfirm:hover) {
-  background-color: #374151 !important;
-}
-
-.dark-table .ant-pagination-item {
-  background-color: #374151;
-  border-color: #4b5563;
-}
-
-.dark-table .ant-pagination-item a {
-  color: #e5e7eb !important;
-}
-
-.dark-table .ant-pagination-item-active {
-  background-color: #6d28d9;
-  border-color: #7c3aed;
-}
-
-.dark-table .ant-pagination-item-active a {
-  color: white !important;
-}
-
-.dark-table .ant-pagination-prev button,
-.dark-table .ant-pagination-next button {
-  color: #e5e7eb;
-  background-color: #374151;
-  border-color: #4b5563;
-}
-
-.dark-table .ant-pagination-disabled button {
-  color: #6B7280 !important;
-  background-color: #1F2937;
-  border-color: #374151;
-}
-
-.dark-table .ant-empty-description {
-  color: #e5e7eb;
-}
-
-/* Dark mode styles for Switch */
-.ant-switch {
-  background-color: #acadad !important;
-}
-
-.dark-switch.ant-switch {
-  background-color: #4b5563 !important;
-}
-
-.ant-switch-checked,
-.dark-switch.ant-switch-checked {
-  background-color: #5B21B6 !important;
-}
-
-.ant-switch:hover {
-  background-color: #4b5563 !important;
-}
-
-.ant-switch-checked:hover {
-  background-color: #5B21B6 !important;
-}
-
-/* Dark mode styles for Buttons */
-.dark-button {
-  background-color: #5B21B6 !important; /* Using the specified primary color */
-  border-color: #4C1D95 !important;
-  color: white !important;
-}
-
-.dark-button:hover {
-  background-color: #6D28D9 !important; /* Slightly lighter for hover */
-  border-color: #5B21B6 !important;
-  color: white !important;
-}
-
-.dark-danger-button {
-  background-color: #991b1b !important;
-  border-color: #7f1d1d !important;
-  color: white;
-}
-
-.dark-danger-button:hover {
-  background-color: #b91c1c;
-  border-color: #991b1b;
-  color: white;
-}
-
-/* Dark mode styles for Popconfirm */
-.dark-popconfirm .ant-popover-inner {
-  background-color: #1f2937 !important;
-  border-color: #4b5563 !important;
-}
-
-.dark-popconfirm .ant-popconfirm-title,
-.dark-popconfirm .ant-popconfirm-description {
-  color: #e5e7eb !important;
-  background-color: #1f2937 !important;
-}
-
-.dark-popconfirm .ant-popover-arrow::before {
-  background-color: #1f2937 !important;
-}
-
-.dark-popconfirm .ant-btn-primary {
-  background-color: #4f46e5 !important;
-  border-color: #4338ca !important;
-}
-
-.dark-popconfirm .ant-btn-primary:hover {
-  background-color: #4338ca !important;
-}
-
-.dark-popconfirm .ant-btn-default {
-  background-color: #374151 !important;
-  border-color: #4b5563 !important;
-  color: #e5e7eb !important;
-}
-
-.dark-popconfirm .ant-btn-default:hover {
-  background-color: #4b5563 !important;
-  border-color: #6b7280 !important;
-}
+.my-listings-page { min-height: 75vh; padding-bottom: clamp(70px, 9vw, 130px); background: var(--canvas); color: var(--ink); }
+.my-listings-hero { position: relative; overflow: hidden; background: #123b37; color: #f6f4ea; }
+.my-listings-hero::after { content: ""; position: absolute; width: 430px; height: 430px; inset-inline-end: -90px; top: -210px; border: 1px solid #ffffff2b; border-radius: 50%; box-shadow: 0 0 0 100px #ffffff09, 0 0 0 200px #ffffff06; pointer-events: none; }
+.my-listings-hero-inner { position: relative; z-index: 1; display: flex; align-items: flex-end; justify-content: space-between; gap: 36px; min-height: 300px; padding-block: 65px 92px; }
+.my-listings-hero-kicker,.my-listings-eyebrow { display: block; color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.my-listings-hero-kicker { color: #d6e58b; }
+.my-listings-hero h1 { color: #f6f4ea; font-size: clamp(42px, 5vw, 76px); line-height: 1.04; letter-spacing: -.045em; font-weight: 800; margin: 14px 0 15px; }
+.my-listings-hero p { max-width: 570px; color: #cee0d9; font-size: clamp(15px, 1.35vw, 18px); line-height: 1.7; margin: 0; }
+.my-listings-add { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 52px; padding: 0 22px; border-radius: 8px; background: #d6e58b; color: #123b37; font-size: 14px; font-weight: 800; white-space: nowrap; transition: background 180ms ease, transform 180ms ease; }
+.my-listings-add:hover { background: #edf5b9; color: #123b37; }
+.my-listings-content { position: relative; z-index: 2; }
+.my-listings-overview { margin-top: -42px; }
+.my-listings-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: hidden; border: 1px solid var(--line); border-radius: 13px; background: var(--surface); box-shadow: 0 20px 50px #123b3710; }
+.my-listings-stat { display: flex; flex-direction: column; justify-content: space-between; min-height: 150px; padding: 26px 28px 24px; border-inline-end: 1px solid var(--line); }
+.my-listings-stat:last-child { border: 0; }
+.my-listings-stat-number { color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+.my-listings-stat strong { color: var(--ink); font-size: clamp(34px, 3.7vw, 52px); letter-spacing: -.055em; line-height: 1; font-weight: 800; }
+.my-listings-stat-available strong { color: var(--accent); }
+.my-listings-insights { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 25px; }
+.my-listings-insight { min-height: 236px; padding: 29px 30px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface); }
+.my-listings-insight h2 { margin: 8px 0 28px; color: var(--ink); font-size: clamp(19px, 2vw, 25px); font-weight: 800; letter-spacing: -.025em; }
+.my-listings-mix-bar { display: flex; height: 13px; border-radius: 999px; overflow: hidden; background: #d6e58b; }
+.my-listings-mix-bar > span { display: block; background: #123b37; }
+.my-listings-mix-legend { display: flex; flex-wrap: wrap; gap: 12px 30px; margin-top: 22px; color: var(--muted); font-size: 13px; }
+.my-listings-mix-legend > span { display: inline-flex; align-items: center; gap: 9px; }
+.my-listings-mix-legend strong { color: var(--ink); font-weight: 800; }
+.my-listings-mix-legend i { width: 10px; height: 10px; border-radius: 50%; }
+.my-listings-dot-sale { background: #123b37; }
+.my-listings-dot-rent { background: #d6e58b; }
+.my-listings-regions { display: grid; gap: 13px; }
+.my-listings-region { display: grid; grid-template-columns: minmax(75px, 130px) minmax(0, 1fr) 22px; gap: 14px; align-items: center; color: var(--muted); font-size: 13px; }
+.my-listings-region > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: capitalize; }
+.my-listings-region > div { height: 6px; border-radius: 999px; background: var(--canvas); overflow: hidden; }
+.my-listings-region > div > span { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
+.my-listings-region strong { color: var(--ink); font-weight: 800; }
+.my-listings-collection { margin-top: clamp(65px, 7vw, 100px); }
+.my-listings-section-heading { display: flex; justify-content: space-between; align-items: end; gap: 25px; margin-bottom: 28px; }
+.my-listings-section-heading h2 { color: var(--ink); font-size: clamp(31px, 3.2vw, 48px); font-weight: 800; letter-spacing: -.04em; line-height: 1.1; margin: 10px 0 0; }
+.my-listings-section-heading p { max-width: 300px; color: var(--muted); line-height: 1.6; margin: 0; }
+.my-listings-toolbar { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 14px; padding: 16px; margin-bottom: 17px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.my-listings-filters { display: flex; gap: 4px; flex-wrap: wrap; }
+.my-listings-filters button { min-height: 43px; padding: 0 15px; color: var(--muted); background: transparent; border: 0; border-radius: 7px; font-size: 13px; font-weight: 800; cursor: pointer; }
+.my-listings-filters button[aria-pressed="true"] { color: #fff; background: #123b37; }
+.my-listings-filters span { display: inline-flex; justify-content: center; min-width: 18px; margin-inline-start: 5px; font-variant-numeric: tabular-nums; }
+.my-listings-search { display: flex; align-items: center; gap: 9px; min-height: 44px; width: min(100%, 285px); padding: 0 13px; border: 1px solid var(--line); border-radius: 7px; color: var(--muted); background: var(--canvas); }
+.my-listings-search:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.my-listings-search input { min-width: 0; width: 100%; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 13px; }
+.my-listings-cards { display: grid; gap: 12px; }
+.my-listings-card { display: grid; grid-template-columns: 158px minmax(0, 1.5fr) minmax(120px, .8fr) minmax(165px, .8fr); gap: 22px; align-items: center; min-height: 164px; padding: 16px 22px 16px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.my-listings-card-image { display: grid; place-items: center; width: 158px; height: 130px; overflow: hidden; border-radius: 7px; background: #e3eae4; color: #6b8a7e; }
+.my-listings-card-image > div,.my-listings-cover { width: 100%; height: 100%; object-fit: cover; }
+.my-listings-card-type { color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.my-listings-card-details { min-width: 0; }
+.my-listings-card-details h3 { color: var(--ink); font-size: clamp(18px, 1.8vw, 24px); font-weight: 800; line-height: 1.25; margin: 8px 0 10px; }
+.my-listings-card-details h3 a { color: inherit; }
+.my-listings-card-details h3 a:hover { color: var(--accent); }
+.my-listings-card-details p { display: flex; align-items: start; gap: 5px; color: var(--muted); font-size: 13px; line-height: 1.5; margin: 0; }
+.my-listings-card-details p svg { flex: none; margin-top: 2px; }
+.my-listings-card-price { display: grid; gap: 7px; }
+.my-listings-card-price > span { color: var(--muted); font-size: 12px; }
+.my-listings-card-price strong { color: var(--ink); font-size: clamp(17px, 1.7vw, 22px); font-weight: 800; white-space: nowrap; }
+.my-listings-card-manage { display: grid; gap: 15px; justify-items: end; }
+.my-listings-availability { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-size: 12px; font-weight: 800; white-space: nowrap; }
+.my-listings-page .ant-switch-checked,.my-listings-page .ant-switch-checked:hover { background: var(--accent) !important; }
+.my-listings-actions { display: flex; align-items: center; gap: 8px; }
+.my-listings-actions > a { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 0 17px; border-radius: 6px; border: 1px solid var(--line); color: var(--ink); font-size: 12px; font-weight: 800; }
+.my-listings-actions > a:hover { border-color: var(--accent); color: var(--accent); }
+.my-listings-actions .ant-btn { min-height: 38px; font-size: 12px; font-weight: 800; }
+.my-listings-pagination { display: flex; align-items: center; justify-content: center; gap: 25px; margin-top: 30px; color: var(--muted); font-size: 13px; }
+.my-listings-pagination button { display: inline-flex; align-items: center; gap: 7px; min-height: 42px; padding: 0 14px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--ink); font-weight: 800; cursor: pointer; }
+.my-listings-pagination button:disabled { opacity: .4; cursor: not-allowed; }
+.my-listings-empty,.my-listings-state,.my-listings-no-results { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 70px 25px; color: var(--muted); }
+.my-listings-empty { gap: 13px; border: 1px solid var(--line); border-radius: 13px; margin-top: 30px; background: var(--surface); }
+.my-listings-empty h2,.my-listings-state h2 { color: var(--ink); font-size: 26px; font-weight: 800; margin: 0; }
+.my-listings-empty p { max-width: 370px; line-height: 1.6; margin: 0 0 8px; }
+.my-listings-state { min-height: 370px; gap: 15px; }
+.my-listings-no-results { border: 1px dashed var(--line); border-radius: 12px; background: var(--surface); }
+@media (hover:hover) and (pointer:fine) { .my-listings-add:hover { transform: translateY(-2px); } }
+@media (max-width: 1050px) { .my-listings-card { grid-template-columns: 135px minmax(0, 1fr) minmax(140px, .7fr); } .my-listings-card-image { width: 135px; } .my-listings-card-manage { grid-column: 2 / -1; display: flex; align-items: center; justify-content: space-between; justify-items: unset; border-top: 1px solid var(--line); padding-top: 13px; } }
+@media (max-width: 760px) { .my-listings-hero-inner { align-items: flex-start; flex-direction: column; min-height: 0; padding-block: 54px 80px; } .my-listings-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .my-listings-stat:nth-child(2) { border-inline-end: 0; } .my-listings-stat:nth-child(-n+2) { border-bottom: 1px solid var(--line); } .my-listings-insights { grid-template-columns: 1fr; } .my-listings-section-heading { display: block; } .my-listings-section-heading p { margin-top: 14px; } .my-listings-card { grid-template-columns: 120px minmax(0, 1fr); gap: 15px; } .my-listings-card-image { width: 120px; height: 120px; grid-row: span 2; } .my-listings-card-price { grid-column: 2; } .my-listings-card-manage { grid-column: 1 / -1; } }
+@media (max-width: 520px) { .my-listings-hero-inner { gap: 25px; padding-block: 48px 73px; } .my-listings-add { width: 100%; } .my-listings-stat { min-height: 121px; padding: 20px 17px; } .my-listings-stat-number { font-size: 10px; line-height: 1.5; } .my-listings-insight { min-height: 0; padding: 24px 20px; } .my-listings-toolbar { padding: 11px; } .my-listings-filters { width: 100%; } .my-listings-filters button { flex: 1; padding: 0 6px; font-size: 12px; } .my-listings-search { width: 100%; } .my-listings-card { grid-template-columns: 96px minmax(0, 1fr); gap: 11px 15px; padding: 13px; } .my-listings-card-image { width: 96px; height: 96px; grid-row: span 2; } .my-listings-card-details h3 { font-size: 18px; } .my-listings-card-details p { font-size: 11px; } .my-listings-card-price strong { font-size: 17px; } .my-listings-card-manage { margin-top: 5px; flex-wrap: wrap; gap: 10px; } }
+@media (prefers-reduced-motion: reduce) { .my-listings-add { transition: none; } }

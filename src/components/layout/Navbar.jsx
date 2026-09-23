@@ -11,11 +11,10 @@ import {
   useAuth,
 } from "@clerk/clerk-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Heart, Store, Globe } from "lucide-react";
-import { useTheme } from "@/context/ThemeContext";
+import { ArrowUpRight, Heart, Store, Globe, Menu, Building2, Plus, X, MessageCircle } from "lucide-react";
 import useSupabaseClient from "@/backend/supabase/supabase";
 import { useHouseStore } from "@/store/useHouseStore";
-import logo from "../../assets/Logo2.svg";
+import "@/assets/style/components/mobile-drawer.css";
 
 const Navbar = () => {
   const { t, i18n } = useTranslation();
@@ -25,7 +24,6 @@ const Navbar = () => {
   const location = useLocation();
   const { isSignedIn } = useUser();
   const { userId } = useAuth();
-  const { isDarkMode } = useTheme();
   const navigate = useNavigate();
 
   const supabase = useSupabaseClient();
@@ -42,7 +40,7 @@ const Navbar = () => {
         processOfflineOutbox(supabase, userId);
       }
     }
-  }, [supabase, userId, isOnline]);
+  }, [supabase, userId, isOnline, fetchWishlistCount, processOfflineOutbox]);
 
   const toggleLanguage = () => {
     const nextLang = i18n.language.startsWith("ar") ? "en" : "ar";
@@ -70,6 +68,7 @@ const Navbar = () => {
 
   const handleOpenMyProp = () => navigate("/MyProperty");
   const handleOpenWishlist = () => navigate("/Wishlist");
+  const handleOpenMessages = () => navigate("/Messages");
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -84,68 +83,67 @@ const Navbar = () => {
 
   return (
     <>
-      <div className="shadow-md mb-10 lg:mb-0">
-        <nav className="flex items-center justify-between mx-4 py-2 border-none">
+      <div className="site-header">
+        <nav className="site-container nav-inner" aria-label="Primary navigation">
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/">
-              <img src={logo} alt="Company Logo" width={150} />
+              <span className="brand-mark"><Building2 size={27} strokeWidth={1.7} /><span>REAL<span>ESTATE</span></span></span>
             </Link>
           </div>
 
           {/* Drawer Menu (Mobile) */}
-          <Drawer onClose={onClose} closable={false} width="60%" open={open}>
-            <Link to="/" onClick={onClose}>
-              <img src={logo} alt="Company Logo" width={160} className="mx-auto mb-4" />
-            </Link>
-
-            <div className="flex flex-col items-center justify-center gap-3">
-              <Link to="/" className="text-gray-600 hover:text-white hover:bg-violet-500 w-full text-center p-2 rounded font-bold" onClick={onClose}>
-                {t("navbar.home")}
-              </Link>
-              <Link to="/About" className="text-gray-600 hover:text-white hover:bg-violet-500 w-full text-center p-2 rounded font-bold" onClick={onClose}>
-                {t("navbar.about")}
-              </Link>
-              <Link to="/ContactUs" className="text-gray-600 hover:text-white hover:bg-violet-500 w-full text-center p-2 rounded font-bold" onClick={onClose}>
-                {t("navbar.contact")}
-              </Link>
-              <Button type="default" onClick={toggleLanguage} className="w-full flex items-center justify-center gap-2 font-bold">
-                <Globe size={16} />
-                {i18n.language.startsWith("ar") ? "English" : "العربية"}
-              </Button>
-              <SignedIn>
-                <Link to="/AddProperty" onClick={onClose}>
-                  <Button type="dashed" className="font-semibold shadow text-white rounded-full w-24 h-9 bg-violet-700 hover:bg-violet-500" style={{ fontSize: "11px" }}>
-                    {t("navbar.addProperty")}
-                  </Button>
-                </Link>
-              </SignedIn>
-              <SignedOut>
-                <Button variant="outline" className="font-semibold shadow rounded-full w-28 h-9" onClick={drawerSignUp}>
-                  {t("navbar.signUp")}
-                </Button>
-                <Button type="dashed" className="font-semibold shadow text-white rounded-full w-28 h-9 bg-violet-700 hover:bg-violet-500" onClick={drawerSignIn}>
-                  {t("navbar.signIn")}
-                </Button>
-              </SignedOut>
+          <Drawer onClose={onClose} width="min(100vw, 390px)" placement={i18n.language.startsWith("ar") ? "left" : "right"} open={open} title={null} closable={false} rootClassName="site-mobile-drawer">
+            <div className="mobile-drawer-shell" dir={i18n.language.startsWith("ar") ? "rtl" : "ltr"}>
+              <div className="mobile-drawer-top">
+                <Link to="/" onClick={onClose} aria-label="Real Estate home" className="mobile-drawer-brand"><Building2 size={27} strokeWidth={1.7} aria-hidden="true" /><span>REAL<span>ESTATE</span></span></Link>
+                <button type="button" className="mobile-drawer-close" onClick={onClose} aria-label={t("navbar.closeMenu")}><X size={21} aria-hidden="true" /></button>
+              </div>
+              <div className="mobile-drawer-intro"><span>{t("navbar.menuEyebrow")}</span><p>{t("navbar.menuIntro")}</p></div>
+              <nav className="mobile-drawer-nav" aria-label={t("navbar.menuLabel")}>
+                {[["/", "home"], ["/About", "about"], ["/ContactUs", "contact"]].map(([path, key], index) => (
+                  <Link key={path} to={path} onClick={onClose} aria-current={location.pathname === path ? "page" : undefined}>
+                    <span className="mobile-drawer-number">0{index + 1}</span><span>{t(`navbar.${key}`)}</span><ArrowUpRight size={18} aria-hidden="true" />
+                  </Link>
+                ))}
+              </nav>
+              <div className="mobile-drawer-account">
+                <span className="mobile-drawer-label">{t("navbar.accountLabel")}</span>
+                <SignedIn>
+                  <Link to="/AddProperty" className="mobile-drawer-primary" onClick={onClose}><Plus size={18} aria-hidden="true" />{t("navbar.addProperty")}<ArrowUpRight size={17} aria-hidden="true" /></Link>
+                  <div className="mobile-drawer-shortcuts">
+                    <Link to="/MyProperty" onClick={onClose} aria-current={location.pathname === "/MyProperty" ? "page" : undefined}><Store size={18} aria-hidden="true" />{t("navbar.myProperties")}</Link>
+                    <Link to="/Wishlist" onClick={onClose} aria-current={location.pathname === "/Wishlist" ? "page" : undefined}><Heart size={18} aria-hidden="true" />{t("navbar.wishlist")}<span>{wishlistCount}</span></Link>
+                    <Link to="/Messages" onClick={onClose} aria-current={location.pathname === "/Messages" ? "page" : undefined}><MessageCircle size={18} aria-hidden="true" />{t("inquiries.title")}</Link>
+                  </div>
+                </SignedIn>
+                <SignedOut>
+                  <button type="button" className="mobile-drawer-primary" onClick={drawerSignIn}>{t("navbar.signIn")}<ArrowUpRight size={17} aria-hidden="true" /></button>
+                  <button type="button" className="mobile-drawer-secondary" onClick={drawerSignUp}>{t("navbar.signUp")}</button>
+                </SignedOut>
+              </div>
+              <div className="mobile-drawer-bottom">
+                <span>{t("navbar.language")}</span>
+                <button type="button" onClick={toggleLanguage} aria-label={t("navbar.switchLanguage")}><Globe size={18} aria-hidden="true" />{i18n.language.startsWith("ar") ? "English" : "العربية"}<ArrowUpRight size={15} aria-hidden="true" /></button>
+              </div>
             </div>
           </Drawer>
 
           {/* Links (Desktop) */}
           <div className="hidden md:flex items-center">
-            <ul className="flex space-x-10 rtl:space-x-reverse">
+            <ul className="nav-links">
               <li>
-                <Link to="/" className={`${isDarkMode ? 'text-gray-100' : 'text-gray-600'} font-bold hover:text-white hover:bg-violet-700 rounded py-2 px-6`}>
+                <Link to="/" className={location.pathname === "/" ? "active" : ""}>
                   {t("navbar.home")}
                 </Link>
               </li>
               <li>
-                <Link to="/About" className={`${isDarkMode ? 'text-gray-100' : 'text-gray-600'} font-bold hover:text-white hover:bg-violet-700 rounded py-2 px-6`}>
+                <Link to="/About" className={location.pathname === "/About" ? "active" : ""}>
                   {t("navbar.about")}
                 </Link>
               </li>
               <li>
-                <Link to="/ContactUs" className={`${isDarkMode ? 'text-gray-100' : 'text-gray-600'} font-bold hover:text-white hover:bg-violet-700 rounded py-2 px-6`}>
+                <Link to="/ContactUs" className={location.pathname === "/ContactUs" ? "active" : ""}>
                   {t("navbar.contact")}
                 </Link>
               </li>
@@ -153,18 +151,18 @@ const Navbar = () => {
           </div>
 
           {/* Buttons and Actions */}
-          <div className="flex gap-4 items-center">
+          <div className="nav-actions">
             {/* Desktop Language Switcher */}
-            <Button onClick={toggleLanguage} className="hidden md:flex items-center gap-1 font-bold border-violet-700 text-violet-700 hover:bg-violet-700 hover:text-white rounded-full transition">
+            <Button onClick={toggleLanguage} className="hidden md:flex nav-language" aria-label="Switch language">
               <Globe size={15} />
               {i18n.language.startsWith("ar") ? "EN" : "عربي"}
             </Button>
 
             <SignedOut>
-              <Button variant="outline" className="font-semibold shadow rounded-full w-28 h-9 hidden md:block" onClick={() => setShowSignUp(true)}>
+              <Button variant="outline" className="nav-signup hidden md:block" onClick={() => setShowSignUp(true)}>
                 {t("navbar.signUp")}
               </Button>
-              <Button type="dashed" className="font-semibold shadow text-white rounded-full w-28 h-9 bg-violet-700 hover:bg-violet-500 hidden md:block" onClick={() => setShowSignIn(true)}>
+              <Button type="primary" className="nav-signin hidden md:block" onClick={() => setShowSignIn(true)}>
                 {t("navbar.signIn")}
               </Button>
             </SignedOut>
@@ -187,16 +185,13 @@ const Navbar = () => {
                     }
                     onClick={handleOpenWishlist}
                   />
+                  <UserButton.Action label="Messages" labelIcon={<MessageCircle size={15} />} onClick={handleOpenMessages} />
                 </UserButton.MenuItems>
               </UserButton>
             </SignedIn>
 
             {/* Hamburger (Mobile) */}
-            <div className="md:hidden flex flex-col cursor-pointer" onClick={showDrawer}>
-              <div className="w-8 h-1 bg-violet-600 mb-1"></div>
-              <div className="w-8 h-1 bg-violet-600 mb-1"></div>
-              <div className="w-8 h-1 bg-violet-600"></div>
-            </div>
+            <button type="button" className="mobile-menu-button md:hidden" onClick={showDrawer} aria-label="Open menu"><Menu size={23} /></button>
           </div>
         </nav>
       </div>

@@ -1,17 +1,9 @@
-export default async function UpdateData(supabase, propertyData, id, userId, token) {
+export default async function UpdateData(supabase, propertyData, id, userId) {
     if (!userId) {
-        console.error("Error updating property: userId is missing.");
-        return null;
+        throw new Error("Seller ID is required");
     }
     
-    if (token) {
-        await supabase.auth.setSession({
-            access_token: token,
-            refresh_token: "",
-        });
-    }
-
-    const { error } = await supabase
+    const { data, error } = await supabase
         .from("properties")
         .update({
             title: propertyData.title,
@@ -34,13 +26,10 @@ export default async function UpdateData(supabase, propertyData, id, userId, tok
             longitude: propertyData.longitude
         })
         .eq('property_id', id)
-        .eq('seller_id', userId); // Secure scoping
+        .eq('seller_id', userId)
+        .select('property_id');
 
-    if (error) {
-        console.error("Error updating data into property table : ", error);
-        return null;
-    } else {
-        console.log('data updated');
-        return "ok";
-    }
+    if (error) throw error;
+    if (!data?.length) throw new Error("Property was not updated. Check ownership and access policies.");
+    return "ok";
 }

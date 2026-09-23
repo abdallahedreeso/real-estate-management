@@ -37,6 +37,8 @@ const OptimizedImage = ({ src, alt, className, ...props }) => {
       <img
         src={error ? fallbackSvg : src}
         alt={alt || "Property"}
+        loading="lazy"
+        decoding="async"
         className={`${className} ${loading ? "invisible" : "visible"}`}
         onLoad={handleImageLoad}
         onError={handleImageError}

@@ -12,6 +12,7 @@ const ContactUs = React.lazy(() => import("./pages/ContactUsPage"));
 const About = React.lazy(() => import("./pages/About"));
 const EditProperty = React.lazy(() => import("./pages/EditProperty"));
 const Wishlist = React.lazy(() => import("./pages/Wishlist"));
+const Messages = React.lazy(() => import("./pages/Messages"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 import { ClerkProvider } from "@clerk/clerk-react";
 import { dark } from "@clerk/themes";
@@ -66,6 +67,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectRoute>
             <Wishlist />
+          </ProtectRoute>
+        ),
+      },
+      {
+        path: "/Messages",
+        element: (
+          <ProtectRoute>
+            <Messages />
           </ProtectRoute>
         ),
       },

@@ -1,38 +1,13 @@
-import { Button, Result } from "antd";
-import { useNavigate } from "react-router-dom";
-import { HomeIcon } from "lucide-react";
-import { useTheme } from "../context/ThemeContext";
+import { Link } from "react-router-dom";
+import { ArrowUpRight } from "lucide-react";
 
-const NotFound = () => {
-  const navigate = useNavigate();
-  const { isDarkMode } = useTheme();
-
+export default function NotFound() {
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
-      <Result
-        status="404"
-        title={<span className={`text-4xl ${isDarkMode ? 'text-violet-400' : 'text-violet-700'} font-bold`}>404</span>}
-        subTitle={
-          <div className={`text-lg ${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mt-4`}>
-            <p>Oops! The page you're looking for doesn't exist.</p>
-            <p>It might have been moved or deleted.</p>
-          </div>
-        }
-        extra={
-          <Button
-            type="primary"
-            size="large"
-            icon={<HomeIcon size={18} />}
-            onClick={() => navigate("/")}
-            className={`mt-6 ${isDarkMode ? 'bg-violet-600 hover:bg-violet-500' : 'bg-violet-700 hover:bg-violet-600'} flex items-center gap-2 mx-auto`}
-          >
-            Back to Home
-          </Button>
-        }
-        className={`shadow-xl rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200'} p-8`}
-      />
-    </div>
+    <section className="not-found site-container">
+      <span>404 / PAGE NOT FOUND</span>
+      <h1>Let’s find your way home.</h1>
+      <p>This page may have moved. Head back to explore available properties.</p>
+      <Link to="/" className="button-primary">Explore homes <ArrowUpRight size={18} /></Link>
+    </section>
   );
-};
-
-export default NotFound;
+}

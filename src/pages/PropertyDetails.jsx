@@ -1,392 +1,204 @@
-import { useState, useEffect, useMemo } from "react";
-import { useParams } from "react-router-dom";
-import OptimizedImage from "@/components/common/OptimizedImage";
-import { useHouseStore } from "../store/useHouseStore";
-import ChatBox from "@/components/chat/ChatBox";
-import { BiBed, BiBath } from "react-icons/bi";
-import { MdLocationOn } from "react-icons/md";
-import { MdHome } from "react-icons/md";
-import { FaShare, FaClipboard, FaParking, FaHeart } from "react-icons/fa";
-import { AiOutlineCalendar } from "react-icons/ai";
-import { FaRulerCombined } from "react-icons/fa";
-import {
-  FacebookShareButton,
-  TwitterShareButton,
-  WhatsappShareButton,
-} from "react-share";
-import Swal from "sweetalert2";
-import Map from "@/components/Home/Map";
-import useSupabaseClient from "../backend/supabase/supabase";
-import { SignedIn, SignedOut, useAuth } from "@clerk/clerk-react";
-import JoinUsCard from "@/components/JoinUs";
-import whatsappIcon from "../assets/img/icons/whatsapp.svg";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { useAuth } from "@clerk/clerk-react";
+import { FacebookShareButton, TwitterShareButton, WhatsappShareButton } from "react-share";
 import { message } from "antd";
-import { useTheme } from "../context/ThemeContext";
+import {
+  ArrowLeft, ArrowUpRight, Bath, BedDouble, Building2, CalendarDays,
+  CarFront, Copy, Heart, House, MapPin, MessageCircle, Ruler, Share2,
+} from "lucide-react";
+import OptimizedImage from "@/components/common/OptimizedImage";
+import ChatBox from "@/components/chat/ChatBox";
+import { useHouseStore } from "../store/useHouseStore";
+import useSupabaseClient from "../backend/supabase/supabase";
+import whatsappIcon from "../assets/img/icons/whatsapp.svg";
+import { egyptianWhatsAppNumber } from "../utils/contact";
+import { useTranslation } from "react-i18next";
+import PropTypes from "prop-types";
 
-const PropertyDetails = () => {
+const Map = lazy(() => import("@/components/Home/Map"));
+
+function PropertyMap({ markers }) {
+  const { t } = useTranslation();
+  const mapRef = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!mapRef.current || visible) return;
+    if (!("IntersectionObserver" in window)) { setVisible(true); return; }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setVisible(true); observer.disconnect(); }
+    }, { rootMargin: "300px" });
+    observer.observe(mapRef.current);
+    return () => observer.disconnect();
+  }, [visible]);
+
+  if (!markers.some((marker) => marker.lat != null && marker.lng != null)) {
+    return <div className="property-map property-map-unavailable"><MapPin size={25} aria-hidden="true" /> {t("propertyDetails.mapUnavailable")}</div>;
+  }
+  return <div ref={mapRef} className="property-map">{visible && <Suspense fallback={null}><Map markers={markers} center={[Number(markers[0].lat), Number(markers[0].lng)]} /></Suspense>}</div>;
+}
+
+PropertyMap.propTypes = { markers: PropTypes.array.isRequired };
+
+export default function PropertyDetails() {
   const { id } = useParams();
   const { userId } = useAuth();
+  const { t, i18n } = useTranslation();
+  const supabase = useSupabaseClient();
   const [house, setHouse] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
-  const supabase = useSupabaseClient();
-  const { isDarkMode } = useTheme();
-
   const incrementWishlist = useHouseStore((state) => state.incrementWishlist);
   const decrementWishlist = useHouseStore((state) => state.decrementWishlist);
   const isOnline = useHouseStore((state) => state.isOnline);
   const queueOfflineAction = useHouseStore((state) => state.queueOfflineAction);
 
-  const markers = useMemo(() => {
-    if (!house) return [];
-    return [
-      {
-        property_id: house.property_id,
-        lat: house.latitude || house.lat,
-        lng: house.longitude || house.lng,
-        address: house.address,
-        price: house.price,
-        bedrooms: house.Bedrooms,
-        bathrooms: house.Bathrooms,
-      },
-    ];
-  }, [house]);
+  const markers = useMemo(() => house ? [{
+    property_id: house.property_id,
+    lat: house.latitude || house.lat,
+    lng: house.longitude || house.lng,
+    address: house.address,
+    price: house.price,
+    bedrooms: house.Bedrooms,
+    bathrooms: house.Bathrooms,
+  }] : [], [house]);
 
   useEffect(() => {
-    const fetchHouseData = async () => {
+    if (!supabase || !id) { setLoading(false); setFetchError(true); return; }
+    let active = true;
+    const fetchHouse = async () => {
+      setLoading(true);
+      setFetchError(false);
       try {
-        const { data, error } = await supabase
-          .from("properties")
-          .select(
-            `property_id, address, price, property_type, country, state, seller_phone, Bedrooms, Bathrooms, surface_area, zip_code, created_at, description, latitude, longitude, ParkingSpaces, images`
-          )
-          .eq("property_id", id)
-          .single();
-
-        if (error) {
-          console.error("Error fetching property data:", error);
-          return;
-        }
-        setHouse(data);
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching data from Supabase:", err);
+        const { data, error } = await supabase.from("properties")
+          .select("property_id, title, seller_id, address, price, property_type, country, state, seller_phone, is_available, Bedrooms, Bathrooms, surface_area, zip_code, created_at, description, latitude, longitude, ParkingSpaces, images")
+          .eq("property_id", id).single();
+        if (error) throw error;
+        if (active) setHouse(data);
+      } catch (error) {
+        console.error("Error fetching property data:", error);
+        if (active) { setHouse(null); setFetchError(true); }
+      } finally {
+        if (active) setLoading(false);
       }
     };
-
-    const fetchWishlistStatus = async () => {
-      const propertyId = id;
-
-      const { data, error } = await supabase
-        .from("wishlist")
-        .select("id")
-        .eq("property_id", propertyId)
-        .eq("user_id", userId);
-      if (error && error.code !== "PGRST116") {
-        console.error("Error fetching wishlist status", error);
-      } else if (data && data.length) {
-        setIsInWishlist(true);
-      }
+    const fetchWishlist = async () => {
+      if (!userId) return;
+      const { data, error } = await supabase.from("wishlist").select("id")
+        .eq("property_id", id).eq("user_id", userId);
+      if (error) console.error("Error fetching wishlist status:", error);
+      else if (active) setIsInWishlist(Boolean(data?.length));
     };
-
-    if (supabase && id) {
-      fetchHouseData();
-      if (userId) {
-        fetchWishlistStatus();
-      }
-    }
+    fetchHouse();
+    fetchWishlist();
+    return () => { active = false; };
   }, [id, supabase, userId]);
 
-  if (loading) {
-    return (
-      <div className="text-center text-xl font-semibold py-10">
-        Loading property details...
-      </div>
-    );
-  }
-
-  if (!house) {
-    return (
-      <div className="text-center text-xl font-semibold py-10">
-        No property found.
-      </div>
-    );
-  }
+  if (loading) return <div className="property-state site-container" role="status"><div className="property-state-image" /><div className="property-state-lines"><span /><span /><span /></div><span className="sr-only">{t("propertyDetails.loading")}</span></div>;
+  if (!house) return <div className="property-state property-state-error site-container"><h1>{t(fetchError ? "propertyDetails.unavailable" : "propertyDetails.notFound")}</h1><Link to="/#explore">{t("propertyDetails.back")} <ArrowUpRight size={18} /></Link></div>;
 
   const shareUrl = window.location.href;
+  const address = [house.address, house.state, house.zip_code].filter(Boolean).join(", ");
+  const price = Number(house.price).toLocaleString(i18n.language);
+  const listedDate = house.created_at ? new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(new Date(house.created_at)) : null;
+  const imageUrl = house.images?.[0];
+  const facts = [
+    { icon: House, label: t("propertyDetails.type"), value: house.property_type },
+    { icon: Ruler, label: t("propertyDetails.area"), value: house.surface_area != null ? `${house.surface_area} m²` : null },
+    { icon: BedDouble, label: t("propertyDetails.bedrooms"), value: house.Bedrooms },
+    { icon: Bath, label: t("propertyDetails.bathrooms"), value: house.Bathrooms },
+    { icon: CarFront, label: t("propertyDetails.parking"), value: house.ParkingSpaces },
+    { icon: CalendarDays, label: t("propertyDetails.listed"), value: listedDate },
+  ];
 
-  const handleCopyLink = () => {
-    navigator.clipboard
-      .writeText(shareUrl)
-      .then(() => {
-        Swal.fire({
-          icon: "success",
-          title: "Link Copied!",
-          text: "The property link has been copied to your clipboard.",
-          showConfirmButton: false,
-          timer: 1500,
-          toast: true,
-          position: "top-end",
-        });
-      })
-      .catch(() => {
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Failed to copy the link. Please try again.",
-        });
-      });
-  };
-
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      message.success(t("propertyDetails.copied"));
+      setDropdownOpen(false);
+    } catch {
+      message.error(t("propertyDetails.copyFailed"));
+    }
   };
 
   const toggleWishlist = async () => {
-    const propertyId = id;
-
+    const nextValue = !isInWishlist;
     if (!isOnline) {
-      if (isInWishlist) {
-        setIsInWishlist(false);
-        decrementWishlist();
-        queueOfflineAction({ propertyId, operation: "REMOVE" });
-        message.info("Wishlist updated offline. Synchronizing changes soon...");
-      } else {
-        setIsInWishlist(true);
-        incrementWishlist();
-        queueOfflineAction({ propertyId, operation: "ADD" });
-        message.info("Wishlist updated offline. Synchronizing changes soon...");
-      }
+      setIsInWishlist(nextValue);
+      if (nextValue) incrementWishlist(); else decrementWishlist();
+      queueOfflineAction({ propertyId: id, operation: nextValue ? "ADD" : "REMOVE" });
+      message.info(t("propertyDetails.savedOffline"));
       return;
     }
-
-    if (isInWishlist) {
-      // Remove from wishlist
-      try {
-        const { error } = await supabase
-          .from("wishlist")
-          .delete()
-          .eq("property_id", propertyId)
-          .eq("user_id", userId);
-
+    try {
+      if (nextValue) {
+        const { error } = await supabase.from("wishlist").insert({ property_id: id, user_id: userId });
         if (error) throw error;
-        console.log("Property deleted from wishlist successfully");
-        message.success("Property deleted from wishlist successfully");
-        decrementWishlist();
-      } catch (err) {
-        console.error("Error deleting property from wishlist:", err.message);
-      } finally {
-        setIsInWishlist(false);
-      }
-    } else {
-      // Add to wishlist
-      const { error } = await supabase.from("wishlist").insert({
-        property_id: propertyId,
-        user_id: userId,
-      });
-      if (error) {
-        console.error("Error adding to wishlist", error);
-      } else {
-        message.success("Property Added to your wishlist successfully");
-        setIsInWishlist(true);
         incrementWishlist();
-        return "ok";
+      } else {
+        const { error } = await supabase.from("wishlist").delete().eq("property_id", id).eq("user_id", userId);
+        if (error) throw error;
+        decrementWishlist();
       }
+      setIsInWishlist(nextValue);
+      message.success(t(nextValue ? "propertyDetails.saved" : "propertyDetails.removed"));
+    } catch (error) {
+      console.error("Wishlist update failed:", error);
+      message.error(t("propertyDetails.saveFailed"));
     }
   };
 
   const handleWhatsAppClick = () => {
-    const phoneNumber = house.seller_phone;
-
-    if (phoneNumber) {
-      const whatsappUrl = `https://wa.me/${phoneNumber}`;
-      window.open(whatsappUrl, "_blank"); // Open WhatsApp in a new tab
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "No Phone Number",
-        text: "This property does not have a valid seller phone number.",
-      });
+    const phone = egyptianWhatsAppNumber(house.seller_phone);
+    if (phone) {
+      const text = t("inquiries.whatsAppIntro", { property: house.title || house.address, url: shareUrl });
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
     }
+    else message.error(t("propertyDetails.noPhone"));
   };
 
-  const imageUrl =
-    house.images && house.images.length > 0
-      ? house.images[0]
-      : "https://via.placeholder.com/768x432";
-
   return (
-    <section className={isDarkMode ? "bg-gray-900 text-gray-100" : ""}>
-      <div className={`container mx-auto min-h-[800px] mb-1 ${isDarkMode ? "text-gray-100" : ""}`}>
-        <div className="max-w-3xl mx-auto my-3 mt-5 h-[400px] overflow-hidden rounded-2xl shadow-lg">
-          <OptimizedImage
-            src={imageUrl}
-            alt="Property"
-            className="w-full h-full object-cover transition-transform transform hover:scale-105 duration-300"
-          />
-        </div>
-        <div className="my-6 flex flex-col gap-3">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className={`font-bold text-3xl pb-3 ${isDarkMode ? "text-violet-400" : "text-violet-700"}`}>
-                ${house.price.toLocaleString()}
-              </h2>
-              <h2 className={`text-lg flex pb-4 w-44 md:w-full ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                <MdLocationOn className={`mr-1 ${isDarkMode ? "text-violet-400" : "text-violet-600"}`} />
-                {house.address}, {house.state}, {house.zip_code}
-              </h2>
-            </div>
-
-            <div className="flex gap-6">
-              {/* Wishlist Icon */}
-              <SignedIn>
-                <button onClick={toggleWishlist}>
-                  <FaHeart
-                    className={`text-3xl transition ${
-                      isInWishlist ? "text-red-500" : isDarkMode ? "text-gray-500" : "text-gray-400"
-                    } hover:scale-110`}
-                  />
-                </button>
-              </SignedIn>
-              <div className="relative">
-                <button
-                  onClick={toggleDropdown}
-                  className={`flex gap-2 ${isDarkMode ? "bg-violet-800" : "bg-violet-700"} text-white rounded p-2 shadow hover:bg-violet-600 transition`}
-                >
-                  <FaShare /> Share
-                </button>
-                {dropdownOpen && (
-                  <div className={`absolute right-0 mt-2 ${isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border"} rounded shadow-lg z-10`}>
-                    <div className="p-2">
-                      <button
-                        onClick={handleCopyLink}
-                        className={`flex items-center gap-2 ${isDarkMode ? "text-gray-300 hover:bg-gray-700" : "text-gray-700 hover:bg-gray-100"} w-full text-left p-2 rounded my-2`}
-                      >
-                        <FaClipboard /> Copy Link
-                      </button>
-                      <FacebookShareButton
-                        url={shareUrl}
-                        className={`flex items-center gap-2 ${isDarkMode ? "text-gray-300 hover:bg-gray-700" : "text-gray-700 hover:bg-gray-200"} w-full text-left p-2 rounded my-2`}
-                      >
-                        <FaShare /> Share on Facebook
-                      </FacebookShareButton>
-                      <TwitterShareButton
-                        url={shareUrl}
-                        className={`flex items-center gap-2 ${isDarkMode ? "text-gray-300 hover:bg-gray-700" : "text-gray-700 hover:bg-gray-100"} w-full text-left p-2 rounded my-2`}
-                      >
-                        <FaShare /> Share on Twitter
-                      </TwitterShareButton>
-                      <WhatsappShareButton
-                        url={shareUrl}
-                        className={`flex items-center gap-2 ${isDarkMode ? "text-gray-300 hover:bg-gray-700" : "text-gray-700 hover:bg-gray-100"} w-full text-left p-2 rounded my-2`}
-                      >
-                        <FaShare /> Share on WhatsApp
-                      </WhatsappShareButton>
-                    </div>
-                  </div>
-                )}
+    <main className="property-detail">
+      <div className="site-container">
+        <Link to="/#explore" className="property-back"><ArrowLeft size={17} aria-hidden="true" /> {t("propertyDetails.back")}</Link>
+        <div className="property-hero">
+          <div className="property-hero-image">
+            {imageUrl ? <OptimizedImage src={imageUrl} alt={house.title || address} className="property-main-image" loading="eager" fetchPriority="high" /> : <div className="property-main-placeholder"><Building2 size={58} strokeWidth={1.2} aria-hidden="true" /><span>{t("redesign.imageUnavailable")}</span></div>}
+          </div>
+          <div className="property-hero-copy">
+            {house.property_type && <span className="property-hero-type">{house.property_type}</span>}
+            <h1>{house.title || house.address}</h1>
+            <p className="property-hero-address"><MapPin size={19} aria-hidden="true" /> {address}</p>
+            <div className="property-hero-price"><span>{t("propertyDetails.price")}</span><strong>${price}</strong></div>
+            <div className="property-hero-actions">
+              {userId && <button type="button" className={`property-action${isInWishlist ? " is-active" : ""}`} onClick={toggleWishlist} aria-pressed={isInWishlist}><Heart size={19} fill={isInWishlist ? "currentColor" : "none"} aria-hidden="true" /> {t(isInWishlist ? "propertyDetails.savedAction" : "propertyDetails.save")}</button>}
+              <div className="property-share-wrap">
+                <button type="button" className="property-action" onClick={() => setDropdownOpen((open) => !open)} aria-expanded={dropdownOpen} aria-controls="property-share-menu"><Share2 size={19} aria-hidden="true" /> {t("propertyDetails.share")}</button>
+                {dropdownOpen && <div id="property-share-menu" className="property-share-menu"><button type="button" onClick={handleCopyLink}><Copy size={17} /> {t("propertyDetails.copyLink")}</button><FacebookShareButton url={shareUrl} onClick={() => setDropdownOpen(false)}>{t("propertyDetails.facebook")}</FacebookShareButton><TwitterShareButton url={shareUrl} onClick={() => setDropdownOpen(false)}>{t("propertyDetails.twitter")}</TwitterShareButton><WhatsappShareButton url={shareUrl} onClick={() => setDropdownOpen(false)}>{t("propertyDetails.whatsapp")}</WhatsappShareButton></div>}
               </div>
             </div>
           </div>
-          <hr className={isDarkMode ? "border-gray-700" : "border-gray-300"} />
-          <div className="mt-4 flex flex-col gap-3 mb-4">
-            <h2 className={`font-bold text-2xl ${isDarkMode ? "text-gray-100" : ""}`}>Key Features</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <h2 className={`flex gap-2 items-center ${isDarkMode ? "bg-gray-800 text-violet-400" : "bg-purple-100 text-violet-700"} rounded-lg p-3 justify-center shadow-md`}>
-                <MdHome /> {house.property_type}
-              </h2>
-              <h2 className={`flex gap-2 items-center ${isDarkMode ? "bg-gray-800 text-violet-400" : "bg-purple-100 text-violet-700"} rounded-lg p-3 justify-center shadow-md`}>
-                <AiOutlineCalendar />{" "}
-                {new Date(house.created_at).toLocaleDateString()}
-              </h2>
-              <h2 className={`flex gap-2 items-center ${isDarkMode ? "bg-gray-800 text-violet-400" : "bg-purple-100 text-violet-700"} rounded-lg p-3 justify-center shadow-md`}>
-                <FaRulerCombined /> {house.surface_area} sq ft
-              </h2>
-              <h2 className={`flex gap-2 items-center ${isDarkMode ? "bg-gray-800 text-violet-400" : "bg-purple-100 text-violet-700"} rounded-lg p-3 justify-center shadow-md`}>
-                <BiBed /> {house.Bedrooms} Bedrooms
-              </h2>
-              <h2 className={`flex gap-2 items-center ${isDarkMode ? "bg-gray-800 text-violet-400" : "bg-purple-100 text-violet-700"} rounded-lg p-3 justify-center shadow-md`}>
-                <BiBath /> {house.Bathrooms} Bathrooms
-              </h2>
-              <h2 className={`flex gap-2 items-center ${isDarkMode ? "bg-gray-800 text-violet-400" : "bg-purple-100 text-violet-700"} rounded-lg p-3 justify-center shadow-md`}>
-                <FaParking /> {house.ParkingSpaces} Parking Lots
-              </h2>
-            </div>
-          </div>
-          {/* Whatsapp message */}
-          <SignedOut>
-            <JoinUsCard />
-            <div className="mt-4 p-4 rounded-xl border border-dashed border-violet-500 bg-violet-50 dark:bg-gray-800 text-center">
-              <p className={`text-sm ${isDarkMode ? "text-violet-300" : "text-violet-700"}`}>
-                Want to chat live? Please sign in to initiate a direct peer-to-peer real-time conversation.
-              </p>
-            </div>
-          </SignedOut>
-          <SignedIn>
-            <div className="flex flex-col gap-4">
-              <button
-                onClick={handleWhatsAppClick}
-                className={`${isDarkMode ? "bg-violet-800" : "bg-violet-700"} text-white p-3 rounded-md shadow hover:bg-violet-600 transition`}
-              >
-                <div className="flex flex-wrap items-center justify-center ">
-                  Message Seller on
-                  <div className="flex ">
-                    <img
-                      src={whatsappIcon}
-                      alt="Whatsapp icon"
-                      width="20px"
-                      className="mx-1"
-                    />
-                    WhatsApp: {house.seller_phone}
-                  </div>
-                </div>
-              </button>
-
-              {/* Instant Peer-to-Peer Realtime Chat Box */}
-              <div className="mt-2">
-                <h3 className={`font-bold text-xl mb-3 ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}>
-                  Live Chat with Agent
-                </h3>
-                <ChatBox 
-                  propertyId={house.property_id.toString()} 
-                  sellerId={house.seller_id} 
-                  propertyTitle={house.title} 
-                />
-              </div>
-            </div>
-          </SignedIn>
-
-          {house.description && (
-            <>
-              <h2 className={`font-bold text-2xl mt-6 ${isDarkMode ? "text-gray-100" : ""}`}>Description</h2>
-              <p className={isDarkMode ? "text-gray-300" : "text-gray-700"}>{house.description}</p>
-            </>
-          )}
         </div>
-        <div className="flex flex-col mt-8">
-          <h2 className={`font-bold text-3xl mb-4 ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}>Location</h2>
-          <div className="h-96 w-full bg-gray-200 rounded-3xl shadow-lg overflow-hidden">
-            <Map markers={markers} className="z-40" />
+
+        <div className="property-body-grid">
+          <div className="property-body-main">
+            <section className="property-facts" aria-labelledby="property-facts-title"><h2 id="property-facts-title">{t("propertyDetails.features")}</h2><dl>{facts.map(({ icon: Icon, label, value }) => <div key={label}><Icon size={25} strokeWidth={1.5} aria-hidden="true" /><dt>{label}</dt><dd>{value ?? "—"}</dd></div>)}</dl></section>
+            {house.description && <section className="property-description" aria-labelledby="property-description-title"><h2 id="property-description-title">{t("propertyDetails.description")}</h2><p>{house.description}</p></section>}
+            <section className="property-location" aria-labelledby="property-location-title"><h2 id="property-location-title">{t("propertyDetails.location")}</h2><p><MapPin size={18} aria-hidden="true" /> {address}</p><PropertyMap markers={markers} /></section>
           </div>
-          <div className={`mt-4 p-5 rounded-lg shadow-md border ${
-            isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-300"
-          }`}>
-            <h3 className={`font-semibold text-lg ${isDarkMode ? "text-gray-100" : "text-gray-800"}`}>
-              Property Address
-            </h3>
-            <p className={isDarkMode ? "text-gray-300 text-base" : "text-gray-600 text-base"}>
-              {house.address}, {house.state}, {house.zip_code}
-            </p>
-            <p className={`text-base mt-2 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-              This property is located in a vibrant area with easy access to
-              local amenities.
-            </p>
-          </div>
+          <aside className="property-contact-panel">
+            <h2>{t("propertyDetails.contactTitle")}</h2>
+            <p>{t("propertyDetails.contactIntro")}</p>
+            {!house.is_available && userId !== house.seller_id ? <p>{t("inquiries.unavailable")}</p> : !userId ? <Link to="/?sign-in=true" className="property-contact-button"><MessageCircle size={19} aria-hidden="true" /> {t("propertyDetails.signIn")}</Link> : userId === house.seller_id ? <Link to="/Messages" className="property-contact-button"><MessageCircle size={19} aria-hidden="true" /> {t("inquiries.openInbox")}</Link> : <>
+              <button type="button" className="property-contact-button" onClick={handleWhatsAppClick}><img src={whatsappIcon} alt="" width="20" height="20" /> {t("propertyDetails.messageWhatsapp")}</button>
+              <div className="property-chat"><h3>{t("propertyDetails.liveChat")}</h3><ChatBox propertyId={String(house.property_id)} sellerId={house.seller_id} propertyTitle={house.title || house.address} /></div>
+            </>}
+          </aside>
         </div>
       </div>
-    </section>
+    </main>
   );
-};
-
-export default PropertyDetails;
+}

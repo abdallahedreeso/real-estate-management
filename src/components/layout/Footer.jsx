@@ -1,115 +1,21 @@
-import { FaFacebookSquare } from "react-icons/fa";
-import { SiInstagram } from "react-icons/si";
-import { FaXTwitter } from "react-icons/fa6";
-import { FaLinkedin } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { useTheme } from "@/context/ThemeContext";
+import { ArrowUpRight, Mail, Building2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-const Footer = () => {
-  const { isDarkMode } = useTheme();
-  
+export default function Footer() {
+  const { t } = useTranslation();
   return (
-    <footer className={`mt-8 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-800'} text-white py-5`}>
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="mb-4">
-            <ul className="mt-2 space-y-2">
-              <li>
-                <Link to="/" className="hover:text-gray-300">
-                  Home
-                </Link>
-              </li>
-              {/* <li>
-                <Link to="property" className="hover:text-gray-300">
-                  Property
-                </Link>
-              </li> */}
-              <li>
-                <Link to="About" className="hover:text-gray-300">
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link to="ContactUs" className="hover:text-gray-300">
-                  Contact Us
-                </Link>
-              </li>
-            </ul>
-          </div>
-          <div className="mb-4">
-            <h5 className="text-xl font-bold">Follow Us</h5>
-            <ul className="flex space-x-4 mt-2">
-              <li>
-                <Link
-                  to="https://www.facebook.com"
-                  target="_blank"
-                  className="text-gray-400 hover:text-white"
-                >
-                  <FaFacebookSquare className="w-7 h-7 fill-current" />
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="https://www.instagram.com"
-                  target="_blank"
-                  className="text-gray-400 hover:text-white"
-                >
-                  <SiInstagram className="w-7 h-7 fill-current" />
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="https://x.com"
-                  target="_blank"
-                  className="text-gray-400 hover:text-white"
-                >
-                  <FaXTwitter className="w-7 h-7 fill-current" />
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="https://www.linkedin.com"
-                  target="_blank"
-                  className="text-gray-400 hover:text-white"
-                >
-                  <FaLinkedin className="w-7 h-7 fill-current" />
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div className="mb-4">
-            <h5 className="text-xl font-bold">Get in Touch</h5>
-            <p className="mt-2">
-              Any questions? Let us know by call us on 0123456789 or
-            </p>
-
-            <form className="mt-4 w-full flex rounded">
-              <input
-                type="email"
-                className="flex-grow w-full p-2 border border-gray-500 rounded-l-md bg-gray-700 text-white placeholder-gray-400"
-                placeholder="email@example.com"
-              />
-              <button
-                className="p-2 bg-gray-600 text-white rounded-r-md hover:bg-gray-500"
-                type="button"
-              >
-                <a href="mailto:abdallahedreeso2@gmail.com">mail</a>
-              </button>
-            </form>
-          </div>
+    <footer className="site-footer">
+      <div className="site-container footer-top">
+        <div className="footer-intro">
+          <span className="brand-mark"><Building2 size={27} /><span>REAL<span>ESTATE</span></span></span>
+          <h2>{t("redesign.footerTitle")}</h2>
+          <p>{t("redesign.footerIntro")}</p>
         </div>
-        <div className="text-center mt-4">
-          <p>
-            Copyright &copy; 2024 All rights reserved | Made by{" "}
-            <span className="text-white hover:text-gray-400">
-              Component Crafterz
-            </span>
-          </p>
-        </div>
+        <div className="footer-links"><h3>{t("redesign.footerExplore")}</h3><Link to="/">{t("navbar.home")}</Link><Link to="/About">{t("navbar.about")}</Link><Link to="/ContactUs">{t("navbar.contact")}</Link></div>
+        <div className="footer-links"><h3>{t("redesign.footerContact")}</h3><a href="mailto:abdallahedreeso2@gmail.com"><Mail size={16} /> {t("redesign.footerEmail")} <ArrowUpRight size={15} /></a></div>
       </div>
+      <div className="site-container footer-bottom"><span>© {new Date().getFullYear()} Real Estate. {t("redesign.rights")}</span><span>{t("redesign.footerNote")}</span></div>
     </footer>
   );
-};
-
-export default Footer;
+}

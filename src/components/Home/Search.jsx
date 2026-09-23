@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RiSearch2Line } from "react-icons/ri";
 import House from './House'; // Import the House component
 import { Pagination } from 'antd';
-import '@/assets/style/pages/search.css';
-import emptyState from "../../assets/img/properties-empty.webp";
+import { Building2 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useShallow } from 'zustand/react/shallow';
 import { useHouseStore, selectFilteredHouses } from '../../store/useHouseStore';
+import { useTranslation } from 'react-i18next';
+import { distanceKm, validPoint } from '@/utils/geo';
 
 const capitalizeFirstLetter = (string) => {
     if (!string) return "";
@@ -14,18 +15,26 @@ const capitalizeFirstLetter = (string) => {
 };
 
 const Search = () => {
+    const { t } = useTranslation();
     const [currentPage, setCurrentPage] = useState(1);
     const [input, setInput] = useState("");
     const { isDarkMode } = useTheme();
 
     const filteredHouses = useHouseStore(useShallow(selectFilteredHouses));
     const handleClick = useHouseStore((state) => state.handleClick);
+    const proximityPoint = useHouseStore((state) => state.proximityPoint);
+    const city = useHouseStore((state) => state.city);
+    const radiusKm = useHouseStore((state) => state.radiusKm);
+    const property = useHouseStore((state) => state.property);
+    const price = useHouseStore((state) => state.price);
+
+    useEffect(() => { setCurrentPage(1); }, [proximityPoint, city, radiusKm, property, price]);
 
     // Format houses for child House component compatibility
     const formattedHouses = filteredHouses
         .filter(property => property.is_available)
         .map((property) => ({
-            image: property.images && property.images.length > 0 ? property.images[0] : 'https://via.placeholder.com/400x250',
+            image: property.images && property.images.length > 0 ? property.images[0] : null,
             type: capitalizeFirstLetter(property.property_type),
             country: capitalizeFirstLetter(property.country),
             address: property.address,
@@ -37,7 +46,9 @@ const Search = () => {
             propertyId: property.property_id,
             lat: property.latitude,
             lng: property.longitude,
-            parking: property.ParkingSpaces
+            parking: property.ParkingSpaces,
+            distanceKm: proximityPoint && validPoint(property.latitude ?? property.lat, property.longitude ?? property.lng)
+                ? distanceKm(proximityPoint, [Number(property.latitude ?? property.lat), Number(property.longitude ?? property.lng)]) : null
         }));
 
     const handleChange = (value) => {
@@ -57,23 +68,26 @@ const Search = () => {
     };
 
     const itemsPerPage = 6;
-    const indexOfLastHouse = currentPage * itemsPerPage;
+    const displayedPage = Math.min(currentPage, Math.max(1, Math.ceil(formattedHouses.length / itemsPerPage)));
+    const indexOfLastHouse = displayedPage * itemsPerPage;
     const indexOfFirstHouse = indexOfLastHouse - itemsPerPage;
     const currentHouses = formattedHouses.slice(indexOfFirstHouse, indexOfLastHouse);
 
     return (
-        <div className='search-container py-10 px-5 w-full'>
-            <div className='flex flex-col lg:flex-row w-full justify-center items-center mt-2 mb-10'>
-                <div className={`search-box ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'} shadow-2xl rounded-lg p-6 flex flex-col lg:flex-row gap-4 w-full max-w-[600px] transition-all duration-300 ease-in-out hover:shadow-xl`}>
+        <div className='search-container'>
+            <div className='search-bar-wrap'>
+                <div className="search-box">
                     <input
-                        placeholder="Type to search..."
+                        aria-label={t("redesign.searchPlaceholder")}
+                        placeholder={t("redesign.searchPlaceholder")}
                         value={input}
                         onChange={(e) => handleChange(e.target.value)}
-                        className={`p-4 ${isDarkMode ? 'bg-gray-700 text-white focus:ring-violet-500' : 'bg-white text-gray-800 border border-gray-300 focus:ring-violet-700'} rounded-lg w-full lg:max-w-[400px] focus:outline-none focus:ring-2 transition duration-300`}
+                        className="search-input"
                     />
                     <button 
                         onClick={handleSearchClick} 
-                        className='bg-violet-700 hover:bg-violet-800 transition w-full lg:max-w-[162px] h-14 rounded-lg flex justify-center items-center text-white text-lg font-semibold'
+                        className='search-submit'
+                        aria-label={t("redesign.searchAction")}
                     >
                         <RiSearch2Line size={24} />
                     </button>
@@ -82,23 +96,24 @@ const Search = () => {
 
             {/* Render house cards */}
             <div>
+                {proximityPoint && <p className="home-nearest-label" role="status">{t("redesign.nearestFirst", { count: formattedHouses.length })}</p>}
                 {currentHouses.length > 0 ? (
-                    <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center justify-center min-w-full">
+                    <div className="property-grid">
                         {currentHouses.map((house) => (
                             <House key={house.propertyId} house={house} />
                         ))}
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center mt-10">
-                        <img src={emptyState} alt="No properties available" className="w-80 h-80 rounded-md" />
-                        <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-500'} mt-4`}>No properties found. Try adjusting your search criteria.</p>
+                    <div className="empty-results">
+                        <Building2 size={54} strokeWidth={1.2} aria-hidden="true" />
+                        <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-500'} mt-4`}>{t("redesign.noResults")}</p>
                     </div>
                 )}
                 
                 {currentHouses.length > 0 && (
-                    <div className="flex justify-center mt-4">
+                    <div className="pagination-wrap">
                         <Pagination
-                            current={currentPage}
+                            current={displayedPage}
                             pageSize={itemsPerPage}
                             total={formattedHouses.length}
                             onChange={handlePageChange}

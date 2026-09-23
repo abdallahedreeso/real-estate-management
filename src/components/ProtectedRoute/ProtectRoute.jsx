@@ -1,6 +1,7 @@
 import { Spin } from "antd";
 import { useUser } from "@clerk/clerk-react";
 import { Navigate } from "react-router-dom";
+import PropTypes from "prop-types";
 
 const ProtectRoute = ({ children }) => {
   const { isSignedIn, isLoaded } = useUser();
@@ -23,3 +24,4 @@ const ProtectRoute = ({ children }) => {
 };
 
 export default ProtectRoute;
+ProtectRoute.propTypes = { children: PropTypes.node.isRequired };
