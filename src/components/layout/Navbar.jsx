@@ -13,6 +13,7 @@ import {
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowUpRight, Heart, Store, Globe, Menu, Building2, Plus, X, MessageCircle } from "lucide-react";
 import useSupabaseClient from "@/backend/supabase/supabase";
+import NotificationBell from "@/components/notifications/NotificationBell";
 import { useHouseStore } from "@/store/useHouseStore";
 import "@/assets/style/components/mobile-drawer.css";
 
@@ -168,6 +169,7 @@ const Navbar = () => {
             </SignedOut>
 
             <SignedIn>
+              <NotificationBell />
               <Link to="/AddProperty" className="hidden md:block">
                 <Button type="dashed" className="font-semibold shadow text-white rounded-full w-28 h-9 bg-violet-700 hover:bg-violet-500" style={{ fontSize: "11px" }}>
                   {t("navbar.addProperty")}

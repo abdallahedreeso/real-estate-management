@@ -100,7 +100,7 @@ export default function PropertyDetails() {
   if (loading) return <div className="property-state site-container" role="status"><div className="property-state-image" /><div className="property-state-lines"><span /><span /><span /></div><span className="sr-only">{t("propertyDetails.loading")}</span></div>;
   if (!house) return <div className="property-state property-state-error site-container"><h1>{t(fetchError ? "propertyDetails.unavailable" : "propertyDetails.notFound")}</h1><Link to="/#explore">{t("propertyDetails.back")} <ArrowUpRight size={18} /></Link></div>;
 
-  const shareUrl = window.location.href;
+  const shareUrl = new URL(`/property/${id}`, window.location.origin).href;
   const address = [house.address, house.state, house.zip_code].filter(Boolean).join(", ");
   const price = Number(house.price).toLocaleString(i18n.language);
   const listedDate = house.created_at ? new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(new Date(house.created_at)) : null;

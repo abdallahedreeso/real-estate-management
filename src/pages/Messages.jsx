@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { MessageCircle, ArrowUpRight } from "lucide-react";
 import useSupabaseClient from "@/backend/supabase/supabase";
 import ChatBox from "@/components/chat/ChatBox";
@@ -16,6 +16,8 @@ export default function Messages() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
+  const [searchParams] = useSearchParams();
+  const requestedConversation = searchParams.get("conversation");
 
   useEffect(() => {
     if (!userId || !supabase) return;
@@ -36,7 +38,7 @@ export default function Messages() {
       if (!active) return;
       setConversations(data || []);
       setProperties(Object.fromEntries((result.data || []).map((item) => [item.property_id, item])));
-      setSelectedId((current) => current && data?.some((item) => item.id === current) ? current : data?.[0]?.id || null);
+      setSelectedId((current) => requestedConversation && data?.some((item) => item.id === requestedConversation) ? requestedConversation : current && data?.some((item) => item.id === current) ? current : data?.[0]?.id || null);
       if (result.error) console.error("Conversation property query failed:", { code: result.error.code, message: result.error.message });
       setError(Boolean(result.error));
       setLoading(false);
@@ -45,7 +47,7 @@ export default function Messages() {
     const refresh = () => { if (document.visibilityState === "visible") load(); };
     window.addEventListener("focus", refresh);
     return () => { active = false; window.removeEventListener("focus", refresh); };
-  }, [supabase, userId, retryKey]);
+  }, [supabase, userId, retryKey, requestedConversation]);
 
   const selected = useMemo(() => conversations.find((item) => item.id === selectedId), [conversations, selectedId]);
   const seekerLabel = (item) => item.seeker_display_name?.trim() || t("inquiries.memberId", { id: item.seeker_id.slice(-6) });

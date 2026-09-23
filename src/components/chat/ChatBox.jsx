@@ -79,13 +79,18 @@ export default function ChatBox({ propertyId, sellerId, propertyTitle, conversat
 
   useEffect(() => {
     if (!threadId || !supabase) return;
+    const markVisibleRead = () => supabase.from("notifications").update({ read_at: new Date().toISOString() })
+      .eq("conversation_id", threadId).eq("recipient_id", userId).is("read_at", null)
+      .then(({ error: readError }) => { if (readError) console.error("Could not mark notifications as read:", readError.message); });
+    markVisibleRead();
     const channel = supabase.channel(`inquiry:${threadId}`)
       .on("postgres_changes", {
         event: "INSERT", schema: "public", table: "property_messages", filter: `conversation_id=eq.${threadId}`,
       }, ({ new: incoming }) => {
         setMessages((current) => current.some((item) => item.id === incoming.id) ? current : [...current, incoming]);
+        if (incoming.sender_id !== userId && document.visibilityState === "visible") markVisibleRead();
       }).subscribe();
-    const refresh = () => { if (document.visibilityState === "visible") loadMessages(threadId).catch(() => {}); };
+    const refresh = () => { if (document.visibilityState === "visible") { loadMessages(threadId).catch(() => {}); markVisibleRead(); } };
     window.addEventListener("focus", refresh);
     document.addEventListener("visibilitychange", refresh);
     return () => {
@@ -93,7 +98,7 @@ export default function ChatBox({ propertyId, sellerId, propertyTitle, conversat
       document.removeEventListener("visibilitychange", refresh);
       supabase.removeChannel(channel);
     };
-  }, [threadId, supabase, loadMessages]);
+  }, [threadId, supabase, loadMessages, userId]);
 
   useEffect(() => { endRef.current?.scrollIntoView({ block: "nearest" }); }, [messages]);
 

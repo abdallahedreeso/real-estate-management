@@ -45,6 +45,10 @@
 - AntDesign & Tailwind
 - Clerk
 
+### Shared link previews
+
+The homepage includes a 1200×630 branded image and Open Graph/X metadata. Vercel routes `/property/:id` through `api/property-preview.js`, which serves the same app shell with listing-specific title, description, and public photo metadata. It reads only publicly available properties with the Supabase anon key. Configure `SITE_URL` when deploying on a different domain; Vercel's production URL is used automatically when available. Regenerate the homepage image with `node scripts/generate-link-preview.mjs`.
+
 ## Author
 
 - Component Crafterz

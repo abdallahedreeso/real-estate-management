@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Real Estate">
+  <rect width="64" height="64" rx="14" fill="#0d6e67"/>
+  <g fill="none" stroke="#f7f7f2" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5">
+    <path d="M19 51V17a4 4 0 0 1 4-4h18a4 4 0 0 1 4 4v34M10 51V32a4 4 0 0 1 4-4h5m26 5h5a4 4 0 0 1 4 4v14M8 51h48"/>
+    <path d="M27 22h10M27 30h10M27 38h10M28 51V44h8v7"/>
+  </g>
+</svg>

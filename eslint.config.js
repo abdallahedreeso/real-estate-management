@@ -6,7 +6,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 
 export default [
   { ignores: ['dist'] },
-  { files: ['playwright.config.js', 'vite.config.js', 'tailwind.config.js'], languageOptions: { globals: globals.node } },
+  { files: ['playwright.config.js', 'vite.config.js', 'tailwind.config.js', 'api/**/*.js', 'scripts/**/*.mjs'], languageOptions: { globals: globals.node } },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {

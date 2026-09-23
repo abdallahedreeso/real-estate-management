@@ -1,5 +1,14 @@
 {
+  "functions": {
+    "api/property-preview.js": {
+      "includeFiles": "dist/index.html"
+    }
+  },
   "rewrites": [
+    {
+      "source": "/property/:id",
+      "destination": "/api/property-preview?id=:id"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
