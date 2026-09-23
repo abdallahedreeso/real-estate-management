@@ -12,7 +12,7 @@ const resources = {
         addProperty: "Add Property",
         signUp: "SignUp",
         signIn: "SignIn",
-        closeMenu: "Close menu", menuLabel: "Mobile navigation", menuEyebrow: "FIND YOUR WAY", menuIntro: "A place for every next step.", accountLabel: "YOUR SPACE", myProperties: "My properties", wishlist: "Wishlist", language: "LANGUAGE", switchLanguage: "Switch language",
+        closeMenu: "Close menu", openMenu: "Open menu", primaryNavigation: "Primary navigation", menuLabel: "Mobile navigation", menuEyebrow: "FIND YOUR WAY", menuIntro: "A place for every next step.", accountLabel: "YOUR SPACE", myProperties: "My properties", wishlist: "Wishlist", language: "LANGUAGE", switchLanguage: "Switch language",
       },
       marketing: {
         rent: "Find",
@@ -32,7 +32,7 @@ const resources = {
         postAd: "Post Your Ad",
         title: "Title",
         price: "Asking price (EGP)",
-        propertyType: "Listing purpose",
+        propertyType: "Listing purpose", propertyCategory: "Property type", choosePropertyCategory: "Choose a property type",
         forRent: "For Rent",
         forSale: "For Sale",
         description: "Description",
@@ -48,7 +48,7 @@ const resources = {
         phone: "Phone Number",
         upload: "Upload",
         save: "Save",
-        egypt: "Egypt"
+        egypt: "Egypt", titleExample: "e.g. Modern apartment in Zamalek", selectListingPurpose: "Select listing purpose", selectGovernorate: "Select governorate", descriptionExample: "Describe the key features and nearby landmarks", cityExample: "e.g. Nasr City", addressExample: "e.g. Building 12, Abbas El-Akkad Street"
       },
       propertyForm: {
         heroIndex: "A NEW PLACE TO DISCOVER", heroTitle: "List a place worth finding.", editHeroTitle: "Make your listing even better.", heroIntro: "Share the details, add photos, and place your property on the map.", editFormTitle: "Edit your listing", guideTitle: "Your listing guide", guideDetails: "Property details", guidePhotos: "Photos", guideLocation: "Location", guideNote: "A clear description and a carefully placed pin help people understand the property before they get in touch.", publish: "Publish property", saveChanges: "Save changes",
@@ -62,7 +62,7 @@ const resources = {
         imagesRequired: "Add at least one property photo.", imageInvalid: "Choose a PNG, JPG, or WebP image under 10 MB.",
         imageLimit: "You can add up to 10 photos.", imageHelp: "PNG, JPG, or WebP · up to 10 photos · 10 MB each",
         coordinatesLabel: "Or enter coordinates", coordinatesInvalid: "Enter valid latitude and longitude, separated by a comma.", setPin: "Go to pin", tapMap: "Click to place pin", pinPlaced: "Pin placed · drag to adjust", removePin: "Remove pin",
-        cityRequired: "Enter the city or neighborhood.", descriptionRequired: "Describe the property in at least 20 characters."
+        categoryRequired: "Choose a property type.", cityRequired: "Enter the city or neighborhood.", descriptionRequired: "Describe the property in at least 20 characters."
       },
       validation: {
         titleRequired: "Title is required.",
@@ -147,12 +147,13 @@ const resources = {
       },
       redesign: {
         heroTag: "A better place to begin", explore: "Explore homes", story: "Our story", heroNote: "Find a place that feels like yours.", imageNote: "Find your place",
-        curated: "Curated homes", listingTitle: "Explore places to call home", listingIntro: "Browse the latest available homes, then use the filters to find the right fit.", searchPlaceholder: "Search by place or address", searchAction: "Search homes", noResults: "No properties found. Try adjusting your search criteria.", imageUnavailable: "Image unavailable", loadingHomes: "Loading homes", loadingMap: "Loading map", houseType: "House type", priceRange: "Price range", anyType: "Any property type", anyPrice: "Any price", type_house: "House", type_apartment: "Apartment", type_condo: "Condo", type_townhouse: "Townhouse",
-        cityFilter: "City", anyCity: "Any city", nearbyTitle: "Find homes near you", nearbyIntro: "Share your location or choose a point on the map.", useLocation: "Use my location", locating: "Locating…", chooseOnMap: "Choose on map", nearMyLocation: "Near my location", nearMapPin: "Near map pin", withinKm: "Within {{count}} km", anyDistance: "Any distance", clearLocation: "Clear location filter", locationUnavailable: "Device location needs HTTPS or localhost and a supported browser. Choose a point on the map instead.", locationDenied: "Location access is blocked. Allow it in browser settings or choose a point on the map.", locationFailed: "Your device couldn't determine its location. Choose a point on the map instead.", mapPickHint: "Tap the map to search nearby", mapPinHint: "Showing homes near this point", viewNearbyResults: "View results: {{count}}", nearestFirst: "Nearest first · results: {{count}}", distanceAway: "{{distance}} km away", viewProperty: "View property",
+        curated: "Curated homes", listingTitle: "Explore places to call home", listingIntro: "Browse the latest available homes, then use the filters to find the right fit.", searchPlaceholder: "Search by place or address", searchAction: "Search homes", noResults: "No properties found. Try adjusting your search criteria.", imageUnavailable: "Image unavailable", loadingHomes: "Loading homes", loadingMap: "Loading map", houseType: "Property type", listingPurpose: "Rent or sale", purpose_any: "Rent or sale", purpose_rent: "For rent", purpose_sale: "For sale", priceRange: "Price range", anyType: "Any property type", anyPrice: "Any price", type_house: "House", type_apartment: "Apartment", type_condo: "Condo", type_townhouse: "Townhouse",
+        cityFilter: "City", anyCity: "Any city", resetFilters: "Reset filters", switchToDark: "Switch to dark mode", switchToLight: "Switch to light mode", beds: "beds", baths: "baths", viewListing: "View property", priceUnit: "EGP", nearbyTitle: "Find homes near you", nearbyIntro: "Share your location or choose a point on the map.", useLocation: "Use my location", locating: "Locating…", chooseOnMap: "Choose on map", nearMyLocation: "Near my location", nearMapPin: "Near map pin", withinKm: "Within {{count}} km", anyDistance: "Any distance", clearLocation: "Clear location filter", locationUnavailable: "Device location needs HTTPS or localhost and a supported browser. Choose a point on the map instead.", locationDenied: "Location access is blocked. Allow it in browser settings or choose a point on the map.", locationFailed: "Your device couldn't determine its location. Choose a point on the map instead.", mapPickHint: "Tap the map to search nearby", mapPinHint: "Showing homes near this point", viewNearbyResults: "View results: {{count}}", nearestFirst: "Nearest first · results: {{count}}", distanceAway: "{{distance}} km away", viewProperty: "View property",
         ownerTag: "For property owners", ownerTitle: "Have a place to share?", ownerIntro: "Create a listing and help the right person discover your property.", ownerAction: "List your property",
         aboutTag: "About Real Estate", aboutTitle: "Home is where your next story starts.", aboutIntro: "We make it easier to explore available properties, compare the essentials, and connect with the people behind the listings.", aboutProcess: "A clearer path to the right place.", aboutProcessIntro: "Simple tools to help you move from browsing to a conversation.", discover: "Discover", discoverText: "Browse available homes and refine your search by the details that matter.", favorites: "Keep your favorites", favoritesText: "Save the properties you want to revisit in one easy place.", connect: "Connect", connectText: "Open a property to see more details and get in touch with the seller.",
         footerTitle: "Find your next chapter.", footerIntro: "Discover homes that make room for the life you want to live.", footerExplore: "Explore", footerContact: "Get in touch", footerEmail: "Email us", rights: "All rights reserved.", footerNote: "Made for the places we call home.",
-        contactTitle: "Let’s talk about what’s next.", contactIntro: "Questions about a listing or about sharing your own property? Send us a note and we’ll get back to you."
+        contactTitle: "Let’s talk about what’s next.", contactIntro: "Questions about a listing or about sharing your own property? Send us a note and we’ll get back to you.",
+        notFoundEyebrow: "404 / Page not found", notFoundTitle: "Let’s find your way home.", notFoundIntro: "This page may have moved. Head back to explore available properties.", editUnavailable: "Property unavailable", editUnavailableIntro: "We could not open this listing for editing. Check that it belongs to your account."
       }
     }
   },
@@ -165,7 +166,7 @@ const resources = {
         addProperty: "أضف عقار",
         signUp: "إنشاء حساب",
         signIn: "تسجيل الدخول",
-        closeMenu: "إغلاق القائمة", menuLabel: "التنقل", menuEyebrow: "طريقك إلى المكان", menuIntro: "كل خطوة تقربك من مكانك القادم.", accountLabel: "مساحتك", myProperties: "عقاراتي", wishlist: "المفضلة", language: "اللغة", switchLanguage: "تغيير اللغة",
+        closeMenu: "إغلاق القائمة", openMenu: "افتح القائمة", primaryNavigation: "التنقل الرئيسي", menuLabel: "التنقل", menuEyebrow: "طريقك إلى المكان", menuIntro: "كل خطوة تقربك من مكانك القادم.", accountLabel: "مساحتك", myProperties: "عقاراتي", wishlist: "المفضلة", language: "اللغة", switchLanguage: "تغيير اللغة",
       },
       marketing: {
         rent: "اعثر على",
@@ -185,7 +186,7 @@ const resources = {
         postAd: "انشر إعلانك",
         title: "العنوان",
         price: "السعر المطلوب (جنيه مصري)",
-        propertyType: "الغرض من الإعلان",
+        propertyType: "الغرض من الإعلان", propertyCategory: "نوع العقار", choosePropertyCategory: "اختر نوع العقار",
         forRent: "للإيجار",
         forSale: "للبيع",
         description: "الوصف",
@@ -201,7 +202,7 @@ const resources = {
         phone: "رقم الهاتف",
         upload: "رفع الصور",
         save: "حفظ",
-        egypt: "مصر"
+        egypt: "مصر", titleExample: "مثال: شقة حديثة في الزمالك", selectListingPurpose: "اختر الغرض من الإعلان", selectGovernorate: "اختر المحافظة", descriptionExample: "صف أهم المميزات والمعالم القريبة", cityExample: "مثال: مدينة نصر", addressExample: "مثال: عمارة ١٢، شارع عباس العقاد"
       },
       propertyForm: {
         heroIndex: "مكان جديد للاكتشاف", heroTitle: "اعرض عقارك ليجده من يبحث عنه.", editHeroTitle: "اجعل إعلانك أوضح وأفضل.", heroIntro: "أضف التفاصيل والصور وحدد موقع العقار على الخريطة.", editFormTitle: "تعديل الإعلان", guideTitle: "دليل إضافة العقار", guideDetails: "تفاصيل العقار", guidePhotos: "الصور", guideLocation: "الموقع", guideNote: "الوصف الواضح وتحديد الموقع بدقة يساعدان الباحثين على فهم العقار قبل التواصل.", publish: "انشر العقار", saveChanges: "احفظ التعديلات",
@@ -215,7 +216,7 @@ const resources = {
         imagesRequired: "أضف صورة واحدة على الأقل للعقار.", imageInvalid: "اختر صورة PNG أو JPG أو WebP بحجم أقل من ١٠ ميجابايت.",
         imageLimit: "يمكنك إضافة ١٠ صور بحد أقصى.", imageHelp: "PNG أو JPG أو WebP · حتى ١٠ صور · ١٠ ميجابايت للصورة",
         coordinatesLabel: "أو أدخل الإحداثيات", coordinatesInvalid: "أدخل خط عرض وخط طول صحيحين مفصولين بفاصلة.", setPin: "اذهب إلى العلامة", tapMap: "اضغط لتحديد الموقع", pinPlaced: "تم تحديد الموقع · اسحب العلامة للتعديل", removePin: "احذف العلامة",
-        cityRequired: "أدخل المدينة أو الحي.", descriptionRequired: "صِف العقار في ٢٠ حرفًا على الأقل."
+        categoryRequired: "اختر نوع العقار.", cityRequired: "أدخل المدينة أو الحي.", descriptionRequired: "صِف العقار في ٢٠ حرفًا على الأقل."
       },
       validation: {
         titleRequired: "العنوان مطلوب.",
@@ -249,7 +250,7 @@ const resources = {
       listings: {
         myProperties: "عقاراتي",
         ownerSpace: "مساحة المالك", intro: "نظرة واضحة على عقاراتك وكيف تظهر للباحثين عن مكان جديد.", addProperty: "أضف عقارًا",
-        overview: "نظرة عامة", totalListings: "إجمالي العقارات", availableListings: "المتاح الآن", saleListings: "للبيع", rentalListings: "للإيجار", listingMix: "أنواع عقاراتك", byRegion: "العقارات حسب المحافظة", unknownRegion: "أخرى",
+        overview: "نظرة عامة", totalListings: "إجمالي العقارات", availableListings: "المتاح الآن", saleListings: "للبيع", rentalListings: "للإيجار", listingMix: "نسبة البيع والإيجار", byRegion: "العقارات حسب المحافظة", unknownRegion: "أخرى",
         manageLabel: "عقاراتك", yourListings: "إدارة العقارات", manageIntro: "حدّث التفاصيل وحدد العقارات التي تظهر للباحثين.", filterLabel: "تصفية العقارات", filter_all: "الكل", filter_available: "متاح", filter_paused: "متوقف", searchLabel: "ابحث في عقاراتك", searchPlaceholder: "ابحث بالمكان أو العنوان", noResults: "لا توجد عقارات تطابق بحثك.", emptyTitle: "ابدأ بإضافة عقارك الأول.", emptyIntro: "أضف عقارًا ليجده الباحثون عن مكانهم القادم.", loading: "جارٍ تحميل عقاراتك…", loadFailed: "تعذر تحميل عقاراتك.", retry: "حاول مجددًا", view: "عرض العقار", sale: "للبيع", rent: "للإيجار", askingPrice: "السعر المطلوب", available: "متاح", paused: "متوقف", previous: "السابق", next: "التالي",
         title: "العنوان",
         propertyType: "نوع العقار",
@@ -300,12 +301,13 @@ const resources = {
       },
       redesign: {
         heroTag: "بداية أفضل لرحلتك", explore: "استكشف العقارات", story: "قصتنا", heroNote: "ابحث عن مكان يشبهك.", imageNote: "ابحث عن مكانك",
-        curated: "عقارات مختارة", listingTitle: "استكشف مكانك القادم", listingIntro: "تصفح العقارات المتاحة واستخدم المرشحات للوصول إلى ما يناسبك.", searchPlaceholder: "ابحث بالموقع أو العنوان", searchAction: "ابحث عن عقارات", noResults: "لم نجد عقارات. جرّب تغيير معايير البحث.", imageUnavailable: "الصورة غير متاحة", loadingHomes: "جارٍ تحميل العقارات", loadingMap: "جارٍ تحميل الخريطة", houseType: "نوع العقار", priceRange: "نطاق السعر", anyType: "كل أنواع العقارات", anyPrice: "كل الأسعار", type_house: "منزل", type_apartment: "شقة", type_condo: "شقة تمليك", type_townhouse: "تاون هاوس",
-        cityFilter: "المدينة", anyCity: "كل المدن", nearbyTitle: "اعثر على عقارات قريبة", nearbyIntro: "شارك موقعك أو اختر نقطة على الخريطة.", useLocation: "استخدم موقعي", locating: "جارٍ تحديد الموقع…", chooseOnMap: "اختر من الخريطة", nearMyLocation: "بالقرب من موقعي", nearMapPin: "بالقرب من علامة الخريطة", withinKm: "ضمن {{count}} كم", anyDistance: "أي مسافة", clearLocation: "إزالة مرشح الموقع", locationUnavailable: "يتطلب موقع الجهاز HTTPS أو localhost ومتصفحًا يدعمه. اختر نقطة على الخريطة بدلًا من ذلك.", locationDenied: "الوصول إلى الموقع محظور. اسمح به من إعدادات المتصفح أو اختر نقطة على الخريطة.", locationFailed: "تعذر على جهازك تحديد موقعه. اختر نقطة على الخريطة بدلًا من ذلك.", mapPickHint: "اضغط على الخريطة للبحث بالقرب منها", mapPinHint: "نعرض العقارات القريبة من هذه النقطة", viewNearbyResults: "عرض النتائج: {{count}}", nearestFirst: "الأقرب أولًا · النتائج: {{count}}", distanceAway: "على بعد {{distance}} كم", viewProperty: "عرض العقار",
+        curated: "عقارات مختارة", listingTitle: "استكشف مكانك القادم", listingIntro: "تصفح العقارات المتاحة واستخدم المرشحات للوصول إلى ما يناسبك.", searchPlaceholder: "ابحث بالموقع أو العنوان", searchAction: "ابحث عن عقارات", noResults: "لم نجد عقارات. جرّب تغيير معايير البحث.", imageUnavailable: "الصورة غير متاحة", loadingHomes: "جارٍ تحميل العقارات", loadingMap: "جارٍ تحميل الخريطة", houseType: "نوع العقار", listingPurpose: "إيجار أو بيع", purpose_any: "إيجار أو بيع", purpose_rent: "للإيجار", purpose_sale: "للبيع", priceRange: "نطاق السعر", anyType: "كل أنواع العقارات", anyPrice: "كل الأسعار", type_house: "منزل", type_apartment: "شقة", type_condo: "شقة تمليك", type_townhouse: "تاون هاوس",
+        cityFilter: "المدينة", anyCity: "كل المدن", resetFilters: "إعادة ضبط المرشحات", switchToDark: "التبديل إلى الوضع الداكن", switchToLight: "التبديل إلى الوضع الفاتح", beds: "غرف نوم", baths: "حمامات", viewListing: "عرض العقار", priceUnit: "ج.م", nearbyTitle: "اعثر على عقارات قريبة", nearbyIntro: "شارك موقعك أو اختر نقطة على الخريطة.", useLocation: "استخدم موقعي", locating: "جارٍ تحديد الموقع…", chooseOnMap: "اختر من الخريطة", nearMyLocation: "بالقرب من موقعي", nearMapPin: "بالقرب من علامة الخريطة", withinKm: "ضمن {{count}} كم", anyDistance: "أي مسافة", clearLocation: "إزالة مرشح الموقع", locationUnavailable: "يتطلب موقع الجهاز HTTPS أو localhost ومتصفحًا يدعمه. اختر نقطة على الخريطة بدلًا من ذلك.", locationDenied: "الوصول إلى الموقع محظور. اسمح به من إعدادات المتصفح أو اختر نقطة على الخريطة.", locationFailed: "تعذر على جهازك تحديد موقعه. اختر نقطة على الخريطة بدلًا من ذلك.", mapPickHint: "اضغط على الخريطة للبحث بالقرب منها", mapPinHint: "نعرض العقارات القريبة من هذه النقطة", viewNearbyResults: "عرض النتائج: {{count}}", nearestFirst: "الأقرب أولًا · النتائج: {{count}}", distanceAway: "على بعد {{distance}} كم", viewProperty: "عرض العقار",
         ownerTag: "لملاك العقارات", ownerTitle: "هل لديك عقار لعرضه؟", ownerIntro: "أضف عقارك وساعد الشخص المناسب في العثور عليه.", ownerAction: "أضف عقارك",
         aboutTag: "عن ريل إستيت", aboutTitle: "هنا تبدأ حكايتك القادمة.", aboutIntro: "نسهّل عليك استكشاف العقارات المتاحة ومقارنة التفاصيل والتواصل مع أصحاب الإعلانات.", aboutProcess: "طريق أوضح إلى المكان المناسب.", aboutProcessIntro: "أدوات بسيطة تنقلك من البحث إلى التواصل.", discover: "اكتشف", discoverText: "تصفح العقارات المتاحة وحدد ما يهمك في البحث.", favorites: "احتفظ بالمفضلة", favoritesText: "احفظ العقارات التي تريد الرجوع إليها بسهولة.", connect: "تواصل", connectText: "اطّلع على تفاصيل العقار وتواصل مع صاحبه.",
         footerTitle: "ابدأ فصلًا جديدًا.", footerIntro: "اكتشف مكانًا يتسع للحياة التي تريدها.", footerExplore: "استكشف", footerContact: "تواصل معنا", footerEmail: "راسلنا", rights: "جميع الحقوق محفوظة.", footerNote: "صُنع للأماكن التي نسميها بيتًا.",
-        contactTitle: "لنتحدث عن خطوتك القادمة.", contactIntro: "هل لديك سؤال عن عقار أو عن عرض عقارك؟ أرسل لنا رسالة وسنرد عليك."
+        contactTitle: "لنتحدث عن خطوتك القادمة.", contactIntro: "هل لديك سؤال عن عقار أو عن عرض عقارك؟ أرسل لنا رسالة وسنرد عليك.",
+        notFoundEyebrow: "٤٠٤ / الصفحة غير موجودة", notFoundTitle: "لنساعدك في العثور على طريقك للمنزل.", notFoundIntro: "ربما انتقلت هذه الصفحة. عد لاستكشاف العقارات المتاحة.", editUnavailable: "العقار غير متاح", editUnavailableIntro: "تعذر فتح هذا الإعلان للتعديل. تأكد من أنه تابع لحسابك."
       }
     }
   }

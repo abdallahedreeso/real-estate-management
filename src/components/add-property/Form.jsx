@@ -26,6 +26,8 @@ import PropTypes from "prop-types";
 import PropertyLocationPicker from "./PropertyLocationPicker";
 import { ownedImagePaths } from "@/api/propertyImages";
 import listingHero from "../../assets/img/home-hero-v2.webp";
+import { PROPERTY_CATEGORIES } from "../../constants/propertyCategories";
+import { GOVERNORATES } from "../../constants/governorates";
 const { TextArea } = Input;
 const { Option } = Select;
 const { Title } = Typography;
@@ -79,12 +81,13 @@ const compressImage = (file) => {
 };
 
 export default function AntdForm({ property, id }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isOnline = useHouseStore((state) => state.isOnline);
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [propertyType, setPropertyType] = useState(null);
+  const [propertyCategory, setPropertyCategory] = useState(null);
   const [description, setDescription] = useState("");
   const [country, setCountry] = useState("egypt");
   const [state, setState] = useState(null);
@@ -116,6 +119,7 @@ export default function AntdForm({ property, id }) {
       setTitle(property.title || "");
       setPrice(property.price?.toString() || "");
       setPropertyType(property.property_type || null);
+      setPropertyCategory(property.property_category || null);
       setDescription(property.description || "");
       setCountry(property.country || "egypt");
       setState(property.state || null);
@@ -171,6 +175,9 @@ export default function AntdForm({ property, id }) {
 
     if (!propertyType) {
       newErrors.propertyType = t("validation.typeRequired");
+    }
+    if (!PROPERTY_CATEGORIES.includes(propertyCategory)) {
+      newErrors.propertyCategory = t("propertyForm.categoryRequired");
     }
 
     if (!description.trim() || description.trim().length < 20) {
@@ -298,6 +305,7 @@ export default function AntdForm({ property, id }) {
         title: title.trim(),
         price: Number(price),
         property_type: propertyType,
+        property_category: propertyCategory,
         description: description.trim(),
         country,
         state,
@@ -398,7 +406,7 @@ export default function AntdForm({ property, id }) {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className={inputThemeClasses}
-                  placeholder="e.g. Modern Apartment in Zamalek"
+                  placeholder={t("form.titleExample")}
                 />
               </Form.Item>
 
@@ -411,12 +419,12 @@ export default function AntdForm({ property, id }) {
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   className={inputThemeClasses}
-                  placeholder="e.g. 2500000"
+                  placeholder="2500000"
                 />
               </Form.Item>
             </div>
 
-            {/* Property Type & Phone Number */}
+            {/* Listing purpose and physical property type */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Form.Item
                 label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.propertyType")}<span className="text-red-500 ml-1">*</span></span>}
@@ -428,13 +436,30 @@ export default function AntdForm({ property, id }) {
                   onChange={setPropertyType}
                   className={`h-12 ${isDarkMode ? "dark-select" : ""}`}
                   dropdownClassName={isDarkMode ? "dark-dropdown" : ""}
-                  placeholder="Select listing option"
+                  placeholder={t("form.selectListingPurpose")}
                 >
                   <Option value="rent">{t("form.forRent")}</Option>
                   <Option value="sale">{t("form.forSale")}</Option>
                 </Select>
               </Form.Item>
 
+              <Form.Item
+                label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.propertyCategory")}<span className="text-red-500 ml-1">*</span></span>}
+                validateStatus={errors.propertyCategory ? "error" : ""}
+                help={errors.propertyCategory}
+              >
+                <Select
+                  value={propertyCategory}
+                  onChange={setPropertyCategory}
+                  className={`h-12 ${isDarkMode ? "dark-select" : ""}`}
+                  popupClassName={isDarkMode ? "dark-dropdown" : ""}
+                  placeholder={t("form.choosePropertyCategory")}
+                  options={PROPERTY_CATEGORIES.map((value) => ({ value, label: t(`redesign.type_${value}`) }))}
+                />
+              </Form.Item>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Form.Item
                 label={<span className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{t("form.phone")}<span className="text-red-500 ml-1">*</span></span>}
                 validateStatus={errors.phoneNumber ? "error" : ""}
@@ -444,7 +469,7 @@ export default function AntdForm({ property, id }) {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className={inputThemeClasses}
-                  placeholder="e.g. 01012345678"
+                  placeholder="01012345678"
                 />
               </Form.Item>
             </div>
@@ -464,7 +489,7 @@ export default function AntdForm({ property, id }) {
                     ? "bg-gray-700 text-white border-gray-600 focus:bg-gray-600 focus:border-teal-600 hover:border-gray-500 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]"
                     : "bg-gray-50 text-gray-800 border-gray-200 focus:bg-white focus:border-teal-600 hover:border-gray-300 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]"
                 }`}
-                placeholder="Describe key features, vicinity landmarks, etc..."
+                placeholder={t("form.descriptionExample")}
               />
             </Form.Item>
 
@@ -491,35 +516,9 @@ export default function AntdForm({ property, id }) {
                   onChange={setState}
                   className={`h-12 ${isDarkMode ? "dark-select" : ""}`}
                   dropdownClassName={isDarkMode ? "dark-dropdown" : ""}
-                  placeholder="Select governorate"
+                  placeholder={t("form.selectGovernorate")}
                 >
-                  <Option value="cairo">Cairo</Option>
-                  <Option value="giza">Giza</Option>
-                  <Option value="alexandria">Alexandria</Option>
-                  <Option value="aswan">Aswan</Option>
-                  <Option value="asyut">Asyut</Option>
-                  <Option value="beheira">Beheira</Option>
-                  <Option value="beni_suef">Beni Suef</Option>
-                  <Option value="dakahlia">Dakahlia</Option>
-                  <Option value="damietta">Damietta</Option>
-                  <Option value="faiyum">Faiyum</Option>
-                  <Option value="gharbia">Gharbia</Option>
-                  <Option value="ismailia">Ismailia</Option>
-                  <Option value="kafr_el_sheikh">Kafr El Sheikh</Option>
-                  <Option value="luxor">Luxor</Option>
-                  <Option value="matruh">Matruh</Option>
-                  <Option value="minya">Minya</Option>
-                  <Option value="monufia">Monufia</Option>
-                  <Option value="new_valley">New Valley</Option>
-                  <Option value="north_sinai">North Sinai</Option>
-                  <Option value="port_said">Port Said</Option>
-                  <Option value="qalyubia">Qalyubia</Option>
-                  <Option value="qena">Qena</Option>
-                  <Option value="red_sea">Red Sea</Option>
-                  <Option value="sharqia">Sharqia</Option>
-                  <Option value="sohag">Sohag</Option>
-                  <Option value="south_sinai">South Sinai</Option>
-                  <Option value="suez">Suez</Option>
+                  {GOVERNORATES.map(([value, english, arabic]) => <Option key={value} value={value}>{i18n.language.startsWith("ar") ? arabic : english}</Option>)}
                 </Select>
               </Form.Item>
             </div>
@@ -535,7 +534,7 @@ export default function AntdForm({ property, id }) {
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   className={inputThemeClasses}
-                  placeholder="e.g. Nasr City"
+                  placeholder={t("form.cityExample")}
                 />
               </Form.Item>
 
@@ -548,7 +547,7 @@ export default function AntdForm({ property, id }) {
                   value={zip}
                   onChange={(e) => setZip(e.target.value)}
                   className={inputThemeClasses}
-                  placeholder="e.g. 11762"
+                  placeholder="11762"
                 />
               </Form.Item>
             </div>
@@ -563,7 +562,7 @@ export default function AntdForm({ property, id }) {
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 className={inputThemeClasses}
-                placeholder="e.g. Building 12, Abbas El-Akkad St."
+                placeholder={t("form.addressExample")}
               />
             </Form.Item>
 
@@ -578,7 +577,7 @@ export default function AntdForm({ property, id }) {
                   value={bedrooms}
                   onChange={(e) => setBedrooms(e.target.value)}
                   className={inputThemeClasses}
-                  placeholder="e.g. 3"
+                  placeholder="3"
                 />
               </Form.Item>
 
@@ -591,7 +590,7 @@ export default function AntdForm({ property, id }) {
                   value={bathrooms}
                   onChange={(e) => setBathrooms(e.target.value)}
                   className={inputThemeClasses}
-                  placeholder="e.g. 2"
+                  placeholder="2"
                 />
               </Form.Item>
 
@@ -604,7 +603,7 @@ export default function AntdForm({ property, id }) {
                   value={parkingSpaces}
                   onChange={(e) => setParkingSpaces(e.target.value)}
                   className={inputThemeClasses}
-                  placeholder="e.g. 1"
+                  placeholder="1"
                 />
               </Form.Item>
 
@@ -617,7 +616,7 @@ export default function AntdForm({ property, id }) {
                   value={surfaceArea}
                   onChange={(e) => setSurfaceArea(e.target.value)}
                   className={inputThemeClasses}
-                  placeholder="e.g. 150"
+                  placeholder="150"
                 />
               </Form.Item>
             </div>
@@ -671,6 +670,7 @@ AntdForm.propTypes = {
     title: PropTypes.string,
     price: PropTypes.number,
     property_type: PropTypes.string,
+    property_category: PropTypes.string,
     country: PropTypes.string,
     description: PropTypes.string,
     state: PropTypes.string,

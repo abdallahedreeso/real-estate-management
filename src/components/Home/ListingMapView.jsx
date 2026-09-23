@@ -11,6 +11,7 @@ import { validPoint } from "@/utils/geo";
 const Map = lazy(() => import("./Map"));
 
 function DeferredMap({ markers, center, selectedPoint, onPickLocation }) {
+  const { t } = useTranslation();
   const markerRef = useRef(null);
   const [visible, setVisible] = useState(false);
 
@@ -27,7 +28,7 @@ function DeferredMap({ markers, center, selectedPoint, onPickLocation }) {
     return () => observer.disconnect();
   }, [visible]);
 
-  return <div ref={markerRef} className="h-full w-full">{visible && <Suspense fallback={<div className="map-loading">Loading map…</div>}><Map markers={markers} center={center} selectedPoint={selectedPoint} onPickLocation={onPickLocation} /></Suspense>}</div>;
+  return <div ref={markerRef} className="h-full w-full">{visible && <Suspense fallback={<div className="map-loading">{t("redesign.loadingMap")}</div>}><Map markers={markers} center={center} selectedPoint={selectedPoint} onPickLocation={onPickLocation} /></Suspense>}</div>;
 }
 
 DeferredMap.propTypes = { markers: PropTypes.array.isRequired, center: PropTypes.array.isRequired, selectedPoint: PropTypes.array, onPickLocation: PropTypes.func.isRequired };

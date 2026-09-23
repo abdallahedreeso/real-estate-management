@@ -8,12 +8,13 @@ export default function House({ house }) {
   const { t, i18n } = useTranslation();
   const { image, type, state, address, bedrooms, bathrooms, surface, price, propertyId, distanceKm } = house;
   const formattedPrice = new Intl.NumberFormat(i18n.language.startsWith("ar") ? "ar-EG" : "en-EG", { style: "currency", currency: "EGP", maximumFractionDigits: 0 }).format(Number(price) || 0);
+  const purpose = t(`redesign.purpose_${type.toLowerCase()}`, { defaultValue: type });
 
   return (
-    <Link to={`/property/${propertyId}`} className="property-card" aria-label={`View ${address}, ${state}`}>
+    <Link to={`/property/${propertyId}`} className="property-card" aria-label={`${t("redesign.viewListing")}: ${address}, ${state}`}>
       <div className="property-photo">
-        {image ? <OptimizedImage src={image} alt={`${type} at ${address}`} className="property-photo-img" /> : <div className="property-photo-placeholder"><Building2 size={42} strokeWidth={1.25} aria-hidden="true" /><span>{t("redesign.imageUnavailable")}</span></div>}
-        <span className="property-type">{type}</span>
+        {image ? <OptimizedImage src={image} alt={address} className="property-photo-img" /> : <div className="property-photo-placeholder"><Building2 size={42} strokeWidth={1.25} aria-hidden="true" /><span>{t("redesign.imageUnavailable")}</span></div>}
+        <span className="property-type">{purpose}</span>
         <span className="property-arrow"><ArrowUpRight size={19} /></span>
       </div>
       <div className="property-content">
@@ -21,8 +22,8 @@ export default function House({ house }) {
         {distanceKm != null && <div className="property-distance">{t("redesign.distanceAway", { distance: distanceKm < 10 ? distanceKm.toFixed(1) : Math.round(distanceKm) })}</div>}
         <h3>{address}</h3>
         <div className="property-features">
-          <span><BedDouble size={16} />{bedrooms ?? "—"} beds</span>
-          <span><Bath size={16} />{bathrooms ?? "—"} baths</span>
+          <span><BedDouble size={16} />{bedrooms ?? "—"} {t("redesign.beds")}</span>
+          <span><Bath size={16} />{bathrooms ?? "—"} {t("redesign.baths")}</span>
           <span><Ruler size={16} />{surface ?? "—"} m²</span>
         </div>
         <div className="property-price"><strong dir="ltr">{formattedPrice}</strong><span>{t("redesign.viewProperty")} <ArrowUpRight size={15} /></span></div>

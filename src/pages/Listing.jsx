@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { governorateLabel } from "../constants/governorates";
 import { useAuth } from "@clerk/clerk-react";
 import { Button, message, Popconfirm, Spin, Switch } from "antd";
 import { ArrowRight, Building2, MapPin, Plus, Search } from "lucide-react";
@@ -162,7 +163,7 @@ export default function Listing() {
                           <div className="my-listings-card-details">
                             <span className="my-listings-card-type">{t(`listings.${purpose}`)}</span>
                             <h3><Link to={`/property/${property.key}`}>{property.title}</Link></h3>
-                            <p><MapPin size={15} aria-hidden="true" />{[property.address, property.state].filter(Boolean).join(", ")}</p>
+                            <p><MapPin size={15} aria-hidden="true" />{[property.address, governorateLabel(property.state, i18n.language)].filter(Boolean).join(", ")}</p>
                           </div>
                           <div className="my-listings-card-price"><span>{t("listings.askingPrice")}</span><strong dir="ltr">{priceFormatter.format(Number(property.price) || 0)}</strong></div>
                           <div className="my-listings-card-manage">

@@ -11,6 +11,7 @@ export const useHouseStore = create(
       houses: [], // Raw database records
       country: "Location (any)",
       property: "Property type (any)",
+      listingPurpose: "any",
       price: "Price range (any)",
       city: "",
       proximityPoint: null,
@@ -26,12 +27,14 @@ export const useHouseStore = create(
       // Setters
       setCountry: (country) => set({ country }),
       setProperty: (property) => set({ property }),
+      setListingPurpose: (listingPurpose) => set({ listingPurpose }),
       setPrice: (price) => set({ price }),
       setCity: (city) => set({ city, proximityPoint: null, proximitySource: null }),
       setProximityPoint: (point, source) => set({ proximityPoint: point, proximitySource: source, city: "" }),
       clearProximity: () => set({ proximityPoint: null, proximitySource: null }),
       setRadiusKm: (radiusKm) => set({ radiusKm }),
       handleClick: (searchAddress) => set({ searchAddress: searchAddress || "" }),
+      resetFilters: () => set({ country: "Location (any)", property: "Property type (any)", listingPurpose: "any", price: "Price range (any)", city: "", proximityPoint: null, proximitySource: null, radiusKm: 25, searchAddress: "" }),
       setNetworkStatus: (status) => set({ isOnline: status }),
 
       // Outbox sync actions
@@ -180,6 +183,7 @@ export const useHouseStore = create(
         wishlistCount: state.wishlistCount,
         country: state.country,
         property: state.property,
+        listingPurpose: state.listingPurpose,
         price: state.price,
         city: state.city,
         radiusKm: state.radiusKm,
@@ -191,7 +195,7 @@ export const useHouseStore = create(
 
 // Derived selector: computes the filtered list dynamically
 export const selectFilteredHouses = (state) => {
-  const { houses, country, property, price, city, proximityPoint, radiusKm, searchAddress } = state;
+  const { houses, country, property, listingPurpose, price, city, proximityPoint, radiusKm, searchAddress } = state;
 
   const results = houses.filter((house) => {
     // Country filter
@@ -204,9 +208,11 @@ export const selectFilteredHouses = (state) => {
     }
 
     // Property type filter
-    if (!isDefault(property) && house.property_type !== property) {
+    if (!isDefault(property) && String(house.property_category || "").toLowerCase() !== property.toLowerCase()) {
       return false;
     }
+
+    if (listingPurpose && listingPurpose !== "any" && !String(house.property_type || "").toLowerCase().includes(listingPurpose)) return false;
 
     // Search Address filter
     if (searchAddress) {

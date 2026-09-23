@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
+import { governorateLabel } from "../../constants/governorates";
 
 const listingPurpose = (value) =>
   String(value || "").toLowerCase().includes("rent") || String(value || "").includes("إيجار")
@@ -7,7 +8,7 @@ const listingPurpose = (value) =>
     : "sale";
 
 export default function ListingAnalytics({ properties = [] }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const total = properties.length;
   const available = properties.filter((item) => item.is_available).length;
   const rent = properties.filter((item) => listingPurpose(item.property_type) === "rent").length;
@@ -54,7 +55,7 @@ export default function ListingAnalytics({ properties = [] }) {
             <div className="my-listings-regions">
               {regions.slice(0, 4).map(([region, count]) => (
                 <div className="my-listings-region" key={region}>
-                  <span>{region}</span>
+                  <span>{governorateLabel(region, i18n.language)}</span>
                   <div aria-hidden="true"><span style={{ width: `${(count / total) * 100}%` }} /></div>
                   <strong>{count}</strong>
                 </div>

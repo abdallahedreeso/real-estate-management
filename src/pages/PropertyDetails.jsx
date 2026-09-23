@@ -14,6 +14,7 @@ import useSupabaseClient from "../backend/supabase/supabase";
 import whatsappIcon from "../assets/img/icons/whatsapp.svg";
 import { egyptianWhatsAppNumber } from "../utils/contact";
 import { useTranslation } from "react-i18next";
+import { governorateLabel } from "../constants/governorates";
 import PropTypes from "prop-types";
 
 const Map = lazy(() => import("@/components/Home/Map"));
@@ -74,7 +75,7 @@ export default function PropertyDetails() {
       setFetchError(false);
       try {
         const { data, error } = await supabase.from("properties")
-          .select("property_id, title, seller_id, address, price, property_type, country, state, seller_phone, is_available, Bedrooms, Bathrooms, surface_area, zip_code, created_at, description, latitude, longitude, ParkingSpaces, images")
+          .select("property_id, title, seller_id, address, price, property_type, property_category, country, state, seller_phone, is_available, Bedrooms, Bathrooms, surface_area, zip_code, created_at, description, latitude, longitude, ParkingSpaces, images")
           .eq("property_id", id).single();
         if (error) throw error;
         if (active) setHouse(data);
@@ -101,12 +102,13 @@ export default function PropertyDetails() {
   if (!house) return <div className="property-state property-state-error site-container"><h1>{t(fetchError ? "propertyDetails.unavailable" : "propertyDetails.notFound")}</h1><Link to="/#explore">{t("propertyDetails.back")} <ArrowUpRight size={18} /></Link></div>;
 
   const shareUrl = new URL(`/property/${id}`, window.location.origin).href;
-  const address = [house.address, house.state, house.zip_code].filter(Boolean).join(", ");
-  const price = Number(house.price).toLocaleString(i18n.language);
+  const address = [house.address, governorateLabel(house.state, i18n.language), house.zip_code].filter(Boolean).join(", ");
+  const price = new Intl.NumberFormat(i18n.language.startsWith("ar") ? "ar-EG" : "en-EG", { style: "currency", currency: "EGP", maximumFractionDigits: 0 }).format(Number(house.price) || 0);
   const listedDate = house.created_at ? new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(new Date(house.created_at)) : null;
   const imageUrl = house.images?.[0];
   const facts = [
-    { icon: House, label: t("propertyDetails.type"), value: house.property_type },
+    { icon: House, label: t("form.propertyType"), value: house.property_type ? t(`redesign.purpose_${house.property_type}`, { defaultValue: house.property_type }) : null },
+    { icon: House, label: t("form.propertyCategory"), value: house.property_category ? t(`redesign.type_${house.property_category}`, { defaultValue: house.property_category }) : null },
     { icon: Ruler, label: t("propertyDetails.area"), value: house.surface_area != null ? `${house.surface_area} m²` : null },
     { icon: BedDouble, label: t("propertyDetails.bedrooms"), value: house.Bedrooms },
     { icon: Bath, label: t("propertyDetails.bathrooms"), value: house.Bathrooms },
@@ -169,10 +171,10 @@ export default function PropertyDetails() {
             {imageUrl ? <OptimizedImage src={imageUrl} alt={house.title || address} className="property-main-image" loading="eager" fetchPriority="high" /> : <div className="property-main-placeholder"><Building2 size={58} strokeWidth={1.2} aria-hidden="true" /><span>{t("redesign.imageUnavailable")}</span></div>}
           </div>
           <div className="property-hero-copy">
-            {house.property_type && <span className="property-hero-type">{house.property_type}</span>}
+            {house.property_type && <span className="property-hero-type">{t(`redesign.purpose_${house.property_type}`, { defaultValue: house.property_type })}</span>}
             <h1>{house.title || house.address}</h1>
             <p className="property-hero-address"><MapPin size={19} aria-hidden="true" /> {address}</p>
-            <div className="property-hero-price"><span>{t("propertyDetails.price")}</span><strong>${price}</strong></div>
+            <div className="property-hero-price"><span>{t("propertyDetails.price")}</span><strong dir="ltr">{price}</strong></div>
             <div className="property-hero-actions">
               {userId && <button type="button" className={`property-action${isInWishlist ? " is-active" : ""}`} onClick={toggleWishlist} aria-pressed={isInWishlist}><Heart size={19} fill={isInWishlist ? "currentColor" : "none"} aria-hidden="true" /> {t(isInWishlist ? "propertyDetails.savedAction" : "propertyDetails.save")}</button>}
               <div className="property-share-wrap">

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { governorateLabel } from "../constants/governorates";
 import { useAuth } from "@clerk/clerk-react";
 import { message, Spin } from "antd";
 import { ArrowRight, ArrowUpRight, Bath, BedDouble, Building2, Heart, MapPin, Ruler, X } from "lucide-react";
@@ -125,7 +126,7 @@ export default function Wishlist() {
                     <div className="wishlist-card-body">
                       <span className={`wishlist-availability ${home.is_available ? "is-available" : ""}`}>{t(home.is_available ? "wishlist.available" : "wishlist.unavailable")}</span>
                       <h3><Link to={`/property/${item.property_id}`}>{home.title || home.address}</Link></h3>
-                      <p className="wishlist-card-address"><MapPin size={16} aria-hidden="true" />{[home.address, home.state].filter(Boolean).join(", ")}</p>
+                      <p className="wishlist-card-address"><MapPin size={16} aria-hidden="true" />{[home.address, governorateLabel(home.state, i18n.language)].filter(Boolean).join(", ")}</p>
                       <div className="wishlist-card-features">
                         <span><BedDouble size={16} aria-hidden="true" />{home.Bedrooms ?? "—"} {t("wishlist.beds")}</span>
                         <span><Bath size={16} aria-hidden="true" />{home.Bathrooms ?? "—"} {t("wishlist.baths")}</span>

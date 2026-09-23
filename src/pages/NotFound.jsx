@@ -1,13 +1,15 @@
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function NotFound() {
+  const { t } = useTranslation();
   return (
     <section className="not-found site-container">
-      <span>404 / PAGE NOT FOUND</span>
-      <h1>Let’s find your way home.</h1>
-      <p>This page may have moved. Head back to explore available properties.</p>
-      <Link to="/" className="button-primary">Explore homes <ArrowUpRight size={18} /></Link>
+      <span>{t("redesign.notFoundEyebrow")}</span>
+      <h1>{t("redesign.notFoundTitle")}</h1>
+      <p>{t("redesign.notFoundIntro")}</p>
+      <Link to="/" className="button-primary">{t("redesign.explore")} <ArrowUpRight size={18} /></Link>
     </section>
   );
 }

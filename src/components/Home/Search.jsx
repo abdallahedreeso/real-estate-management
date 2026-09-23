@@ -8,6 +8,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useHouseStore, selectFilteredHouses } from '../../store/useHouseStore';
 import { useTranslation } from 'react-i18next';
 import { distanceKm, validPoint } from '@/utils/geo';
+import { governorateLabel } from '../../constants/governorates';
 
 const capitalizeFirstLetter = (string) => {
     if (!string) return "";
@@ -15,9 +16,10 @@ const capitalizeFirstLetter = (string) => {
 };
 
 const Search = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [currentPage, setCurrentPage] = useState(1);
-    const [input, setInput] = useState("");
+    const searchAddress = useHouseStore((state) => state.searchAddress);
+    const [input, setInput] = useState(searchAddress);
     const { isDarkMode } = useTheme();
 
     const filteredHouses = useHouseStore(useShallow(selectFilteredHouses));
@@ -26,9 +28,11 @@ const Search = () => {
     const city = useHouseStore((state) => state.city);
     const radiusKm = useHouseStore((state) => state.radiusKm);
     const property = useHouseStore((state) => state.property);
+    const listingPurpose = useHouseStore((state) => state.listingPurpose);
     const price = useHouseStore((state) => state.price);
 
-    useEffect(() => { setCurrentPage(1); }, [proximityPoint, city, radiusKm, property, price]);
+    useEffect(() => { setCurrentPage(1); }, [proximityPoint, city, radiusKm, property, listingPurpose, price]);
+    useEffect(() => { setInput(searchAddress); setCurrentPage(1); }, [searchAddress]);
 
     // Format houses for child House component compatibility
     const formattedHouses = filteredHouses
@@ -38,7 +42,7 @@ const Search = () => {
             type: capitalizeFirstLetter(property.property_type),
             country: capitalizeFirstLetter(property.country),
             address: property.address,
-            state: property.state,
+            state: governorateLabel(property.state, i18n.language),
             bedrooms: property.Bedrooms,
             bathrooms: property.Bathrooms,
             surface: property.surface_area,

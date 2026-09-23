@@ -16,9 +16,12 @@ const Messages = React.lazy(() => import("./pages/Messages"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 import { ClerkProvider } from "@clerk/clerk-react";
 import { dark } from "@clerk/themes";
+import { arSA } from "@clerk/localizations";
 import { useTheme } from "./context/ThemeContext";
 import { SupabaseProvider } from "./context/SupabaseContext";
 import EnvDiagnosticScreen from "./components/diagnostics/EnvDiagnosticScreen";
+import { ConfigProvider, theme as antdTheme } from "antd";
+import { useTranslation } from "react-i18next";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -96,6 +99,7 @@ const router = createBrowserRouter([
 
 function App() {
   const { isDarkMode } = useTheme();
+  const { i18n } = useTranslation();
 
   if (hasMissingKeys) {
     return <EnvDiagnosticScreen />;
@@ -104,11 +108,14 @@ function App() {
   return (
     <ClerkProvider
       appearance={isDarkMode ? { baseTheme: dark } : null}
+      localization={i18n.language.startsWith("ar") ? arSA : undefined}
       publishableKey={PUBLISHABLE_KEY}
       afterSignOutUrl="/"
     >
       <SupabaseProvider>
-        <RouterProvider router={router} />
+        <ConfigProvider direction={i18n.dir()} theme={{ algorithm: isDarkMode ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm, token: { colorPrimary: isDarkMode ? "#69d1c4" : "#0d6e67", fontFamily: i18n.dir() === "rtl" ? "'Noto Sans Arabic', sans-serif" : "'DM Sans', sans-serif" } }}>
+          <RouterProvider router={router} />
+        </ConfigProvider>
       </SupabaseProvider>
     </ClerkProvider>
   );

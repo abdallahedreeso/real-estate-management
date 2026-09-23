@@ -85,7 +85,7 @@ const Navbar = () => {
   return (
     <>
       <div className="site-header">
-        <nav className="site-container nav-inner" aria-label="Primary navigation">
+        <nav className="site-container nav-inner" aria-label={t("navbar.primaryNavigation")}>
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/">
@@ -97,7 +97,7 @@ const Navbar = () => {
           <Drawer onClose={onClose} width="min(100vw, 390px)" placement={i18n.language.startsWith("ar") ? "left" : "right"} open={open} title={null} closable={false} rootClassName="site-mobile-drawer">
             <div className="mobile-drawer-shell" dir={i18n.language.startsWith("ar") ? "rtl" : "ltr"}>
               <div className="mobile-drawer-top">
-                <Link to="/" onClick={onClose} aria-label="Real Estate home" className="mobile-drawer-brand"><Building2 size={27} strokeWidth={1.7} aria-hidden="true" /><span>REAL<span>ESTATE</span></span></Link>
+                <Link to="/" onClick={onClose} aria-label={t("navbar.home")} className="mobile-drawer-brand"><Building2 size={27} strokeWidth={1.7} aria-hidden="true" /><span>REAL<span>ESTATE</span></span></Link>
                 <button type="button" className="mobile-drawer-close" onClick={onClose} aria-label={t("navbar.closeMenu")}><X size={21} aria-hidden="true" /></button>
               </div>
               <div className="mobile-drawer-intro"><span>{t("navbar.menuEyebrow")}</span><p>{t("navbar.menuIntro")}</p></div>
@@ -154,7 +154,7 @@ const Navbar = () => {
           {/* Buttons and Actions */}
           <div className="nav-actions">
             {/* Desktop Language Switcher */}
-            <Button onClick={toggleLanguage} className="hidden md:flex nav-language" aria-label="Switch language">
+            <Button onClick={toggleLanguage} className="hidden md:flex nav-language" aria-label={t("navbar.switchLanguage")}>
               <Globe size={15} />
               {i18n.language.startsWith("ar") ? "EN" : "عربي"}
             </Button>
@@ -171,15 +171,15 @@ const Navbar = () => {
             <SignedIn>
               <NotificationBell />
               <Link to="/AddProperty" className="hidden md:block">
-                <Button type="dashed" className="font-semibold shadow text-white rounded-full w-28 h-9 bg-violet-700 hover:bg-violet-500" style={{ fontSize: "11px" }}>
+                <Button className="nav-add-property">
                   {t("navbar.addProperty")}
                 </Button>
               </Link>
               <UserButton appearance={{ elements: { avatarBox: "w-10 h-10" } }}>
                 <UserButton.MenuItems>
-                  <UserButton.Action label="My Properties" labelIcon={<Store size={15} />} onClick={handleOpenMyProp} />
+                  <UserButton.Action label={t("navbar.myProperties")} labelIcon={<Store size={15} />} onClick={handleOpenMyProp} />
                   <UserButton.Action
-                    label="Wishlist"
+                    label={t("navbar.wishlist")}
                     labelIcon={
                       <Badge count={wishlistCount} size="small" offset={[10, -5]}>
                         <Heart size={15} />
@@ -187,13 +187,13 @@ const Navbar = () => {
                     }
                     onClick={handleOpenWishlist}
                   />
-                  <UserButton.Action label="Messages" labelIcon={<MessageCircle size={15} />} onClick={handleOpenMessages} />
+                  <UserButton.Action label={t("inquiries.title")} labelIcon={<MessageCircle size={15} />} onClick={handleOpenMessages} />
                 </UserButton.MenuItems>
               </UserButton>
             </SignedIn>
 
             {/* Hamburger (Mobile) */}
-            <button type="button" className="mobile-menu-button md:hidden" onClick={showDrawer} aria-label="Open menu"><Menu size={23} /></button>
+            <button type="button" className="mobile-menu-button md:hidden" onClick={showDrawer} aria-label={t("navbar.openMenu")}><Menu size={23} /></button>
           </div>
         </nav>
       </div>

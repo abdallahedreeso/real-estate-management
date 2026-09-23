@@ -5,7 +5,9 @@ import useSupabaseClient from '@/backend/supabase/supabase';
 import { Spin } from 'antd';
 import { useAuth } from '@clerk/clerk-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 export default function EditProperty() {
+    const { t } = useTranslation();
     const [property, setProperty] = useState(null)
     const [status, setStatus] = useState('loading');
     const { id } = useParams();
@@ -44,7 +46,7 @@ export default function EditProperty() {
         <>
             {status === 'loading' && <Spin fullscreen size='large' />}
             {status === 'ready' && <Form property={property} id={id} />}
-            {(status === 'error' || status === 'not-found') && <div className="site-container property-edit-error"><h1>Property unavailable</h1><p>We could not open this listing for editing. Check that it belongs to your account.</p><Link to="/MyProperty">Back to my properties</Link></div>}
+            {(status === 'error' || status === 'not-found') && <div className="site-container property-edit-error"><h1>{t('redesign.editUnavailable')}</h1><p>{t('redesign.editUnavailableIntro')}</p><Link to="/MyProperty">{t('listings.myProperties')}</Link></div>}
         </>
     )
 }

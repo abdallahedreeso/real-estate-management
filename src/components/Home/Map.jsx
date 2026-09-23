@@ -6,6 +6,7 @@ import "leaflet/dist/leaflet.css";
 import { useTheme } from "../../context/ThemeContext";
 import PropTypes from "prop-types";
 import { validPoint } from "@/utils/geo";
+import { useTranslation } from "react-i18next";
 
 const markerIcon = divIcon({ className: "property-location-pin", html: '<span aria-hidden="true"></span>', iconSize: [26, 26], iconAnchor: [13, 26] });
 const searchPinIcon = divIcon({ className: "home-search-pin", html: '<span aria-hidden="true"></span>', iconSize: [32, 32], iconAnchor: [16, 16] });
@@ -26,6 +27,7 @@ PickArea.propTypes = { onPickLocation: PropTypes.func.isRequired };
 
 function Map({ markers, center = [30.143055439268853, 31.394735395877987], selectedPoint, onPickLocation }) {
   const { isDarkMode } = useTheme();
+  const { t, i18n } = useTranslation();
 
   // Optimized Tile Layer URL and Attribution depending on Light / Dark Mode
   const tileUrl = isDarkMode
@@ -72,9 +74,9 @@ function Map({ markers, center = [30.143055439268853, 31.394735395877987], selec
               <Popup>
                 <div className={isDarkMode ? "text-gray-900" : ""}>
                   <h3 className="font-semibold">{marker.address}</h3>
-                  <p>{marker.price?.toLocaleString()} EGP</p>
-                  <p>Bedrooms: {marker.bedrooms}</p>
-                  <p>Bathrooms: {marker.bathrooms}</p>
+                  <p>{Number(marker.price || 0).toLocaleString(i18n.language)} {t("redesign.priceUnit")}</p>
+                  <p>{t("redesign.beds")}: {marker.bedrooms}</p>
+                  <p>{t("redesign.baths")}: {marker.bathrooms}</p>
                 </div>
               </Popup>
             </Marker>

@@ -30,5 +30,4 @@
 .mobile-drawer-bottom { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding: 20px 25px 25px; border-top: 1px solid var(--line); }
 .mobile-drawer-bottom button { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--ink); font-size: 12px; font-weight: 800; cursor: pointer; }
 .mobile-drawer-bottom button:hover { border-color: var(--accent); color: var(--accent); }
-[dir="rtl"] .mobile-drawer-nav a > svg,[dir="rtl"] .mobile-drawer-primary > svg:last-child,[dir="rtl"] .mobile-drawer-bottom button > svg:last-child { transform: scaleX(-1); }
 @media (max-height: 700px) { .mobile-drawer-top { min-height: 68px; } .mobile-drawer-intro { padding-block: 20px; } .mobile-drawer-intro p { font-size: 21px; } .mobile-drawer-nav { padding-top: 10px; } .mobile-drawer-nav a { min-height: 55px; } .mobile-drawer-account { padding-block: 20px 18px; } .mobile-drawer-bottom { padding-block: 12px 15px; } }
