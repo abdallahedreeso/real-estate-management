@@ -21,7 +21,8 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-      - run: npm ci
+          cache-dependency-path: integration/package-lock.json
+      - run: npm ci --prefix integration
       - uses: supabase/setup-cli@v1
         with:
           version: 2.117.0
