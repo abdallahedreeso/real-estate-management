@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import useSupabaseClient from "@/backend/supabase/supabase";
 import { formatEgp, useSaleCopy } from "./copy";
+import AuthorityUpload from "./AuthorityUpload";
 import "./sales.css";
 
 export default function DealPanel({ conversation }) {
@@ -19,6 +20,7 @@ export default function DealPanel({ conversation }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [authorityBlocked, setAuthorityBlocked] = useState(false);
 
   const reload = async () => {
     const { data, error: queryError } = await supabase.from("sale_deals").select("*")
@@ -39,8 +41,13 @@ export default function DealPanel({ conversation }) {
         p_expires_at: new Date(expires).toISOString(),
       });
       if (actionError) throw actionError;
-      await reload(); setNotice(c.saved); setConditions("");
-    } catch (actionError) { setError(actionError.message || c.saveFailed); }
+      await reload(); setNotice(c.saved); setConditions(""); setAuthorityBlocked(false);
+    } catch (actionError) {
+      if (actionError.message?.includes("Seller authority must be approved")) {
+        setAuthorityBlocked(true);
+        setError("");
+      } else setError(actionError.message || c.saveFailed);
+    }
     finally { setBusy(false); }
   };
   const accept = async () => {
@@ -58,6 +65,8 @@ export default function DealPanel({ conversation }) {
   return <section className="sale-panel" aria-label={c.deal}>
     <h2>{c.deal}</h2><p>{c.dealIntro}</p>
     <p className="sale-funding-notice" role="note">{c.fundingDisabled}</p>
+    {authorityBlocked && <div className="sale-authority-help" role="alert"><strong>{c.authorityBlockedTitle}</strong><p>{userId === conversation.seller_id ? c.authorityBlockedSeller : c.authorityBlockedBuyer}</p></div>}
+    {userId === conversation.seller_id && canRevise && <details className="sale-authority-help"><summary>{c.authoritySteps}</summary><AuthorityUpload propertyId={String(conversation.property_id)} /><p>{c.authorityReviewStep}</p></details>}
     {deal && <div className="sale-panel-terms">
       <div><span>{c.status}</span><strong>{expired ? c.status_expired : c[`status_${deal.status}`] || deal.status}</strong></div>
       <div><span>{c.version}</span><strong>{deal.offer_version}</strong></div>
@@ -79,4 +88,4 @@ export default function DealPanel({ conversation }) {
     {error && <p role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}
   </section>;
 }
-DealPanel.propTypes = { conversation: PropTypes.shape({ id: PropTypes.string.isRequired }).isRequired };
+DealPanel.propTypes = { conversation: PropTypes.shape({ id: PropTypes.string.isRequired, property_id: PropTypes.string, seller_id: PropTypes.string }).isRequired };
