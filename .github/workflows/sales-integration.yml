@@ -12,6 +12,18 @@ on:
       - "package-lock.json"
 
 jobs:
+  linux-lockfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-package-lock
+          path: package-lock.json
   protected-sales:
     runs-on: ubuntu-latest
     timeout-minutes: 30
