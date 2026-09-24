@@ -145,6 +145,37 @@ assert.equal(reconciliation.real_money_moved, false);
 const realMoney = await ok(admin.from('sale_payment_references').select('id').eq('deal_id', dealId), 'read real payment references');
 assert.equal(realMoney.length, 0, 'Demo wrote a real payment reference');
 
+// A separate synthetic case exercises the evidence-gated release branch.
+const releaseProperty = await ok(admin.from('properties').insert({
+  seller_id: seller.id, title: 'Release demonstration', price: 500000,
+  country: 'Egypt', state: 'Cairo', property_type: 'sale', review_status: 'approved',
+}).select('property_id').single(), 'seed release property');
+const releaseConversation = await ok(buyer.client.from('property_conversations').insert({
+  property_id: releaseProperty.property_id, seeker_id: buyer.id, seller_id: seller.id,
+}).select('id').single(), 'release conversation');
+const releaseDeal = await ok(admin.from('sale_deals').insert({
+  conversation_id: releaseConversation.id, property_id: releaseProperty.property_id,
+  buyer_id: buyer.id, seller_id: seller.id, status: 'ready_for_partner',
+  price_egp: 500000, conditions: 'Synthetic registration and handover',
+  expires_at: new Date(Date.now() + 86400000).toISOString(),
+}).select('id').single(), 'seed reviewed release deal');
+await ok(staff.client.rpc('start_sale_simulation', { p_deal: releaseDeal.id }), 'start release demo');
+await ok(buyer.client.rpc('simulate_sale_payment', {
+  p_deal: releaseDeal.id, p_event_key: crypto.randomUUID(), p_outcome: 'success',
+}), 'fund release demo');
+for (const kind of ['registration', 'handover']) {
+  await ok(admin.from('sale_documents').insert({
+    deal_id: releaseDeal.id, uploaded_by: seller.id, kind,
+    object_path: `${releaseDeal.id}/${seller.id}/${kind}.pdf`,
+    review_status: 'approved', reviewed_by: staff.id,
+  }), `seed reviewed ${kind}`);
+}
+await ok(staff.client.rpc('request_sale_simulation_outcome', { p_deal: releaseDeal.id, p_action: 'release' }), 'request release demo');
+assert.equal(await ok(manager.client.rpc('approve_sale_simulation_outcome', { p_deal: releaseDeal.id, p_action: 'release' }), 'approve release 1'), 1);
+assert.equal(await ok(secondManager.client.rpc('approve_sale_simulation_outcome', { p_deal: releaseDeal.id, p_action: 'release' }), 'approve release 2'), 2);
+const released = await ok(buyer.client.from('sale_simulations').select('state').eq('deal_id', releaseDeal.id).single(), 'read release');
+assert.equal(released.state, 'demo_released');
+
 const paymentWrite = await buyer.client.from('sale_payment_references').insert({
   deal_id: dealId, provider: 'fake', provider_reference: 'fake', state: 'funded', amount_egp: 950000,
 });
