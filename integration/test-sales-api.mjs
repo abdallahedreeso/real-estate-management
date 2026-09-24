@@ -35,7 +35,10 @@ const seller = await account('seller');
 const buyer = await account('buyer');
 const outsider = await account('outsider');
 const staff = await account('staff');
+const manager = await account('manager');
+const secondManager = await account('second-manager');
 await ok(admin.from('sale_staff').insert({ user_id: staff.id, role: 'reviewer' }), 'staff provisioning');
+await ok(admin.from('sale_staff').insert([{ user_id: manager.id, role: 'manager' }, { user_id: secondManager.id, role: 'manager' }]), 'manager provisioning');
 
 const property = await ok(seller.client.from('properties').insert({
   seller_id: seller.id, title: 'Integration sale', price: 1000000,
@@ -97,6 +100,50 @@ assert.equal(staffDocuments.length, 1);
 const outsiderDownload = await outsider.client.storage.from('sale-documents').createSignedUrl(documentPath, 60);
 assert.ok(outsiderDownload.error, 'Outsider obtained a document URL');
 await ok(staff.client.rpc('review_sale_document', { p_document: document.id, p_approved: true, p_note: 'Identity reviewed' }), 'document review');
+
+async function approvedEvidence(owner, kind) {
+  const path = `${dealId}/${owner.id}/${kind}-${crypto.randomUUID()}.pdf`;
+  await ok(owner.client.storage.from('sale-documents').upload(path, Buffer.from('test evidence'), { contentType: 'application/pdf' }), `${kind} upload`);
+  const row = await ok(owner.client.from('sale_documents').insert({ deal_id: dealId, uploaded_by: owner.id, kind, object_path: path }).select('id').single(), `${kind} record`);
+  await ok(staff.client.rpc('review_sale_document', { p_document: row.id, p_approved: true, p_note: `${kind} reviewed` }), `${kind} review`);
+}
+for (const kind of ['identity', 'seller_authority', 'title', 'encumbrance', 'agreement']) await approvedEvidence(seller, kind);
+await ok(staff.client.rpc('advance_sale_review', { p_deal: dealId, p_next: 'reviewing' }), 'start review');
+await ok(staff.client.rpc('advance_sale_review', { p_deal: dealId, p_next: 'ready_for_partner' }), 'finish review');
+const outsiderStart = await outsider.client.rpc('start_sale_simulation', { p_deal: dealId });
+assert.ok(outsiderStart.error, 'Outsider started a simulation');
+await ok(staff.client.rpc('start_sale_simulation', { p_deal: dealId }), 'start demo');
+const forgedDemo = await buyer.client.from('sale_simulations').update({ state: 'demo_released' }).eq('deal_id', dealId);
+assert.ok(forgedDemo.error, 'Buyer changed demo state directly');
+const outsiderDemo = await ok(outsider.client.from('sale_simulations').select('deal_id').eq('deal_id', dealId), 'outsider demo read');
+assert.equal(outsiderDemo.length, 0);
+const failedKey = crypto.randomUUID();
+assert.equal(await ok(buyer.client.rpc('simulate_sale_payment', { p_deal: dealId, p_event_key: failedKey, p_outcome: 'failure' }), 'failed demo payment'), 'payment_failed');
+assert.equal(await ok(buyer.client.rpc('simulate_sale_payment', { p_deal: dealId, p_event_key: failedKey, p_outcome: 'failure' }), 'duplicate demo payment'), 'payment_failed');
+const successfulKey = crypto.randomUUID();
+assert.equal(await ok(buyer.client.rpc('simulate_sale_payment', { p_deal: dealId, p_event_key: successfulKey, p_outcome: 'success' }), 'demo funding'), 'demo_held');
+const lateFailure = await buyer.client.rpc('simulate_sale_payment', { p_deal: dealId, p_event_key: crypto.randomUUID(), p_outcome: 'failure' });
+assert.ok(lateFailure.error, 'Delayed failure changed held demo');
+const earlyRelease = await staff.client.rpc('request_sale_simulation_outcome', { p_deal: dealId, p_action: 'release' });
+assert.ok(earlyRelease.error, 'Release skipped registration and handover');
+const dispute = await ok(buyer.client.from('sale_disputes').insert({ deal_id: dealId, opened_by: buyer.id, reason: 'Please investigate this simulated sale before any outcome.' }).select('id').single(), 'open dispute');
+const disputedRefund = await staff.client.rpc('request_sale_simulation_outcome', { p_deal: dealId, p_action: 'refund' });
+assert.ok(disputedRefund.error, 'Open dispute did not hold demo funds');
+await ok(staff.client.rpc('resolve_sale_dispute', { p_dispute: dispute.id, p_resolution: 'Reviewed the demonstration and agreed to refund.' }), 'resolve dispute');
+await ok(staff.client.rpc('request_sale_simulation_outcome', { p_deal: dealId, p_action: 'refund' }), 'request demo refund');
+const reviewerApprove = await staff.client.rpc('approve_sale_simulation_outcome', { p_deal: dealId, p_action: 'refund' });
+assert.ok(reviewerApprove.error, 'Reviewer approved refund as manager');
+assert.equal(await ok(manager.client.rpc('approve_sale_simulation_outcome', { p_deal: dealId, p_action: 'refund' }), 'first manager approval'), 1);
+assert.equal(await ok(manager.client.rpc('approve_sale_simulation_outcome', { p_deal: dealId, p_action: 'refund' }), 'duplicate manager approval'), 1);
+assert.equal(await ok(secondManager.client.rpc('approve_sale_simulation_outcome', { p_deal: dealId, p_action: 'refund' }), 'second manager approval'), 2);
+const refunded = await ok(buyer.client.from('sale_simulations').select('state,amount_egp,seller_fee_egp,seller_net_egp').eq('deal_id', dealId).single(), 'read refund');
+assert.equal(refunded.state, 'demo_refunded');
+assert.equal(Number(refunded.amount_egp), Number(refunded.seller_fee_egp) + Number(refunded.seller_net_egp));
+const reconciliation = await ok(buyer.client.rpc('reconcile_sale_simulation', { p_deal: dealId }), 'reconcile demo');
+assert.equal(reconciliation.balanced, true);
+assert.equal(reconciliation.real_money_moved, false);
+const realMoney = await ok(admin.from('sale_payment_references').select('id').eq('deal_id', dealId), 'read real payment references');
+assert.equal(realMoney.length, 0, 'Demo wrote a real payment reference');
 
 const paymentWrite = await buyer.client.from('sale_payment_references').insert({
   deal_id: dealId, provider: 'fake', provider_reference: 'fake', state: 'funded', amount_egp: 950000,

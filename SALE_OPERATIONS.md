@@ -4,6 +4,12 @@ This document is a draft for the pilot team and Egyptian counsel. It does not au
 
 ## Current capability and controls
 
+### Closing simulation (no money movement)
+
+After a reviewed sale reaches `ready_for_partner`, staff may start a clearly marked simulation. The buyer can simulate a failed payment and retry, or simulate a successful payment. Staff can request a simulated refund; a simulated release additionally requires approved registration and handover evidence. An open dispute pauses either outcome. Two distinct active managers must approve the result. The demo calculates the illustrative seller fee and net proceeds and exposes a reconciliation result and append-only event log. `sale_simulations`, `sale_simulation_events`, and `sale_simulation_approvals` are separate from all real payment records. The buyer browser cannot write these records directly; the only write path is an authenticated database command with role and state checks. No payment provider, payment instruction, account balance, payout, or fee collection is connected. A second manager must be provisioned before a production deal simulation can finish its dual approval; do not invent a staff identity to bypass the control.
+
+For training, use synthetic people and documents. Never ask a customer to send funds based on a demo state or reference. The demonstration state is not a legal or financial record of closing. Review the final operating rules with Egyptian counsel and a qualified payment partner before enabling any real money action.
+
 - New sale listings are private until a staff reviewer approves an authority document and the listing. Existing sale listings remain approved on migration; operations should re-review them before pilot admission.
 - The buyer and seller can propose, revise, and accept the same version of sale terms from a property chat. A revision clears both acceptances. A property may have multiple proposals, but only one accepted or later active sale.
 - Accepted deals have a private document area, immutable event records, and a dispute record. Listing reviews, authority decisions, and reports also have append-only audit events visible in the staff queue. Staff can check evidence and mark a case ready for a future payment partner. This status is **not** a funding instruction.

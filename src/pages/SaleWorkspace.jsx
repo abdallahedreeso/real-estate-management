@@ -19,6 +19,10 @@ export default function SaleWorkspace() {
   const [documents, setDocuments] = useState([]);
   const [disputes, setDisputes] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [simulation, setSimulation] = useState(null);
+  const [simulationEvents, setSimulationEvents] = useState([]);
+  const [reconciliation, setReconciliation] = useState(null);
+  const [staffRole, setStaffRole] = useState(null);
   const [kind, setKind] = useState("identity");
   const [file, setFile] = useState(null);
   const [reason, setReason] = useState("");
@@ -31,16 +35,24 @@ export default function SaleWorkspace() {
     setLoading(true);
     const { data, error: dealError } = await supabase.from("sale_deals").select("*").eq("id", id).maybeSingle();
     if (dealError || !data) { setDeal(null); setError(dealError?.message || c.unavailable); setLoading(false); return; }
-    const [eventsResult, documentsResult, disputesResult, paymentsResult] = await Promise.all([
+    const [eventsResult, documentsResult, disputesResult, paymentsResult, simulationResult, simulationEventsResult, staffResult] = await Promise.all([
       supabase.from("sale_events").select("*").eq("deal_id", id).order("id", { ascending: false }),
       supabase.from("sale_documents").select("*").eq("deal_id", id).order("created_at", { ascending: false }),
       supabase.from("sale_disputes").select("*").eq("deal_id", id).order("created_at", { ascending: false }),
       supabase.from("sale_payment_references").select("id,provider,provider_reference,state,amount_egp,created_at").eq("deal_id", id).order("created_at", { ascending: false }),
+      supabase.from("sale_simulations").select("*").eq("deal_id", id).maybeSingle(),
+      supabase.from("sale_simulation_events").select("*").eq("deal_id", id).order("id", { ascending: false }),
+      userId ? supabase.from("sale_staff").select("role").eq("user_id", userId).eq("active", true).maybeSingle() : Promise.resolve({ data: null }),
     ]);
     setDeal(data); setEvents(eventsResult.data || []); setDocuments(documentsResult.data || []); setDisputes(disputesResult.data || []); setPayments(paymentsResult.data || []);
-    setError(eventsResult.error?.message || documentsResult.error?.message || disputesResult.error?.message || paymentsResult.error?.message || "");
+    setSimulation(simulationResult.data); setSimulationEvents(simulationEventsResult.data || []); setStaffRole(staffResult.data?.role || null);
+    setError(eventsResult.error?.message || documentsResult.error?.message || disputesResult.error?.message || paymentsResult.error?.message || simulationResult.error?.message || simulationEventsResult.error?.message || "");
+    if (simulationResult.data) {
+      const result = await supabase.rpc("reconcile_sale_simulation", { p_deal: id });
+      setReconciliation(result.data);
+    } else setReconciliation(null);
     setLoading(false);
-  }, [supabase, id, c]);
+  }, [supabase, id, userId, c]);
   useEffect(() => { load(); }, [load]);
 
   const upload = async (event) => {
@@ -80,6 +92,13 @@ export default function SaleWorkspace() {
     else { setCancelReason(""); await load(); }
     setBusy(false);
   };
+  const simulate = async (name, params) => {
+    setBusy(true); setError("");
+    const { error: actionError } = await supabase.rpc(name, params);
+    if (actionError) setError(actionError.message || c.saveFailed);
+    else await load();
+    setBusy(false);
+  };
 
   if (loading) return <main className="site-container sale-page"><p role="status">…</p></main>;
   if (!deal) return <main className="site-container sale-page"><p role="alert">{error || c.unavailable}</p></main>;
@@ -91,6 +110,16 @@ export default function SaleWorkspace() {
     <div className="sale-summary"><div><span>{c.status}</span><strong>{deal.status === "proposed" && new Date(deal.expires_at).getTime() <= Date.now() ? c.status_expired : c[`status_${deal.status}`] || deal.status}</strong></div><div><span>{c.price}</span><strong>{formatEgp(deal.price_egp, i18n.language)}</strong></div><div><span>{c.fee}</span><strong>{formatEgp(Number(deal.price_egp) * deal.seller_fee_bps / 10000, i18n.language)}</strong></div></div>
     <p>{deal.conditions}</p><p>{c.feeNote}</p>
     <section><h2>{c.payment}</h2>{payments.length === 0 ? <p>{c.fundingDisabled}</p> : <ul className="sale-list">{payments.map((item) => <li key={item.id}><strong>{c[`payment_${item.state}`] || item.state}</strong><span>{formatEgp(item.amount_egp, i18n.language)}</span><small>{c.partnerRef}: {item.provider_reference}</small></li>)}</ul>}</section>
+    <section className="sale-simulation" aria-label={c.demoTitle}><h2>{c.demoTitle}</h2><p className="sale-funding-notice">{c.demoWarning}</p>
+      {!simulation && <><p>{c.demoIntro}</p>{staffRole && deal.status === "ready_for_partner" && <button type="button" disabled={busy} onClick={() => simulate("start_sale_simulation", { p_deal: id })}>{c.demoStart}</button>}</>}
+      {simulation && <><div className="sale-summary"><div><span>{c.status}</span><strong>{c[`demo_${simulation.state}`] || simulation.state}</strong></div><div><span>{c.price}</span><strong>{formatEgp(simulation.amount_egp, i18n.language)}</strong></div><div><span>{c.fee}</span><strong>{formatEgp(simulation.seller_fee_egp, i18n.language)}</strong></div><div><span>{c.demoSellerNet}</span><strong>{formatEgp(simulation.seller_net_egp, i18n.language)}</strong></div></div><p>{c.demoReference}: {simulation.demo_reference}</p>
+        {userId === deal.buyer_id && ["awaiting_demo_payment", "payment_failed"].includes(simulation.state) && <div className="sale-simulation-actions"><button type="button" disabled={busy} onClick={() => simulate("simulate_sale_payment", { p_deal: id, p_event_key: crypto.randomUUID(), p_outcome: "success" })}>{c.demoFund}</button><button type="button" disabled={busy} onClick={() => simulate("simulate_sale_payment", { p_deal: id, p_event_key: crypto.randomUUID(), p_outcome: "failure" })}>{c.demoFail}</button></div>}
+        {staffRole && simulation.state === "demo_held" && <div className="sale-simulation-actions"><button type="button" disabled={busy} onClick={() => simulate("request_sale_simulation_outcome", { p_deal: id, p_action: "release" })}>{c.demoRequestRelease}</button><button type="button" disabled={busy} onClick={() => simulate("request_sale_simulation_outcome", { p_deal: id, p_action: "refund" })}>{c.demoRequestRefund}</button></div>}
+        {staffRole === "manager" && ["release_pending", "refund_pending"].includes(simulation.state) && <button type="button" disabled={busy} onClick={() => simulate("approve_sale_simulation_outcome", { p_deal: id, p_action: simulation.state === "release_pending" ? "release" : "refund" })}>{c.demoApprove}</button>}
+        <p role="status">{reconciliation?.balanced ? c.demoBalanced : c.demoUnbalanced}</p><p>{c.demoSecondReviewer}</p>
+        <h3>{c.timeline}</h3><ol className="sale-list">{simulationEvents.map((item) => <li key={item.id}><strong>{c[`demo_event_${item.event_type}`] || item.event_type.replaceAll("_", " ")}</strong><time>{new Date(item.created_at).toLocaleString(i18n.language)}</time></li>)}</ol>
+      </>}
+    </section>
     <div className="sale-workspace-grid">
       <section><h2>{c.evidence}</h2><p>{c.uploadNote}</p>
         <form onSubmit={upload} className="sale-form"><label>{c.kind}<select value={kind} onChange={(event) => setKind(event.target.value)}>{documentKinds.map((item) => <option key={item} value={item}>{c[item]}</option>)}</select></label><input type="file" accept=".pdf,.png,.jpg,.jpeg" required onChange={(event) => setFile(event.target.files?.[0] || null)} /><button type="submit" disabled={busy}>{c.upload}</button></form>
