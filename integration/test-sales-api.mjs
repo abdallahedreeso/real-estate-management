@@ -150,7 +150,7 @@ const releaseProperty = await ok(admin.from('properties').insert({
   seller_id: seller.id, title: 'Release demonstration', price: 500000,
   country: 'Egypt', state: 'Cairo', property_type: 'sale', review_status: 'approved',
 }).select('property_id').single(), 'seed release property');
-const releaseConversation = await ok(buyer.client.from('property_conversations').insert({
+const releaseConversation = await ok(admin.from('property_conversations').insert({
   property_id: releaseProperty.property_id, seeker_id: buyer.id, seller_id: seller.id,
 }).select('id').single(), 'release conversation');
 const releaseDeal = await ok(admin.from('sale_deals').insert({
