@@ -10,7 +10,6 @@ export default function SaleReview() {
   const supabase = useSupabaseClient();
   const c = useSaleCopy();
   const [allowed, setAllowed] = useState(false);
-  const [staffRole, setStaffRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState([]);
   const [authority, setAuthority] = useState([]);
@@ -25,8 +24,8 @@ export default function SaleReview() {
   const load = useCallback(async () => {
     setLoading(true);
     const staff = await supabase.from("sale_staff").select("role").eq("user_id", userId).eq("active", true).maybeSingle();
-    if (staff.error || !staff.data) { setAllowed(false); setStaffRole(null); setLoading(false); return; }
-    setAllowed(true); setStaffRole(staff.data.role);
+    if (staff.error || !staff.data) { setAllowed(false); setLoading(false); return; }
+    setAllowed(true);
     const [listingResult, authorityResult, docResult, dealResult, reportResult, disputeResult, listingEventsResult] = await Promise.all([
       supabase.from("properties").select("property_id,title,seller_id,review_status").eq("property_type", "sale").eq("review_status", "pending"),
       supabase.from("listing_authority_documents").select("*").eq("status", "pending"),
