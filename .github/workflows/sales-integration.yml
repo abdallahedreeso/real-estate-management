@@ -12,18 +12,22 @@ on:
       - "package-lock.json"
 
 jobs:
-  linux-lockfile:
+  application:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-      - uses: actions/upload-artifact@v4
-        with:
-          name: linux-package-lock
-          path: package-lock.json
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run test:sales-db
+      - run: npm run build
+        env:
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
   protected-sales:
     runs-on: ubuntu-latest
     timeout-minutes: 30
