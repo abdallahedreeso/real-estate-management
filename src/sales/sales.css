@@ -1,0 +1,33 @@
+.sale-page { padding-block: 56px 100px; color: var(--ink); }
+.sale-page > header { max-width: 780px; margin: 24px 0 32px; }
+.sale-page h1 { font-family: Manrope, sans-serif; font-size: clamp(2.1rem, 4vw, 4rem); line-height: 1.1; letter-spacing: -.03em; margin: 0 0 14px; }
+.sale-page h2, .sale-panel h2 { font-family: Manrope, sans-serif; font-size: clamp(1.4rem, 2vw, 2rem); margin: 0 0 18px; }
+.sale-page section { margin-top: 48px; }
+.sale-page a, .sale-panel a { color: var(--action, #0d6e67); text-underline-offset: 3px; }
+.sale-funding-notice { padding: 16px 20px; background: var(--canvas, #f7f7f2); border: 1px solid var(--line, #dfe5e1); border-radius: 12px; max-width: 760px; font-weight: 650; }
+.sale-panel { margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--line, #dfe5e1); }
+.sale-panel > p { max-width: 65ch; }
+.sale-panel-terms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; margin: 22px 0; }
+.sale-panel-terms > div, .sale-summary > div { display: flex; flex-direction: column; padding: 14px 0; border-bottom: 1px solid var(--line, #dfe5e1); }
+.sale-panel-terms span, .sale-summary span { color: var(--muted, #687579); font-size: .86rem; }
+.sale-panel-terms p, .sale-panel-terms small, .sale-panel-terms > a, .sale-panel-terms > button { grid-column: 1 / -1; }
+.sale-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; max-width: 900px; }
+.sale-workspace-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 56px; }
+.sale-form { display: grid; gap: 14px; max-width: 650px; margin-block: 20px; }
+.sale-form label { display: grid; gap: 7px; font-weight: 650; }
+.sale-form input, .sale-form textarea, .sale-form select { width: 100%; padding: 11px 12px; border: 1px solid var(--line, #dfe5e1); border-radius: 9px; color: var(--ink, #162326); background: var(--surface, white); }
+.sale-form textarea { min-height: 110px; resize: vertical; }
+.sale-form button, .sale-panel button, .sale-page button { width: fit-content; border: 1px solid #0d6e67; border-radius: 9px; background: #0d6e67; color: white; padding: 10px 16px; cursor: pointer; }
+.sale-form button:disabled, .sale-panel button:disabled, .sale-page button:disabled { opacity: .5; cursor: not-allowed; }
+.sale-form :focus-visible, .sale-panel :focus-visible, .sale-page :focus-visible { outline: 3px solid #a8d9d0; outline-offset: 2px; }
+.sale-list, .sale-deal-list { list-style: none; padding: 0; margin: 18px 0; }
+.sale-list li, .sale-deal-list li { display: flex; gap: 18px; align-items: baseline; flex-wrap: wrap; padding: 15px 0; border-bottom: 1px solid var(--line, #dfe5e1); }
+.sale-list button { background: transparent; color: #0d6e67; border: 0; text-decoration: underline; padding-inline: 0; }
+.sale-deal-list a { display: flex; gap: 18px; flex-wrap: wrap; justify-content: space-between; width: 100%; }
+.sale-report { margin-top: 22px; }
+.sale-report > button { background: transparent; border: 0; color: #0d6e67; text-decoration: underline; cursor: pointer; }
+.sale-listing-review { margin-block: 12px; min-width: 220px; }
+.sale-listing-review .sale-form { max-width: 250px; }
+.sale-review-note { display: grid; gap: 8px; max-width: 600px; font-weight: 650; }
+.sale-review-note textarea { min-height: 88px; padding: 11px; border: 1px solid var(--line, #dfe5e1); border-radius: 9px; background: var(--surface, white); color: var(--ink, #162326); }
+@media (max-width: 760px) { .sale-summary, .sale-workspace-grid, .sale-panel-terms { grid-template-columns: 1fr; } .sale-page { padding-block: 32px 64px; } }

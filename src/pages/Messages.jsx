@@ -5,6 +5,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import { MessageCircle, ArrowUpRight } from "lucide-react";
 import useSupabaseClient from "@/backend/supabase/supabase";
 import ChatBox from "@/components/chat/ChatBox";
+import DealPanel from "@/sales/DealPanel";
+import { protectedSalesEnabled } from "@/sales/config";
 
 export default function Messages() {
   const { userId } = useAuth();
@@ -34,7 +36,7 @@ export default function Messages() {
         setError(true); setLoading(false); return;
       }
       const ids = [...new Set((data || []).map((item) => item.property_id))];
-      const result = ids.length ? await supabase.from("properties").select("property_id,title,address").in("property_id", ids) : { data: [], error: null };
+      const result = ids.length ? await supabase.from("properties").select("property_id,title,address,property_type").in("property_id", ids) : { data: [], error: null };
       if (!active) return;
       setConversations(data || []);
       setProperties(Object.fromEntries((result.data || []).map((item) => [item.property_id, item])));
@@ -62,7 +64,7 @@ export default function Messages() {
             <span>{properties[item.property_id]?.title || t("inquiries.propertyUnavailable")}</span>
           </button>)}
         </nav>
-        {selected && <div className="inquiries-thread"><ChatBox key={selected.id} conversationId={selected.id} propertyId={selected.property_id} sellerId={selected.seller_id} propertyTitle={properties[selected.property_id]?.title || t("inquiries.propertyUnavailable")} counterpartName={selected.seller_id === userId ? seekerLabel(selected) : undefined} /><Link to={`/property/${selected.property_id}`}>{t("inquiries.viewProperty")} <ArrowUpRight size={16} aria-hidden="true" /></Link></div>}
+        {selected && <div className="inquiries-thread"><ChatBox key={selected.id} conversationId={selected.id} propertyId={selected.property_id} sellerId={selected.seller_id} propertyTitle={properties[selected.property_id]?.title || t("inquiries.propertyUnavailable")} counterpartName={selected.seller_id === userId ? seekerLabel(selected) : undefined} />{protectedSalesEnabled && properties[selected.property_id]?.property_type === "sale" && <DealPanel key={`deal-${selected.id}`} conversation={selected} />}<Link to={`/property/${selected.property_id}`}>{t("inquiries.viewProperty")} <ArrowUpRight size={16} aria-hidden="true" /></Link></div>}
       </div>}
   </main>;
 }

@@ -1,5 +1,9 @@
 # React + Vite - Real Estate Management
 
+## Protected sale preparation
+
+Sale listings have an approval and private authority evidence workflow. Buyers and sellers can propose and accept versioned terms from the in-site conversation, then use `/Deals` for the case timeline and documents. Authorized reviewers use `/SalesReview`. The `20260924074555_protected_sales_foundation.sql` migration was applied to the RealEstate Supabase project after the disposable GitHub Actions Supabase integration run passed. The UI is on by default; set `VITE_PROTECTED_SALES_ENABLED=false` for an emergency UI rollback. See [SALE_OPERATIONS.md](SALE_OPERATIONS.md) for access and release gates. Payments, funding instructions, and payouts are disabled until a qualified Egyptian partner and legal review are complete. The business rationale and fee scenarios are in [BUSINESS_ANALYSIS.md](BUSINESS_ANALYSIS.md).
+
 ## Table of contents
 
 - [Overview](#overview)
