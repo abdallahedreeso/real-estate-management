@@ -11,7 +11,9 @@ import {
   useAuth,
 } from "@clerk/clerk-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowUpRight, Heart, Store, Globe, Menu, Building2, Plus, X, MessageCircle } from "lucide-react";
+import { ArrowUpRight, Heart, Store, Globe, Menu, Building2, Plus, X, MessageCircle, Handshake } from "lucide-react";
+import { useSaleCopy } from "@/sales/copy";
+import { protectedSalesEnabled } from "@/sales/config";
 import useSupabaseClient from "@/backend/supabase/supabase";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import { useHouseStore } from "@/store/useHouseStore";
@@ -19,9 +21,11 @@ import "@/assets/style/components/mobile-drawer.css";
 
 const Navbar = () => {
   const { t, i18n } = useTranslation();
+  const saleCopy = useSaleCopy();
   const [open, setOpen] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
+  const [saleStaff, setSaleStaff] = useState(false);
   const location = useLocation();
   const { isSignedIn } = useUser();
   const { userId } = useAuth();
@@ -32,6 +36,14 @@ const Navbar = () => {
   const fetchWishlistCount = useHouseStore((state) => state.fetchWishlistCount);
   const isOnline = useHouseStore((state) => state.isOnline);
   const processOfflineOutbox = useHouseStore((state) => state.processOfflineOutbox);
+
+  useEffect(() => {
+    if (!protectedSalesEnabled || !supabase || !userId) { setSaleStaff(false); return; }
+    let active = true;
+    supabase.from("sale_staff").select("user_id").eq("user_id", userId).eq("active", true).maybeSingle()
+      .then(({ data }) => { if (active) setSaleStaff(Boolean(data)); });
+    return () => { active = false; };
+  }, [supabase, userId]);
 
   // Fetch wishlist count and sync offline outbox queue when user is online
   useEffect(() => {
@@ -70,6 +82,7 @@ const Navbar = () => {
   const handleOpenMyProp = () => navigate("/MyProperty");
   const handleOpenWishlist = () => navigate("/Wishlist");
   const handleOpenMessages = () => navigate("/Messages");
+  const handleOpenDeals = () => navigate("/Deals");
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -116,6 +129,8 @@ const Navbar = () => {
                     <Link to="/MyProperty" onClick={onClose} aria-current={location.pathname === "/MyProperty" ? "page" : undefined}><Store size={18} aria-hidden="true" />{t("navbar.myProperties")}</Link>
                     <Link to="/Wishlist" onClick={onClose} aria-current={location.pathname === "/Wishlist" ? "page" : undefined}><Heart size={18} aria-hidden="true" />{t("navbar.wishlist")}<span>{wishlistCount}</span></Link>
                     <Link to="/Messages" onClick={onClose} aria-current={location.pathname === "/Messages" ? "page" : undefined}><MessageCircle size={18} aria-hidden="true" />{t("inquiries.title")}</Link>
+                    {protectedSalesEnabled && <Link to="/Deals" onClick={onClose} aria-current={location.pathname === "/Deals" ? "page" : undefined}><Handshake size={18} aria-hidden="true" />{saleCopy.deals}</Link>}
+                    {saleStaff && <Link to="/SalesReview" onClick={onClose} aria-current={location.pathname === "/SalesReview" ? "page" : undefined}><Handshake size={18} aria-hidden="true" />{saleCopy.review}</Link>}
                   </div>
                 </SignedIn>
                 <SignedOut>
@@ -188,6 +203,8 @@ const Navbar = () => {
                     onClick={handleOpenWishlist}
                   />
                   <UserButton.Action label={t("inquiries.title")} labelIcon={<MessageCircle size={15} />} onClick={handleOpenMessages} />
+                  {protectedSalesEnabled && <UserButton.Action label={saleCopy.deals} labelIcon={<Handshake size={15} />} onClick={handleOpenDeals} />}
+                  {saleStaff && <UserButton.Action label={saleCopy.review} labelIcon={<Handshake size={15} />} onClick={() => navigate("/SalesReview")} />}
                 </UserButton.MenuItems>
               </UserButton>
             </SignedIn>

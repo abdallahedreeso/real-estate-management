@@ -13,6 +13,9 @@ const About = React.lazy(() => import("./pages/About"));
 const EditProperty = React.lazy(() => import("./pages/EditProperty"));
 const Wishlist = React.lazy(() => import("./pages/Wishlist"));
 const Messages = React.lazy(() => import("./pages/Messages"));
+const SaleDeals = React.lazy(() => import("./pages/SaleDeals"));
+const SaleWorkspace = React.lazy(() => import("./pages/SaleWorkspace"));
+const SaleReview = React.lazy(() => import("./pages/SaleReview"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 import { ClerkProvider } from "@clerk/clerk-react";
 import { dark } from "@clerk/themes";
@@ -20,6 +23,7 @@ import { arSA } from "@clerk/localizations";
 import { useTheme } from "./context/ThemeContext";
 import { SupabaseProvider } from "./context/SupabaseContext";
 import EnvDiagnosticScreen from "./components/diagnostics/EnvDiagnosticScreen";
+import { protectedSalesEnabled } from "./sales/config";
 import { ConfigProvider, theme as antdTheme } from "antd";
 import { useTranslation } from "react-i18next";
 
@@ -81,6 +85,9 @@ const router = createBrowserRouter([
           </ProtectRoute>
         ),
       },
+      { path: "/Deals", element: protectedSalesEnabled ? <ProtectRoute><SaleDeals /></ProtectRoute> : <NotFound /> },
+      { path: "/Deals/:id", element: protectedSalesEnabled ? <ProtectRoute><SaleWorkspace /></ProtectRoute> : <NotFound /> },
+      { path: "/SalesReview", element: protectedSalesEnabled ? <ProtectRoute><SaleReview /></ProtectRoute> : <NotFound /> },
       {
         path: "/ContactUs",
         element: <ContactUs />,

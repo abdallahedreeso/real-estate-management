@@ -1,0 +1,33 @@
+name: Protected sales integration
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["codex/**"]
+    paths:
+      - ".github/workflows/sales-integration.yml"
+      - "integration/**"
+      - "supabase/migrations/20260924074555_protected_sales_foundation.sql"
+      - "package.json"
+      - "package-lock.json"
+
+jobs:
+  protected-sales:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.117.0
+      - name: Add protected sale migration to disposable project
+        run: cp supabase/migrations/20260924074555_protected_sales_foundation.sql integration/supabase/migrations/
+      - name: Start local Supabase services
+        run: supabase --workdir integration start
+      - name: Exercise Auth, Storage, API, and RLS
+        run: node integration/test-sales-api.mjs

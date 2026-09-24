@@ -9,12 +9,17 @@ import useSupabaseClient from "../backend/supabase/supabase";
 import { ownedImagePaths } from "@/api/propertyImages";
 import ListingAnalytics from "@/components/dashboard/ListingAnalytics";
 import OptimizedImage from "@/components/common/OptimizedImage";
+import AuthorityUpload from "@/sales/AuthorityUpload";
+import { useSaleCopy } from "@/sales/copy";
+import { protectedSalesEnabled } from "@/sales/config";
+import "@/sales/sales.css";
 import "@/assets/style/pages/listing.css";
 
 const PAGE_SIZE = 8;
 
 export default function Listing() {
   const { t, i18n } = useTranslation();
+  const saleCopy = useSaleCopy();
   const { userId } = useAuth();
   const supabase = useSupabaseClient();
   const [properties, setProperties] = useState([]);
@@ -34,7 +39,9 @@ export default function Listing() {
       setError(false);
       const { data, error: fetchError } = await supabase
         .from("properties")
-        .select("property_id,title,price,state,property_type,address,is_available,images")
+        .select(protectedSalesEnabled
+          ? "property_id,title,price,state,property_type,address,is_available,images,review_status,refreshed_at,archived_at"
+          : "property_id,title,price,state,property_type,address,is_available,images")
         .eq("seller_id", userId);
       if (!active) return;
       if (fetchError) {
@@ -67,6 +74,13 @@ export default function Listing() {
     if (!userId) return;
     setDeletingId(property.key);
     try {
+      if (protectedSalesEnabled && property.property_type === "sale") {
+        const { error: archiveError } = await supabase.rpc("archive_sale_listing", { p_property: property.key });
+        if (archiveError) throw archiveError;
+        setProperties((current) => current.map((item) => item.key === property.key ? { ...item, archived_at: new Date().toISOString(), is_available: false } : item));
+        message.success(saleCopy.saved);
+        return;
+      }
       const { error: deleteError } = await supabase.from("properties").delete()
         .eq("property_id", property.key).eq("seller_id", userId);
       if (deleteError) throw deleteError;
@@ -103,6 +117,12 @@ export default function Listing() {
     } finally {
       setUpdatingId(null);
     }
+  };
+
+  const refreshSale = async (property) => {
+    const { error: refreshError } = await supabase.rpc("refresh_sale_listing", { p_property: property.key });
+    if (refreshError) message.error(refreshError.message);
+    else { setProperties((current) => current.map((item) => item.key === property.key ? { ...item, refreshed_at: new Date().toISOString() } : item)); message.success(saleCopy.saved); }
   };
 
   return (
@@ -167,11 +187,12 @@ export default function Listing() {
                           </div>
                           <div className="my-listings-card-price"><span>{t("listings.askingPrice")}</span><strong dir="ltr">{priceFormatter.format(Number(property.price) || 0)}</strong></div>
                           <div className="my-listings-card-manage">
-                            <label className="my-listings-availability"><Switch checked={!!property.is_available} loading={updatingId === property.key} disabled={updatingId === property.key || deletingId === property.key} onChange={() => toggleAvailability(property)} aria-label={`${t("listings.isAvailable")}: ${property.title}`} /><span>{t(property.is_available ? "listings.available" : "listings.paused")}</span></label>
+                            <label className="my-listings-availability"><Switch checked={!!property.is_available} loading={updatingId === property.key} disabled={!!property.archived_at || updatingId === property.key || deletingId === property.key} onChange={() => toggleAvailability(property)} aria-label={`${t("listings.isAvailable")}: ${property.title}`} /><span>{property.archived_at ? saleCopy.archived : t(property.is_available ? "listings.available" : "listings.paused")}</span></label>
+                            {protectedSalesEnabled && property.property_type === "sale" && !property.archived_at && <div className="sale-listing-review"><strong>{saleCopy[property.review_status] || saleCopy.pending}</strong>{property.review_status !== "approved" && <AuthorityUpload propertyId={String(property.key)} />}{property.review_status === "approved" && <button type="button" onClick={() => refreshSale(property)}>{saleCopy.refresh}</button>}</div>}
                             <div className="my-listings-actions">
-                              <Link to={`/MyProperty/edit/${property.key}`}>{t("listings.edit")}</Link>
+                              {!property.archived_at && <Link to={`/MyProperty/edit/${property.key}`}>{t("listings.edit")}</Link>}
                               <Popconfirm title={t("listings.deleteConfirm")} description={t("listings.deleteWarning")} onConfirm={() => removeProperty(property)} okText={t("listings.yes")} cancelText={t("listings.no")} okButtonProps={{ danger: true }}>
-                                <Button type="text" danger loading={deletingId === property.key}>{t("listings.delete")}</Button>
+                                <Button type="text" danger disabled={!!property.archived_at} loading={deletingId === property.key}>{protectedSalesEnabled && property.property_type === "sale" ? saleCopy.archive : t("listings.delete")}</Button>
                               </Popconfirm>
                             </div>
                           </div>

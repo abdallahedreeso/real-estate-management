@@ -13,6 +13,8 @@ import { useHouseStore } from "../store/useHouseStore";
 import useSupabaseClient from "../backend/supabase/supabase";
 import whatsappIcon from "../assets/img/icons/whatsapp.svg";
 import { egyptianWhatsAppNumber } from "../utils/contact";
+import { useSaleCopy } from "@/sales/copy";
+import { protectedSalesEnabled } from "@/sales/config";
 import { useTranslation } from "react-i18next";
 import { governorateLabel } from "../constants/governorates";
 import PropTypes from "prop-types";
@@ -46,12 +48,17 @@ export default function PropertyDetails() {
   const { id } = useParams();
   const { userId } = useAuth();
   const { t, i18n } = useTranslation();
+  const saleCopy = useSaleCopy();
   const supabase = useSupabaseClient();
   const [house, setHouse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("fraud");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reportError, setReportError] = useState("");
   const incrementWishlist = useHouseStore((state) => state.incrementWishlist);
   const decrementWishlist = useHouseStore((state) => state.decrementWishlist);
   const isOnline = useHouseStore((state) => state.isOnline);
@@ -162,6 +169,13 @@ export default function PropertyDetails() {
     else message.error(t("propertyDetails.noPhone"));
   };
 
+  const submitReport = async (event) => {
+    event.preventDefault(); setReportError("");
+    const { error } = await supabase.from("listing_reports").insert({ property_id: id, reporter_id: userId, reason: reportReason, details: reportDetails.trim() });
+    if (error) setReportError(error.message);
+    else { setReportOpen(false); setReportDetails(""); message.success(saleCopy.reportSent); }
+  };
+
   return (
     <main className="property-detail">
       <div className="site-container">
@@ -195,9 +209,10 @@ export default function PropertyDetails() {
             <h2>{t("propertyDetails.contactTitle")}</h2>
             <p>{t("propertyDetails.contactIntro")}</p>
             {!house.is_available && userId !== house.seller_id ? <p>{t("inquiries.unavailable")}</p> : !userId ? <Link to="/?sign-in=true" className="property-contact-button"><MessageCircle size={19} aria-hidden="true" /> {t("propertyDetails.signIn")}</Link> : userId === house.seller_id ? <Link to="/Messages" className="property-contact-button"><MessageCircle size={19} aria-hidden="true" /> {t("inquiries.openInbox")}</Link> : <>
-              <button type="button" className="property-contact-button" onClick={handleWhatsAppClick}><img src={whatsappIcon} alt="" width="20" height="20" /> {t("propertyDetails.messageWhatsapp")}</button>
+              {house.property_type !== "sale" && <button type="button" className="property-contact-button" onClick={handleWhatsAppClick}><img src={whatsappIcon} alt="" width="20" height="20" /> {t("propertyDetails.messageWhatsapp")}</button>}
               <div className="property-chat"><h3>{t("propertyDetails.liveChat")}</h3><ChatBox propertyId={String(house.property_id)} sellerId={house.seller_id} propertyTitle={house.title || house.address} /></div>
             </>}
+            {protectedSalesEnabled && house.property_type === "sale" && userId && userId !== house.seller_id && <div className="sale-report"><button type="button" onClick={() => setReportOpen((open) => !open)}>{saleCopy.report}</button>{reportOpen && <form onSubmit={submitReport} className="sale-form"><label>{saleCopy.reportReason}<select value={reportReason} onChange={(event) => setReportReason(event.target.value)}>{["fraud","duplicate","wrong_details","other"].map((reason) => <option key={reason} value={reason}>{saleCopy[reason]}</option>)}</select></label><label>{saleCopy.reportDetails}<textarea minLength={10} maxLength={2000} required value={reportDetails} onChange={(event) => setReportDetails(event.target.value)} /></label><button type="submit">{saleCopy.report}</button>{reportError && <p role="alert">{reportError}</p>}</form>}</div>}
           </aside>
         </div>
       </div>

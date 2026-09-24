@@ -6,6 +6,7 @@ import { Spin } from 'antd';
 import { useAuth } from '@clerk/clerk-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { protectedSalesEnabled } from '@/sales/config';
 export default function EditProperty() {
     const { t } = useTranslation();
     const [property, setProperty] = useState(null)
@@ -28,7 +29,11 @@ export default function EditProperty() {
                     setStatus('error');
                     return;
                 } else {
-                    setProperty(data);
+                    if (protectedSalesEnabled && data?.property_type === 'sale') {
+                        const contact = await supabase.from('seller_contacts').select('phone').eq('property_id', id).maybeSingle();
+                        if (contact.error) throw contact.error;
+                        setProperty({ ...data, seller_phone: contact.data?.phone || '' });
+                    } else setProperty(data);
                     setStatus(data ? 'ready' : 'not-found');
                 }
             } catch (err) {
