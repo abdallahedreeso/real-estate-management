@@ -39,6 +39,7 @@ export default function AuthorityUpload({ propertyId }) {
     } catch (error) { if (uploaded) await supabase.storage.from("listing-authority").remove([path]); setStatus(error.message || c.saveFailed); }
     finally { setBusy(false); }
   };
-  return <form onSubmit={upload} className="sale-form"><p>{c.authorityHint}</p><label>{c.authority}<input type="file" accept=".pdf,.png,.jpg,.jpeg" required onChange={(event) => setFile(event.target.files?.[0] || null)} /></label><button type="submit" disabled={busy}>{c.upload}</button>{status && <p role="status">{status}</p>}<ul className="sale-list">{documents.map((item) => <li key={item.id}><span>{c[item.status]}</span>{item.review_note && <small>{item.review_note}</small>}</li>)}</ul></form>;
+  const verified = documents.some((item) => item.status === "approved");
+  return <div className="sale-form"><p>{c.authorityHint}</p>{!verified && <form onSubmit={upload}><label>{c.authority}<input type="file" accept=".pdf,.png,.jpg,.jpeg" required onChange={(event) => setFile(event.target.files?.[0] || null)} /></label><button type="submit" disabled={busy}>{c.upload}</button></form>}{status && <p role="status">{status}</p>}<ul className="sale-list">{documents.map((item) => <li key={item.id}><span>{c[item.status]}</span>{item.review_note && <small>{item.review_note}</small>}</li>)}</ul></div>;
 }
 AuthorityUpload.propTypes = { propertyId: PropTypes.string.isRequired };

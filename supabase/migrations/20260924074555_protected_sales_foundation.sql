@@ -316,6 +316,9 @@ begin
     and p.property_type = 'sale' and p.is_available and p.review_status = 'approved' and p.archived_at is null
     and p.refreshed_at > now() - interval '90 days') then
     raise exception 'Sale listing is not approved and available'; end if;
+  if not exists (select 1 from public.listing_authority_documents a
+    where a.property_id = c.property_id and a.owner_id = c.seller_id and a.status = 'approved') then
+    raise exception 'Seller authority must be approved before a protected offer'; end if;
   update public.sale_deals set status = 'expired', updated_at = now()
     where property_id = c.property_id and status = 'proposed' and expires_at <= now();
   select * into d from public.sale_deals where conversation_id = p_conversation for update;

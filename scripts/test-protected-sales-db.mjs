@@ -36,6 +36,11 @@ try {
  if (sellerPhone.rows[0]?.phone !== '01000000000') throw new Error('Seller cannot see private phone');
  console.log('LISTING_RLS_OK');
  await db.query(`update public.properties set review_status='approved' where property_id=$1`,[propertyId]);
+ let authorityDenied=false; try { await as('buyer',`select public.propose_sale_deal($1,950000,'Subject to title review',now()+ interval '7 days')`,[conversation]); } catch { authorityDenied=true; }
+ if (!authorityDenied) throw new Error('Offer allowed without seller authority');
+ const authorityPath=`${propertyId}/seller/authority.pdf`;
+ await db.query(`insert into storage.objects(bucket_id,name) values ('listing-authority',$1)`,[authorityPath]);
+ await db.query(`insert into public.listing_authority_documents(property_id,owner_id,object_path,status) values ($1,'seller',$2,'approved')`,[propertyId,authorityPath]);
  const deal = (await as('buyer',`select public.propose_sale_deal($1,950000,'Subject to title review',now()+ interval '7 days') as id`,[conversation])).rows[0].id;
  const outsiderDeal = await as('outsider',`select id from public.sale_deals where id=$1`,[deal]);
  if (outsiderDeal.rows.length !== 0) throw new Error('Outsider can read deal');
