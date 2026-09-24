@@ -7,6 +7,11 @@ on:
     paths:
       - ".github/workflows/sales-integration.yml"
       - "integration/**"
+      - "src/**"
+      - "api/**"
+      - ".env.example"
+      - "README.md"
+      - "SALE_OPERATIONS.md"
       - "supabase/migrations/20260924074555_protected_sales_foundation.sql"
       - "package.json"
       - "package-lock.json"
