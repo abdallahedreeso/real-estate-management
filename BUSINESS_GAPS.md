@@ -2,6 +2,8 @@
 
 The protected sale implementation and its operating analysis are documented in [BUSINESS_ANALYSIS.md](BUSINESS_ANALYSIS.md). New sale listings now require authority evidence and staff approval; offer versions, private deal evidence, reports, and review status are implemented in the repository. Live funding, conditional release, registration verification, and seller payout remain **disabled pending a licensed partner, counsel review, and pilot operations**. Do not market these as available protections.
 
+A separate closing simulation now rehearses payment failure, a fake held balance, a disputed hold, evidence checks, two manager decisions, simulated release or refund, and fee reconciliation. It does not move money or change real payment records. The production team has only one authorized manager, so a second independently authorized manager is still needed to finish either simulated outcome on a live case.
+
 The marketplace serves **home seekers and property owners equally**. The current product lets people browse, filter, save, and view properties; signed-in owners can add and manage listings. The items below need business decisions or operational work before they should be promised in the interface.
 
 ## Decide before launch

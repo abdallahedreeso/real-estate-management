@@ -12,7 +12,7 @@ on:
       - ".env.example"
       - "README.md"
       - "SALE_OPERATIONS.md"
-      - "supabase/migrations/20260924074555_protected_sales_foundation.sql"
+      - "supabase/migrations/**"
       - "package.json"
       - "package-lock.json"
 
@@ -51,7 +51,7 @@ jobs:
         with:
           version: 2.117.0
       - name: Add protected sale migration to disposable project
-        run: cp supabase/migrations/20260924074555_protected_sales_foundation.sql integration/supabase/migrations/
+        run: cp supabase/migrations/20260924*.sql integration/supabase/migrations/
       - name: Start local Supabase services
         run: supabase --workdir integration start
       - name: Exercise Auth, Storage, API, and RLS

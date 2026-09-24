@@ -31,3 +31,6 @@
 .sale-review-note { display: grid; gap: 8px; max-width: 600px; font-weight: 650; }
 .sale-review-note textarea { min-height: 88px; padding: 11px; border: 1px solid var(--line, #dfe5e1); border-radius: 9px; background: var(--surface, white); color: var(--ink, #162326); }
 @media (max-width: 760px) { .sale-summary, .sale-workspace-grid, .sale-panel-terms { grid-template-columns: 1fr; } .sale-page { padding-block: 32px 64px; } }
+.sale-simulation { border: 2px solid #b36b24; border-radius: 12px; padding: clamp(1rem, 2vw, 1.5rem); margin-block: 1.5rem; background: #fffaf2; }
+.sale-simulation-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-block: 1rem; }
+.sale-simulation .sale-funding-notice { font-weight: 700; }
